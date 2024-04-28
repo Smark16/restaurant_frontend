@@ -316,7 +316,7 @@ import '../App.css'
                   aria-label="open drawer"
                   sx={{ mr: 2 }}
                 >
-                  <MenuIcon />
+                  {/* <MenuIcon /> */}
                 </IconButton>
                 <Typography
                   variant="h6"
@@ -325,7 +325,7 @@ import '../App.css'
                   sx={{ display: { xs: 'none', sm: 'block' } }}
                 >
                   <div className="link">
-                   <Link to='/'>Smark</Link>
+                   <Link to='/'className='text-white'>Smark</Link>
                   </div>
                 
                 </Typography>
@@ -337,18 +337,6 @@ import '../App.css'
                 <Link to='/signup'>SignUp</Link>
                  </div>
                 </>)}
-                <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-                  <IconButton
-                    size="large"
-                    aria-label="show more"
-                    aria-controls={mobileMenuId}
-                    aria-haspopup="true"
-                    onClick={handleMobileMenuOpen}
-                    color="inherit"
-                  >
-                    <MoreIcon />
-                  </IconButton>
-                </Box>
               </Toolbar>
             </AppBar>
             {renderMobileMenu}

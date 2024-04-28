@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nosifer&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nosifer&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Seaweed+Script&display=swap');
+body{
+    font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.fill-page {
+    height: 100vh;
+    width: 100%;
+    padding: 40px;
+  }
+  
+  .fist p {
+    font-size:50px;
+    font-family: "Nosifer", sans-serif;
+    font-weight: 400;
+    font-style: normal; 
+  }
+  
+  .first-image {
+    width: 50%; /* Adjusted width to make it responsive */
+    margin: 0 auto; /* Center align the image */
+    padding: 20px; 
+    position: relative;/* Added padding for spacing */
+  }
+  
+  .first-image img {
+    border-radius: 50%;
+    width: 100%;
+    height: auto;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.8); /* Ensure aspect ratio is maintained */
+  }
+  
+  .first-image p {
+    width: fit-content; /* Adjusted width for better fit */
+    color: black;
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 5px;
+    margin-top: -5px;
+    position: absolute;
+    bottom: -20px; /* Adjusted position */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    text-align: center; /* Center align text */
+  }
+  
+  .first-image p span {
+    font-weight: bold; /* Corrected typo */
+  }
+  
+  .first-image p h6 {
+    color: rgb(245, 166, 19);
+  }
+  
+  .words {
+    position: absolute;
+    bottom: 10px; /* Adjusted position */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+  }
+  
+  .words p {
+    font-weight: bold;
+  }
+  
+  .flex-div .card {
+    position: relative;
+    width: 200px;
+    height: 300px; /* Increased height for better layout */
+    border-radius: 20px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+    margin: 20px; /* Added margin for spacing */
+    padding: 10px; /* Added padding for spacing */
+    text-align: center; /* Center align content */
+  }
+  
+  .flex-div .card .img {
+    position: relative; /* Corrected position */
+    margin: 0 auto; /* Center align the image */
+  }
+  
+  .flex-div .card .img img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+  }
+  .flex-div{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+  }
+.rd-row{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+justify-content: center;
+gap: 20px;
+}
+  .rd-row span{
+   font-size: 40px;
+   font-family: "Seaweed Script", cursive;
+   font-weight: 400;
+   font-style: normal;
+  }
+  .carousel{
+    width: 460px;
+  }
+  .carousel-inner{
+    width: 460px;
+  }
+  .footer-div{
+    width:100%;
+    background-color: #45526e;
+    color: white;
+    padding: 20px;
+  }
+  footer{
+    width: 100%;
+  }
+  .footer{
+    display: flex;
+  }
+  .footer > div{
+    flex: 1;
+  }
+  .moreinfo{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .socials{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .socials i{
+    border: 3px solid white;
+    border-radius: 50%;
+    
+    padding: 5px;
+  }
+
+  /* media screen */
+  @media screen and (max-width: 1000px) {
+   .socials{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+   }
+  }
