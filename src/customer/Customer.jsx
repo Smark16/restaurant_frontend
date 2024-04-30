@@ -135,9 +135,9 @@ function Customer() {
       <img src={reserve} alt="" className='cons' />
     </div>
 
-    <div className="words">
-      <p>Total Reservations</p>
-      <h4>{UserReservation.length}</h4>
+    <div className="word">
+      <p className='text-black'>Total Reservations</p>
+      <h4 className='text-black'>{UserReservation.length}</h4>
     </div>
   </div>
 
@@ -146,7 +146,7 @@ function Customer() {
       <i className="bi bi-bar-chart-line-fill cons"></i>
     </div>
 
-    <div className="words">
+    <div className="word">
       <p>Total Expense</p>
       <h4>UGX 89000</h4>
     </div>
@@ -157,7 +157,7 @@ function Customer() {
       <img src={order} alt="" className='cons' />
     </div>
 
-    <div className="words">
+    <div className="word">
       <p>Total Order</p>
       <h4>{Userorder.length}</h4>
     </div>
@@ -168,7 +168,7 @@ function Customer() {
       <i className="bi bi-wallet cons"></i>
     </div>
 
-    <div className="words">
+    <div className="word">
       <p>Wallet</p>
       <h4>UGX 3000</h4>
     </div>

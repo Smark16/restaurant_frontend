@@ -186,7 +186,6 @@ const totalAmount = data.map(prices =>{
   ) : (
     <>Download</>
   )}
-  Receipt
 </button>
       </div>
 </>
