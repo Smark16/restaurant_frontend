@@ -4,7 +4,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import * as jwt_decode from 'jwt-decode';
 
-const baseURL = 'http://127.0.0.1:8000/restaurant'
+const baseURL = 'https://restaurant-backend-5.onrender.com/restaurant'
 
 //we want to create refresh tokens
 const useAxios =()=>{
