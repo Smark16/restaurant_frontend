@@ -1,4 +1,4 @@
-import React, { useContext, useState} from 'react'
+import React, { useContext, useEffect, useState} from 'react'
 import { AuthContext } from '../Context/AuthContext'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -13,9 +13,28 @@ import useHook from './customHook';
 
 
 function Staff() {
-    const {orders, loading, Revenue, reservations, avg, customer, latest} = useHook(orderUrl, reservation, userUrl, latestOrder)
+    const {orders, loading, reservations,customer, latest} = useHook(orderUrl, reservation, userUrl, latestOrder)
     const {user} = useContext(AuthContext)
+    const [Revenue, setRevenue] = useState(0)
+    const [avg , setAvg] = useState(0)
 
+    const fetchOrderItems = async()=>{
+        try{
+         const response = await axios(orderItems)
+         const data = response.data
+         const amount = data.map(cash => cash.menu.reduce((total, item)=> total + item.price, 0)).reduce((total, order) => total + order, 0).toFixed(2)
+         setRevenue(amount)
+      
+         const avg_rev = amount / data.length
+         setAvg(avg_rev)
+        }catch(err){
+          console.log('there was an error')
+        }
+      }
+
+      useEffect(()=>{
+        fetchOrderItems()
+      },[])
     // getting meal by its price
     const expenseByMeal = latest.reduce((item, transaction) =>{
         const {menu_price, menu_name} = transaction
@@ -40,7 +59,7 @@ function Staff() {
                 <div className="icon">
                 <i className="bi bi-bar-chart-line-fill cons"></i>
                 </div>
-                <div className="words">
+                <div className="word">
                     <h4>UGX.{Revenue}</h4>
                     <p>Total Revenue</p>
                 </div>
@@ -52,7 +71,7 @@ function Staff() {
                 <div className="icon">
                 <i class="bi bi-bag cons"></i>
                 </div>
-                <div className="words">
+                <div className="word">
                     <h4>{latest.length}</h4>
                     <p>Today Order</p>
                 </div>
@@ -64,7 +83,7 @@ function Staff() {
                 <div className="icon">
                 <i class="bi bi-wallet2 cons"></i>
                 </div>
-                <div className="words">
+                <div className="word">
                     <h4>{customer.length}</h4>
                     <p>Customers</p>
                 </div>
@@ -76,7 +95,7 @@ function Staff() {
                 <div className="icon">
                 <i className="bi bi-bar-chart-line-fill cons"></i>
                 </div>
-                <div className="words">
+                <div className="word">
                     <h4>UGX.{avg.toFixed(2)}</h4>
                     <p>Average Revenue</p>
                 </div>

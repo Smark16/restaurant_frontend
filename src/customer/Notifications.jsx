@@ -26,6 +26,7 @@ function Notifications() {
  }, [])
   return (
     <>
+    {showNotifications && (<>
       <div className="notify bg-white p-3">
     <p className='text-primary'>show notifications</p>
     <ul className='ordermsg'>
@@ -42,6 +43,8 @@ function Notifications() {
       })}
     </ul>
     </div>   
+    </>)}
+     
     </>
   )
 }

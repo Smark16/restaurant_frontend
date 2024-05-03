@@ -15,7 +15,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
-    const {loginUser} = useContext(AuthContext)
+    const {loginUser, Loginloading} = useContext(AuthContext)
     const [user, setUser] = useState({username:"", password:""})
     const [loader, setLoader] = useState(false)
 
@@ -42,6 +42,7 @@ function Login() {
     }
   return (
     <>
+    
       <div className='mt-5 text-center container-fluid loginForm'>
 
         <Box
@@ -104,7 +105,11 @@ function Login() {
          
          <Button className='mt-3' variant='contained' type='submit' onClick={handleSubmit}>
          {loader ? (
-       <>Loging...</>
+       <>
+       Loging...
+       <div className="shape-loader"></div>
+<div className='shape-overlay'></div>
+       </>
          ) : (
         <>LOGIN</>
           )}

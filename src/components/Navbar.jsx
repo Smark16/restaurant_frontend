@@ -150,12 +150,22 @@ import '../App.css'
                 color="inherit"
               >
                 {/* notifications */}
-                <Badge badgeContent={orderNotify.length} color="error" onClick={handleMessages}>
+                {clicked ? (<>
+                  <Badge onClick={handleMessages}>
                     <NotificationsIcon />
                     </Badge>
                     <div className="container-notify">
                       {showNotifications && (<Notifications/>)}
                       </div>
+                </>) : (<>
+                  <Badge badgeContent={orderNotify.length} color="error" onClick={handleMessages}>
+                    <NotificationsIcon />
+                    </Badge>
+                    <div className="container-notify">
+                      {showNotifications && (<Notifications/>)}
+                      </div>
+                </>)}
+               
               </IconButton>
               <p>Notifications</p>
             </MenuItem>
