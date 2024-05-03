@@ -17,6 +17,7 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const {loginUser} = useContext(AuthContext)
     const [user, setUser] = useState({username:"", password:""})
+    const [loader, setLoader] = useState(false)
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -30,12 +31,14 @@ function Login() {
     }
 
     const handleSubmit = (e)=>{
+      setLoader(false)
         e.preventDefault()
         if(loginUser){
           const username = user.username
           const password = user.password
           loginUser(username, password)
         }
+        setLoader(true)
     }
   return (
     <>
@@ -99,7 +102,13 @@ function Login() {
           />
       </div>
          
-         <Button className='mt-3' variant='contained' type='submit' onClick={handleSubmit}>LOGIN</Button>
+         <Button className='mt-3' variant='contained' type='submit' onClick={handleSubmit}>
+         {loader ? (
+       <>Loging...</>
+         ) : (
+        <>LOGIN</>
+          )}
+        </Button>
         </form>
          
          <p className='text-center w-100'>forgot Password ? <Link to='/forgot-password'>Reset Password</Link></p>

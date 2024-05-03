@@ -13,7 +13,7 @@ body{
   }
   
   .fist p {
-    font-size:50px;
+    font-size:40px;
     font-family: "Nosifer", sans-serif;
     font-weight: 400;
     font-style: normal; 
@@ -153,4 +153,14 @@ gap: 20px;
     align-items: center;
     gap: 20px;
    }
+ 
+  }
+  @media screen and (max-width:768px){
+    .first-image img {
+      margin-left:-80%;
+      border-radius: 50%;
+      width: 300px;
+      height: 300px;
+      box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.8); /* Ensure aspect ratio is maintained */
+    }
   }

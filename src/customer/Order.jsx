@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react'
-const orderPlaced = 'http://127.0.0.1:8000/restaurant/orders'
+import React, { useContext, useEffect, useState } from 'react'
 import './cust.css'
 import axios from 'axios'
+import { AuthContext } from '../Context/AuthContext'
+import norder from '../Images/noorder.jpg'
 
 function Order() {
 const [loading, setLoading] = useState(false)
 const [orders, setOrders] = useState([])
+const {user} = useContext(AuthContext)
+const orderPlaced = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
   const fetchData = async()=>{
     try{
       setLoading(true)
@@ -43,7 +46,11 @@ const [orders, setOrders] = useState([])
           <span className="loader"></span>
         </div>) : (
           <>
-              <table className='table'>
+          {orders.length === 0 ? (<>
+          <h5 className='text-center'>NO ORDERS PLACED YET</h5>
+          <img src={norder} alt='no order' className='text-center norder_img'></img>
+          </>) : (<>
+            <table className='table'>
      <tr>
       <th>#</th>
       <th>Username</th>
@@ -73,6 +80,8 @@ const [orders, setOrders] = useState([])
         })}
      </tbody>
     </table>
+          </>)}
+             
           </>
         )}
 

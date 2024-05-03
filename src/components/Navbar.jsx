@@ -107,8 +107,6 @@ import '../App.css'
             open={isMenuOpen}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem>
           </Menu>
         );
       
@@ -337,6 +335,18 @@ import '../App.css'
                 <Link to='/signup'>SignUp</Link>
                  </div>
                 </>)}
+                <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+                  <IconButton
+                    size="large"
+                    aria-label="show more"
+                    aria-controls={mobileMenuId}
+                    aria-haspopup="true"
+                    onClick={handleMobileMenuOpen}
+                    color="inherit"
+                  >
+                    <MoreIcon />
+                  </IconButton>
+                </Box>
               </Toolbar>
             </AppBar>
             {renderMobileMenu}

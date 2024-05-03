@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
 import './cust.css';
 import { AuthContext } from '../Context/AuthContext';
-const OrderItem = 'http://127.0.0.1:8000/restaurant/order_items'
+const OrderItem = 'http://127.0.0.1:8000/restaurant/post_OrderItems'
 const placedOrder = 'http://127.0.0.1:8000/restaurant/placed_orders'
 import html2canvas from 'html2canvas'; // Import html2canvas library
 import jsPDF from 'jspdf';
 import axios from 'axios';
 
 function Cart() {
-  const {data, user,handleDelete} = useContext(AuthContext)   
+  const {data, user,handleDelete, newData} = useContext(AuthContext)   
+  console.log(newData)
   const [info, setInfo] = useState({location:"", contact:""})
   const [orderId, setOrderId] = useState('')
   const [Userorder, setUserOrder] = useState([])
@@ -81,16 +82,25 @@ const handleSubmit = (e) => {
   }).catch (err =>{
     console.log(err)
   })
-
-  data.map(item =>{
-    formData.append('order', orderId)
-    formData.append('menu', item.id)
-    formData.append('quantity', 1)
+console.log(orderId)
+  const orderItemData = new FormData()
+  const total_item = newData.map(item => {
+    const {quantity} = item
+    return quantity
+}).reduce((acc, amount) => acc + amount, 1)
+console.log(total_item)
+  newData.map(Order_item =>{
+    console.log(Order_item)
+    orderItemData.append('user', user.user_id)
+    orderItemData.append('order', orderId )
+    orderItemData.append('menu', Order_item.id)
+    orderItemData.append('total_quantity', total_item)
   })
-  console.log(orderId)
   axios
-    .post(OrderItem, formData, {
-      headers: { 'content-type': 'multipart/form-data' },
+    .post(OrderItem, orderItemData, {
+      headers: {
+        'Content-Type': 'multipart/form-data' // Set the content type for multipart form data
+      }
     })
     .then((res) => {
       console.log(res);

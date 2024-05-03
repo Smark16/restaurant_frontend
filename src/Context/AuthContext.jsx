@@ -2,7 +2,7 @@ import {createContext, useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2'
-const loginurl = 'https://restaurant-backend-5.onrender.com/restaurant/'
+const loginurl = 'http://127.0.0.1:8000/restaurant/'
 const registerurl = 'http://127.0.0.1:8000/restaurant/register'
 const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
 const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
@@ -11,7 +11,7 @@ export const AuthContext = createContext()
 
 export const AuthProvider = ({children}) =>{
   const data = JSON.parse(localStorage.getItem("clickedItem")) || []
- 
+  
  const [authTokens, setAuthTokens] = useState(null)
  const [user, setUser] = useState(null)
  const [Loginloading, setLoginLoading] = useState(true)
@@ -57,6 +57,7 @@ const handleDisplay = ()=> {
   }
 }
 
+
 const handleMessages = ()=>{
 setShowNotifications(!showNotifications)
 }
@@ -74,7 +75,7 @@ const handleCart = (product) => {
   const totalItems = addItem.map(item => {
     const {quantity} = item
     return quantity
-  }).reduce((sum, amount) => sum + amount, 0)
+  }).reduce((sum, amount) => sum + amount, 1)
 setTotal(totalItems)
 
   localStorage.setItem('clickedItem', JSON.stringify(addItem));
@@ -84,9 +85,10 @@ setTotal(totalItems)
 
 // delete items 
 const handleDelete = (id)=>{
-  const addedItem = addItem.filter(item => item.id !== id)
+  console.log(id)
+  const addedItem = newData.filter(item => item.id !== id)
   localStorage.setItem('clickedItem', JSON.stringify(addedItem));
- setAddItem(addedItem)
+ setNewData(addedItem)
   totalAmount
 }
 

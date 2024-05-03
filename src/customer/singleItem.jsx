@@ -16,7 +16,6 @@ function SingleMenu() {
   const url = `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`;
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const { handleCart } = useContext(AuthContext);
   const [visible, setVisible] = useState(false);
   const [myreview, setMyReview] = useState({ review: '' });
@@ -143,7 +142,14 @@ function SingleMenu() {
         axios
           .post(postReview, formData)
           .then((response) => {
-            console.log(response);
+           
+              // Update the ProductReview state with the new review
+              setProductReview(prevReviews => [...prevReviews, response.data]);
+              // Clear the review form
+              setMyReview({ review: '' });
+              setVisible(false);
+            console.log(response.data);
+
           })
           .catch((err) => {
             console.log('There is a server error', err);
@@ -232,7 +238,7 @@ function SingleMenu() {
             {!category && (
               <div className="reviewbtn">
                 <Link>
-                  <span onClick={toggleReviews}>View all reviews({ProductReview.length - 5})</span>
+                  <span onClick={toggleReviews}>{ProductReview.length <= 3 ? '' : (<>View all reviews({ProductReview.length - 3})</>)}</span>
                 </Link>
                 <button className="bg-primary text-white text-center" onClick={popForm}>
                   Add Review
