@@ -8,7 +8,7 @@ function Order() {
 const [loading, setLoading] = useState(false)
 const [orders, setOrders] = useState([])
 const {user} = useContext(AuthContext)
-const orderPlaced = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
+const orderPlaced = `https://restaurant-backend-5.onrender.com/restaurant/userOrder/${user.user_id}`
   const fetchData = async()=>{
     try{
       setLoading(true)
