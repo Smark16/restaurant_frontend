@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import Swal from 'sweetalert2'
-const url = 'http://127.0.0.1:8000/restaurant/items'
+const url = 'https://restaurant-backend-5.onrender.com/restaurant/items'
 
 function AddItem() {
   const navigate = useNavigate()
