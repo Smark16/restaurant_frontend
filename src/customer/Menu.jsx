@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
 
-const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items';
+const foodUrl = 'https://restaurant-backend-5.onrender.com/restaurant/food_items';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
