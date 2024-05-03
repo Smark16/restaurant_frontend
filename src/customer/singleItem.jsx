@@ -4,16 +4,16 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
 import './cust.css';
 
-const rates = 'http://127.0.0.1:8000/restaurant/rates';
-const postReview = 'http://127.0.0.1:8000/restaurant/post_review';
+const rates = 'https://restaurant-backend-5.onrender.com/restaurant/rates';
+const postReview = 'https://restaurant-backend-5.onrender.com/restaurant/post_review';
 
 function SingleMenu() {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
   const [userReview, setUserReview] = useState('');
-  const singleUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`;
-  const productReview = `http://127.0.0.1:8000/restaurant/product_review/${id}`;
-  const url = `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`;
+  const singleUrl = `https://restaurant-backend-5.onrender.com/restaurant/food_items/${id}`;
+  const productReview = `https://restaurant-backend-5.onrender.com/restaurant/product_review/${id}`;
+  const url = `https://restaurant-backend-5.onrender.com/restaurant/profile/${user.user_id}`;
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const { handleCart } = useContext(AuthContext);
