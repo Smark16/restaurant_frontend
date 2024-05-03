@@ -4,7 +4,7 @@ import 'datatables.net';
 import axios from 'axios';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-const reservation = 'http://127.0.0.1:8000/restaurant/reservation'
+const reservation = 'https://restaurant-backend-5.onrender.com/restaurant/reservation'
 
 function Reservation() {
   const [orders, setOrders] = useState([]);
@@ -13,7 +13,7 @@ function Reservation() {
 
   const handleDelete = async (id)=>{
     try{
-      await axios.delete(`http://127.0.0.1:8000/restaurant/reservation/${id}`)
+      await axios.delete(`https://restaurant-backend-5.onrender.com/restaurant/reservation/${id}`)
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
 
     }catch (err){
@@ -26,7 +26,7 @@ function Reservation() {
     formData.append("newStatus", newStatus)
     setMystatus(newStatus)
     try {
-      const response = await axios.patch(`http://127.0.0.1:8000/restaurant/update_reservation/${id}`, formData)
+      const response = await axios.patch(`https://restaurant-backend-5.onrender.com/restaurant/update_reservation/${id}`, formData)
       console.log(response)
       localStorage.setItem(`status_${id}`, newStatus);
   
