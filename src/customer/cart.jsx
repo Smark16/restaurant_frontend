@@ -16,8 +16,8 @@ function Cart() {
   const [Userorder, setUserOrder] = useState([])
   const [dispReceipt, setDispReceipt] = useState(false)
   const [loader, setLoader] = useState(false)
-  const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
-  const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
+  const userOrder = `https://restaurant-backend-5.onrender.com/restaurant/userOrder/${user.user_id}`
+  const notificationOrderUrl =  `https://restaurant-backend-5.onrender.com/restaurant/usermsg/${user.user_id}`
 const {orderNotify, setOrderNotify} = useHook(notificationOrderUrl)
   // const userOrder = `https://restaurant-backend-5.onrender.com/restaurant/userOrder/${user.user_id}`
 
@@ -63,7 +63,7 @@ const handleChange = (e) =>{
 }
 
 // Handle Notifications
-let url = 'ws://127.0.0.1:8000/ws/socket-server/';
+let url = 'ws://restaurant-backend-5.onrender.com/ws/socket-server/';
 const socket = new WebSocket(url);
 useEffect(() => {
   
