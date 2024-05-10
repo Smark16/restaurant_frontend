@@ -3,7 +3,7 @@ import './staff.css'
 import { AuthContext } from '../Context/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
-const ProfileUrl = 'http://127.0.0.1:8000/restaurant/profiles'
+const ProfileUrl = 'https://restaurant-backend-5.onrender.com/restaurant/profiles'
 
 function StaffProfile() {
   const navigate = useNavigate()
@@ -14,10 +14,10 @@ function StaffProfile() {
   const [myUser, setMyUser] = useState({username:"", is_staff:"", is_customer:""})
 
 
-  const updateProfileUrl = `http://127.0.0.1:8000/restaurant/update_profile/${user.user_id}`
-  const url = `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`
-  const updateUsername =  'http://127.0.0.1:8000/restaurant/update-username'
-  const userUrl = `http://127.0.0.1:8000/restaurant/single_user/${user.user_id}`
+  const updateProfileUrl = `https://restaurant-backend-5.onrender.com/restaurant/update_profile/${user.user_id}`
+  const url = `https://restaurant-backend-5.onrender.com/restaurant/profile/${user.user_id}`
+  const updateUsername =  'https://restaurant-backend-5.onrender.com/restaurant/update-username'
+  const userUrl = `https://restaurant-backend-5.onrender.com/restaurant/single_user/${user.user_id}`
   console.log(url)
 
   const fetchProfiles = async ()=>{

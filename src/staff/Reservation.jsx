@@ -5,16 +5,16 @@ import axios from 'axios';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { AuthContext } from '../Context/AuthContext';
 
-const reservation = 'http://127.0.0.1:8000/restaurant/reservation';
+const reservation = 'http://127.0.0.1:8000/restaurant/reservation'
 
 function Reservation() {
   const [orders, setOrders] = useState([]);
   const [orderStatus, setOrderStatus] = useState(true);
   const { orderNotify, setOrderNotify } = useContext(AuthContext);
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://127.0.0.1:8000/restaurant/reservation/${id}`);
+  const handleDelete = async (id)=>{
+    try{
+      await axios.delete(`http://127.0.0.1:8000/restaurant/reservation/${id}`)
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
     } catch (err) {
       console.log("There was an error:", err);
@@ -41,13 +41,14 @@ function Reservation() {
   }, [orderNotify, setOrderNotify]);
 
   const changeStatus = async (id, newStatus) => {
+    const formData = new FormData()
+    formData.append("newStatus", newStatus)
+    setMystatus(newStatus)
     try {
-      await axios.patch(`http://127.0.0.1:8000/restaurant/update_reservation/${id}`, { newStatus });
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === id ? { ...order, status: newStatus } : order
-        )
-      );
+      const response = await axios.patch(`http://127.0.0.1:8000/restaurant/update_reservation/${id}`, formData)
+      console.log(response)
+      localStorage.setItem(`status_${id}`, newStatus);
+  
     } catch (err) {
       console.log("There was an error changing the status:", err);
     }

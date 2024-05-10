@@ -8,8 +8,8 @@ function UpdateItem() {
   const navigate = useNavigate()
 //   const [product, setProduct] = useState({name:"", price:"", desc:"", image:null})
   const [item, setItem] = useState({name:"", price:"", descriptions:"", image:null})
-  const singleUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`
-  const url = `http://127.0.0.1:8000/restaurant/update_order/${id}`
+  const singleUrl = `https://restaurant-backend-5.onrender.com/restaurant/food_items/${id}`
+  const url = `https://restaurant-backend-5.onrender.com/restaurant/update_order/${id}`
 
   const fetchData = async ()=>{
     try{

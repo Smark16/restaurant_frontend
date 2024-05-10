@@ -4,7 +4,7 @@ import 'datatables.net';
 import axios from 'axios';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
+const orderUrl = 'https://restaurant-backend-5.onrender.com/restaurant/orders';
 
 function App() {
   const [orders, setOrders] = useState([]);
@@ -12,7 +12,7 @@ function App() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/restaurant/delete_order/${id}`);
+      await axios.delete(`https://restaurant-backend-5.onrender.com/restaurant/delete_order/${id}`);
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
     } catch (err) {
       console.log("there was an err");
@@ -21,7 +21,7 @@ function App() {
 
   const changeStatus = async (id, newStatus) => {
     try {
-      await axios.patch(`http://127.0.0.1:8000/restaurant/update_status/${id}`, { newStatus });
+      await axios.patch(`https://restaurant-backend-5.onrender.com/restaurant/update_status/${id}`, { newStatus });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === id ? { ...order, status: newStatus } : order

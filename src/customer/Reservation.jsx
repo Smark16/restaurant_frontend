@@ -2,9 +2,10 @@ import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import { AuthContext } from '../Context/AuthContext'
-const tables = 'http://127.0.0.1:8000/restaurant/tables'
-const newReservation = 'http://127.0.0.1:8000/restaurant/new_reservation'
 import useHook from './customhook';
+
+const tables = 'https://restaurant-backend-5.onrender.com/restaurant/tables'
+const newReservation = 'https://restaurant-backend-5.onrender.com/restaurant/new_reservation'
 
 function Reservations() {
 const {user, showSuccessAlert, showErrorAlert} = useContext(AuthContext)

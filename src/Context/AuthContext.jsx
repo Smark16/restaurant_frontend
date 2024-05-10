@@ -2,10 +2,10 @@ import {createContext, useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2'
-const loginurl = 'http://127.0.0.1:8000/restaurant/'
-const registerurl = 'http://127.0.0.1:8000/restaurant/register'
-const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
-const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
+const loginurl = 'https://restaurant-backend-5.onrender.com/restaurant/'
+const registerurl = 'https://restaurant-backend-5.onrender.com/restaurant/register'
+const foodUrl = 'https://restaurant-backend-5.onrender.com/restaurant/food_items'
+const notificationOrderUrl = 'https://restaurant-backend-5.onrender.com/restaurant/messages'
 import axios from 'axios'
 import { formGroupClasses } from '@mui/material';
 export const AuthContext = createContext()

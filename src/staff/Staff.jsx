@@ -4,10 +4,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../App.css'
 import './staff.css'
-const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
-const reservation = 'http://127.0.0.1:8000/restaurant/reservation'
-const userUrl = 'http://127.0.0.1:8000/restaurant/users'
-const latestOrder = 'http://127.0.0.1:8000/restaurant/latest_orders'
+const orderUrl = 'https://restaurant-backend-5.onrender.com/restaurant/orders';
+const reservation = 'https://restaurant-backend-5.onrender.com/restaurant/reservation'
+const userUrl = 'https://restaurant-backend-5.onrender.com/restaurant/users'
+const latestOrder = 'https://restaurant-backend-5.onrender.com/restaurant/latest_orders'
 
 import useHook from './customHook';
 

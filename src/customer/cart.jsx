@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
 import './cust.css';
 import { AuthContext } from '../Context/AuthContext';
-const OrderItem = 'http://127.0.0.1:8000/restaurant/post_OrderItems'
-const placedOrder = 'http://127.0.0.1:8000/restaurant/placed_orders'
+const OrderItem = 'https://restaurant-backend-5.onrender.com/restaurant/post_OrderItems'
+const placedOrder = 'https://restaurant-backend-5.onrender.com/restaurant/placed_orders'
 import html2canvas from 'html2canvas'; // Import html2canvas library
 import jsPDF from 'jspdf';
 import axios from 'axios';
@@ -19,6 +19,8 @@ function Cart() {
   const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
   const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
 const {orderNotify, setOrderNotify} = useHook(notificationOrderUrl)
+  // const userOrder = `https://restaurant-backend-5.onrender.com/restaurant/userOrder/${user.user_id}`
+
 
   // calculate expense for individual item
   const itemExpense = data.reduce((accumulator, item) => {
