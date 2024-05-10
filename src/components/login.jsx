@@ -42,7 +42,7 @@ function Login() {
     }
   return (
     <>
-    
+   
       <div className='mt-5 text-center container-fluid loginForm'>
 
         <Box
@@ -106,9 +106,9 @@ function Login() {
          <Button className='mt-3' variant='contained' type='submit' onClick={handleSubmit}>
          {loader ? (
        <>
-       Loging...
-       <div className="shape-loader"></div>
-<div className='shape-overlay'></div>
+       LOADING...
+       {/* <div className="shape-loader"></div>
+<div className='shape-overlay'></div> */}
        </>
          ) : (
         <>LOGIN</>
@@ -116,7 +116,7 @@ function Login() {
         </Button>
         </form>
          
-         <p className='text-center w-100'>forgot Password ? <Link to='/forgot-password'>Reset Password</Link></p>
+         {/* <p className='text-center w-100'>forgot Password ? <Link to='/forgot-password'>Reset Password</Link></p> */}
         <p className='text-center w-100'>No account? <Link to='/signup'>Create one</Link></p>
        
     </Box>

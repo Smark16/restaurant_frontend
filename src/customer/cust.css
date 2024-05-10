@@ -26,28 +26,36 @@
     margin: auto;
 }
 .cartcont {
-  position: relative;
   display: flex;
+  align-items: center;
   gap:5px;
+  border: 2px solid rgb(248, 225, 225);
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.1);
 }
 
 .cartimg {
-  width: 200px;
-  height: auto; 
-  flex-shrink: 0;
-}
-
-.content {
-  flex: 1;
-  flex-direction: column;
- justify-content: flex-start;
+  width: 70px;
+  height: 70px; 
+  border-radius: 50%;
 }
 
 .content p{
   color: green;
   font-weight: bolder;
 }
-
+.content{
+  display: flex;
+  height: 100px;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+.symb{
+  display: flex;
+  gap: 5px;
+}
 .btns {
   display: flex;
   align-items: center;

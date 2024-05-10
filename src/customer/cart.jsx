@@ -6,9 +6,10 @@ const placedOrder = 'http://127.0.0.1:8000/restaurant/placed_orders'
 import html2canvas from 'html2canvas'; // Import html2canvas library
 import jsPDF from 'jspdf';
 import axios from 'axios';
+import useHook from './customhook';
 
 function Cart() {
-  const {data, user,handleDelete, newData} = useContext(AuthContext)   
+  const {data, user,handleDelete, newData, Increase, Reduce} = useContext(AuthContext)   
   console.log(newData)
   const [info, setInfo] = useState({location:"", contact:""})
   const [orderId, setOrderId] = useState('')
@@ -16,6 +17,8 @@ function Cart() {
   const [dispReceipt, setDispReceipt] = useState(false)
   const [loader, setLoader] = useState(false)
   const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
+  const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
+const {orderNotify, setOrderNotify} = useHook(notificationOrderUrl)
 
   // calculate expense for individual item
   const itemExpense = data.reduce((accumulator, item) => {
@@ -65,9 +68,20 @@ useEffect(() => {
   socket.onmessage = function (e) {
     let data = JSON.parse(e.data);
     console.log(data)  
+    setOrderNotify([...orderNotify, data])
   };
+
  
 }, []);
+const overlay = document.querySelector('.overlay')
+const modalform = document.querySelector('.modal-form')
+const modalall = document.querySelector('.modal-all')
+
+const removeOverlay = ()=>{
+  overlay.classList.remove('overlay')
+  modalform.style.display = 'none';
+  modalall.style.display = 'none';
+}
 
 const handleSubmit = (e) => {
   e.preventDefault();
@@ -89,7 +103,7 @@ console.log(orderId)
     return quantity
 }).reduce((acc, amount) => acc + amount, 1)
 console.log(total_item)
-  newData.map(Order_item =>{
+  newData.forEach(Order_item =>{
     console.log(Order_item)
     orderItemData.append('user', user.user_id)
     orderItemData.append('order', orderId )
@@ -123,7 +137,13 @@ const removeModal = ()=>{
 const Download = () => {
   setLoader(true);
   const capture = document.querySelector('.modal-form');
-  html2canvas(capture).then((canvas) => {
+  const options = {
+    scrollY: -window.scrollY, // Fixes issue with capturing scrollable elements
+    scale: 2, // Increase scale for higher resolution
+    useCORS: true // Enable cross-origin resource sharing (CORS)
+  };
+
+  html2canvas(capture, options).then((canvas) => {
     const imgData = canvas.toDataURL('image/png'); /* Convert canvas to image URL */
     const doc = new jsPDF('p', 'mm', 'a4');
     const componentWidth = doc.internal.pageSize.getWidth();
@@ -133,6 +153,7 @@ const Download = () => {
     doc.save('receipt.pdf'); // Save PDF with the name 'receipt.pdf'
   });
 };
+
 
 const totalAmount = data.map(prices =>{
   const {price, quantity} = prices
@@ -149,7 +170,7 @@ const totalAmount = data.map(prices =>{
 
 {/* modal */}
 {dispReceipt ? (<>
-  <div className="overlay"></div>
+  <div className="overlay" onClick={removeOverlay}></div>
     <div className='modal-all'>
     <button className='text-center bg-primary text-white modal-off' onClick={removeModal}>X</button>
   <div className="modal-dialog modal-dialog-scrollable modal-form">
@@ -209,14 +230,19 @@ const totalAmount = data.map(prices =>{
       const {id, name, price, image, quantity} = sele
       return (
         <>
-           <div className="mt-3 bg-alert alert-secondary cartcont" key={id}>
+           <div className="mt-3 cartcont" key={id}>
+            <div className="block">
+            <h4>{name}</h4>
       <img src={image} alt={name} className='cartimg'></img>
-
+            </div>
       <div className="content">
-        <h4>{name}</h4>
+        <p>UGX. {price}</p>
 
-        <p>quantity: {quantity}</p>
-        <p>price: shs. {price}</p>
+        <div className="symb">
+          <button className='bg-danger text-white text-center' onClick={()=>Reduce(sele)}>-</button>
+          <span>{quantity}</span>
+          <button className='bg-primary text-white text-center'onClick={()=>Increase(sele)}>+</button>
+        </div>
          <div className="btns">
           <button className='bg-danger text-white text-center' onClick={()=>handleDelete(id)}>Delete</button>
          </div>

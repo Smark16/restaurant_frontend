@@ -32,6 +32,14 @@ import ForgotPassword from './components/forgotPassword';
 import ChangePassword from './components/ChangePassword';
 import SingleMenu from './customer/singleItem';
 import Cart from './customer/cart';
+import About from './LandingPage/about';
+import Booking from './LandingPage/booking';
+import Contact from './LandingPage/contact';
+import Testimonial from './LandingPage/testimonial';
+import Service from './LandingPage/service';
+import Team from './LandingPage/team';
+import Menus from './LandingPage/menu';
+import Index from './LandingPage';
 // import { AuthContext } from './Context/AuthContext';
 
 
@@ -49,6 +57,16 @@ function App() {
             <Route path='/signup' element={<Signup />} />
             <Route path='/forgot-password' element={<ForgotPassword/>}/>
             <Route path='/changePassword' element={<ChangePassword/>}/>
+            <Route path='/index' element={<Index/>}></Route>
+            <Route path='/about' element={<About/>}></Route>
+            <Route path='/booking' element={<Booking/>}></Route>
+            <Route path='/contact' element={<Contact/>}></Route>
+            <Route path='/menus' element={<Menus/>}></Route>
+            <Route path='/team' element={<Team/>}></Route>
+            <Route path='/testimonial' element={<Testimonial/>}></Route>
+            <Route path='/service' element={<Service/>}></Route>
+
+
 
             {/* Staff Routes */}
             <Route

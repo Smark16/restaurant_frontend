@@ -148,7 +148,7 @@ function Customer() {
 
     <div className="word">
       <p>Total Expense</p>
-      <h4>UGX 89000</h4>
+      <h4>UGX 0.00</h4>
     </div>
   </div>
 
@@ -170,7 +170,7 @@ function Customer() {
 
     <div className="word">
       <p>Wallet</p>
-      <h4>UGX 3000</h4>
+      <h4>UGX 0.00</h4>
     </div>
   </div>
 </div>

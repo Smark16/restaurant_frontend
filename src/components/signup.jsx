@@ -4,7 +4,8 @@ import myImage from '../Images/pizza2.jpg'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Signup() {
-  const { RegisterUser } = useContext(AuthContext);
+  const { RegisterUser, passwordError, usernameError } = useContext(AuthContext);
+  const [validate, setValidate] = useState('')
   const [person, setPerson] = useState({
     username: "",
     email: "",
@@ -23,10 +24,10 @@ function Signup() {
   const handleMember = (e) => {
     const selectedValue = e.target.value
     console.log(selectedValue)
-  if(selectedValue === 'Staff'){
-    return setPerson({...person, is_staff:true, is_customer:false})
+  if(selectedValue === 'Customer'){
+    return setPerson({...person, is_customer:true, is_staff:false})
   }else{
-    return setPerson({...person, is_staff:false, is_customer:true})
+    return setPerson({...person, is_customer:false, is_staff:true})
   }
 
   };
@@ -34,6 +35,10 @@ function Signup() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const { email, username, password, is_staff, is_customer } = person;
+    if(!is_customer){
+      setValidate('please choose a role')
+      return
+    }
     RegisterUser(email, username, password, is_staff, is_customer);
   };
 
@@ -57,10 +62,16 @@ function Signup() {
             className="form-control"
             id="formGroupExampleInput"
             name="username"
+            required
             value={person.username}
             onChange={handleChange}
             placeholder="username"
           />
+          {usernameError.map(err =>{
+            return (
+              <p className='text-danger'>{err}</p>
+            )
+          })}
         </div>
 
         <div className="mb-3">
@@ -72,6 +83,7 @@ function Signup() {
             className="form-control"
             id="formGroupExampleInput2"
             name="email"
+            required
             value={person.email}
             onChange={handleChange}
             placeholder="Email"
@@ -87,18 +99,26 @@ function Signup() {
             className="form-control"
             id="formGroupExampleInput2"
             name="password"
+            required
             value={person.password}
             onChange={handleChange}
             placeholder="password"
           />
+
+          {passwordError.map(err =>{
+            return (
+              <p className='text-danger'>{err}</p>
+            )
+          })}
         </div>
 
         <div className="mb-3">
-          <select name="members" onChange={handleMember}>
-            <option>Choose</option>
-            <option value="Staff">Staff</option>
+          <select name="members" onChange={handleMember} required>
+            <option>Choose Role</option>
+            {/* <option value="Staff">Staff</option> */}
             <option value="Customer">Customer</option>
           </select>
+          <p className='text-danger'>{validate}</p>
         </div>
 
         <div className="mb-3">

@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useState, useEffect} from 'react'
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -19,7 +19,9 @@ import { Link} from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Notifications from '../customer/Notifications';
+import AllNotifications from '../customer/allnotifications';
 import '../App.css'
+
     const Search = styled('div')(({ theme }) => ({
         position: 'relative',
         borderRadius: theme.shape.borderRadius,
@@ -63,19 +65,42 @@ import '../App.css'
       function Bar() {
         const [anchorEl, setAnchorEl] = useState(null);
         const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-        const {user, staff, customer, clicked, setClicked, total, handleMessages,showNotifications, orderNotify} = useContext(AuthContext)
-        
+        const {user, staff, customer, clicked, setClicked, total, handleMessages,handleAllMessages,showNotificationsAll, orderNotify} = useContext(AuthContext)
+        const [notifyAll, setNotifyAll] = useState([])
+        const [showNotifications, setShowNotifications] = useState(false)
+      
         const isMenuOpen = Boolean(anchorEl);
         const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-      
-        const handleProfileMenuOpen = (event) => {
-          setAnchorEl(event.currentTarget);
-        };
       
         const handleMobileMenuClose = () => {
           setMobileMoreAnchorEl(null);
         };
       
+        useEffect(() => {
+          if (user) {
+            const fetchNotifications = async () => {
+              try {
+                const response = await fetch(`http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`);
+                const data = await response.json();
+                setNotifyAll(data);
+              } catch (error) {
+                console.error('Error fetching notifications:', error);
+              }
+            };
+      
+            fetchNotifications();
+          }
+
+        }, [user]);
+        console.log(notifyAll.length)
+
+        const handleMessage = ()=>{
+          setShowNotifications(!showNotifications)
+          if(showNotifications){
+            setNotifyAll([])
+          }
+        }
+
         const handleMenuClose = () => {
           setAnchorEl(null);
           handleMobileMenuClose();
@@ -127,23 +152,28 @@ import '../App.css'
             open={isMobileMenuOpen}
             onClose={handleMobileMenuClose}
           >
-            <MenuItem>
-              <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-              <Link to='/customer/dashboard/cart' className='text-black'>
-                    {clicked ? (
-                      <Badge>
-                        <ShoppingCartIcon />
-                      </Badge>
-                    ) : (
-                      <Badge badgeContent={total} color="error" onClick={removeContent}>
-                        <ShoppingCartIcon />
-                      </Badge>
-                    )}
-              </Link>
-              </IconButton>
-              <p>Cart</p>
-            </MenuItem>
-            <MenuItem>
+
+{user && customer && (
+      <MenuItem>
+        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
+          <Link to='/customer/dashboard/cart' className='text-black'>
+            {clicked ? (
+              <Badge>
+                <ShoppingCartIcon />
+              </Badge>
+            ) : (
+              <Badge badgeContent={total} color="error" onClick={removeContent}>
+                <ShoppingCartIcon />
+              </Badge>
+            )}
+          </Link>
+        </IconButton>
+        <p>Cart</p>
+      </MenuItem>
+    )}
+
+    {user && staff && (
+      <MenuItem>
               <IconButton
                 size="large"
                 aria-label="show 17 new notifications"
@@ -151,24 +181,55 @@ import '../App.css'
               >
                 {/* notifications */}
                 {clicked ? (<>
-                  <Badge onClick={handleMessages}>
+                  <Badge onClick={handleAllMessages}>
                     <NotificationsIcon />
                     </Badge>
                     <div className="container-notify">
-                      {showNotifications && (<Notifications/>)}
+                      {showNotificationsAll && (<Notifications/>)}
                       </div>
                 </>) : (<>
-                  <Badge badgeContent={orderNotify.length} color="error" onClick={handleMessages}>
+                  <Badge badgeContent={orderNotify.length} color="error" onClick={handleAllMessages}>
                     <NotificationsIcon />
                     </Badge>
                     <div className="container-notify">
-                      {showNotifications && (<Notifications/>)}
+                      {showNotificationsAll && (<AllNotifications/>)}
                       </div>
                 </>)}
                
               </IconButton>
               <p>Notifications</p>
             </MenuItem>
+    )}
+
+    {user && customer && (
+      <MenuItem>
+      <IconButton
+        size="large"
+        aria-label="show 17 new notifications"
+        color="inherit"
+      >
+        {/* notifications */}
+        {clicked ? (<>
+          <Badge onClick={handleMessage}>
+            <NotificationsIcon />
+            </Badge>
+            <div className="container-notify">
+              {showNotifications && (<Notifications/>)}
+              </div>
+        </>) : (<>
+          <Badge badgeContent={notifyAll.length} color="error" onClick={handleMessage}>
+            <NotificationsIcon />
+            </Badge>
+            <div className="container-notify">
+              {showNotifications && (<Notifications/>)}
+              </div>
+        </>)}
+       
+      </IconButton>
+      <p>Notifications</p>
+    </MenuItem>
+    )}
+            
 
             {/* profile */}
             <Link to='/customer/dashboard/CustomerProfile' className='text-black'>
@@ -227,11 +288,11 @@ import '../App.css'
                     aria-label="show 17 new notifications"
                     color="inherit"
                   >
-                    <Badge badgeContent={orderNotify.length} color="error" onClick={handleMessages}>
+                    <Badge badgeContent={orderNotify.length} color="error" onClick={handleAllMessages}>
                     <NotificationsIcon />
                     </Badge>
                     <div className="container-notify">
-                      {showNotifications && (<Notifications/>)}
+                      {showNotificationsAll && (<AllNotifications/>)}
                       </div>
                   </IconButton>
                   <IconButton
@@ -292,7 +353,7 @@ import '../App.css'
                     color="inherit"
                   >
                    
-                    <Badge badgeContent={orderNotify.length} color="error" onClick={handleMessages}>
+                    <Badge badgeContent={notifyAll.length} color="error" onClick={handleMessage}>
                     <NotificationsIcon />
                     </Badge>
                     <div className="container-notify">

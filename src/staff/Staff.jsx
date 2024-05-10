@@ -14,6 +14,7 @@ import useHook from './customHook';
 
 function Staff() {
     const {orders, loading, reservations,customer, latest} = useHook(orderUrl, reservation, userUrl, latestOrder)
+    console.log('latest', latest)
     const {user} = useContext(AuthContext)
     const [Revenue, setRevenue] = useState(0)
     const [avg , setAvg] = useState(0)
@@ -35,14 +36,16 @@ function Staff() {
       useEffect(()=>{
         fetchOrderItems()
       },[])
+
     // getting meal by its price
     const expenseByMeal = latest.reduce((item, transaction) =>{
         const {menu_price, menu_name} = transaction
+        const total_price = parseFloat(menu_price)
         console.log(menu_price, menu_name)
         if(!item[menu_name]){
           item[menu_name] = 0
         }
-        item[menu_name] += parseFloat(menu_price)
+        item[menu_name] += parseFloat(total_price)
         return item
     }, {})
 
@@ -175,26 +178,25 @@ function Staff() {
          </div>
        </div>
 
+{/* orders today */}
        <div className="col-md-4 col-sm-12">
           <h4>Orders Today</h4>
-          {latest.map(latest_order=>{
-            const {id, menu_name, image} = latest_order
-            const avg_revenue = expenseByMeal[menu_name]
+          {Object.keys(expenseByMeal).map(latest_order=>{
             return (
                 <>
-                 <div className="todayOrders" key={id}>
+                 <div className="todayOrders" key={latest_order}>
             <div className='orderItem'>
-                <div className="icon">
+                {/* <div className="icon">
                 <img src={image}/>
-                </div>
-                <div className="words">
-                    <h4>shs.{avg_revenue}</h4>
+                </div> */}
+                {/* <div className="words">
+                    <h4>shs.{expenseByMeal[latest_order].toFixed(2)}</h4>
                     <p>Total Revenue</p>
-                </div>
+                </div> */}
             </div>
 
             <div className='quantity'>
-             <span>{menu_name}</span>
+             <span>{latest_order}</span>
             </div>
             </div>
                 </>

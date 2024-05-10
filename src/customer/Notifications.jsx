@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
-const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
+// const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
 import { AuthContext } from '../Context/AuthContext'
 import './cust.css'
 
 function Notifications() {
  const [orderNotify, setOrderNotify] = useState([])
- const {showNotifications, setShowNotifications} = useContext(AuthContext)
+ const {showNotifications, setShowNotifications, user} = useContext(AuthContext)
+ const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
 
  const orderMsg = async()=>{
   try{

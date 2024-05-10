@@ -1,15 +1,22 @@
 import React, { useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import { AuthContext } from '../Context/AuthContext'
 const tables = 'http://127.0.0.1:8000/restaurant/tables'
 const newReservation = 'http://127.0.0.1:8000/restaurant/new_reservation'
+import useHook from './customhook';
 
 function Reservations() {
-const {user} = useContext(AuthContext)
+const {user, showSuccessAlert, showErrorAlert} = useContext(AuthContext)
 const [reservation, setReservation] = useState({contact:"", Email:"" ,party_size:"", table:"", reservation_date:""})
 const [table, setTable] = useState([])
 const [result, setResult] = useState('')
 const [reserve, setReserve] = useState('')
+const [confirmed, setConfirmed] = useState(false)
+const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
+const {orderNotify, setOrderNotify} = useHook(notificationOrderUrl)
+const navigate = useNavigate()
+
 
 const fetchTables = async ()=>{
   try{
@@ -34,17 +41,18 @@ useEffect(() => {
   socket.onmessage = function (e) {
     let data = JSON.parse(e.data);
     console.log(data)
+    setOrderNotify([...orderNotify, data])
     if(data.type === 'notification') {
       console.log(data.message)
-    Notification.requestPermission()
-    .then(perm =>{
-    if(perm === 'granted'){
-    new Notification(`order from ${user.username}`, {
-      body:`${data.message}`,
-          })
-       }
-      })
-     }   
+    // Notification.requestPermission()
+    // .then(perm =>{
+    // if(perm === 'granted'){
+    // new Notification(`order from ${user.username}`, {
+    //   body:`${data.message}`,
+    //       })
+    //    }
+    //   })
+      }   
   };
  
 }, []);
@@ -68,10 +76,17 @@ axios.post(newReservation, formData)
     setReserve(res.data.response)
     setResult('')
     setReservation({contact:"", Email:"" ,party_size:"", table:"", reservation_date:""})
+    showSuccessAlert("Reservation Made Successfully")
+    setConfirmed(true)
+    navigate("/customer/dashboard")
+  }else{
+    showErrorAlert("Please fill in all Details")
+    setConfirmed(false)
   }
  
 }).catch (err =>{
   console.log("An error occured", err)
+  setConfirmed(false)
 })
 
 socket.send(JSON.stringify({
@@ -103,6 +118,7 @@ useEffect(()=>{
       className="form-control"
       id="formGroupExampleInput"
       placeholder="Contact"
+      required
       name='contact'
       value={reservation.contact}
       onChange={handleChange}
@@ -118,6 +134,7 @@ useEffect(()=>{
       className="form-control"
       id="formGroupExampleInput"
       placeholder="Email"
+      required
       name='Email'
       value={reservation.Email}
       onChange={handleChange}
@@ -133,6 +150,7 @@ useEffect(()=>{
       className="form-control"
       id="formGroupExampleInput"
       placeholder="Party_Size"
+      required
       name='party_size'
       value={reservation.party_size}
       onChange={handleChange}
@@ -168,6 +186,7 @@ useEffect(()=>{
       className="form-control"
       id="formGroupExampleInput"
       placeholder="Reservation Date"
+      required
       name='reservation_date'
       value={reservation.reservation_date}
       onChange={handleChange}
@@ -175,7 +194,13 @@ useEffect(()=>{
   </div>
 
   <div className='text-center'>
-    <button className='bg-primary text-white' type='submit'>Confirm Reservation</button>
+    <button className='bg-primary text-white' type='submit'>
+      {confirmed ? (<>
+      Confirming...
+      </>) : (<>
+        Confirm Reservation
+      </>)}
+      </button>
   </div>
       </form>
     </>

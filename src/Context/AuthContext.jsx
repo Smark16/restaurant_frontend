@@ -7,6 +7,7 @@ const registerurl = 'http://127.0.0.1:8000/restaurant/register'
 const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
 const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
 import axios from 'axios'
+import { formGroupClasses } from '@mui/material';
 export const AuthContext = createContext()
 
 export const AuthProvider = ({children}) =>{
@@ -14,7 +15,6 @@ export const AuthProvider = ({children}) =>{
   
  const [authTokens, setAuthTokens] = useState(null)
  const [user, setUser] = useState(null)
- const [Loginloading, setLoginLoading] = useState(true)
  const [loading, setLoading] = useState(true)
  const [staff, setStaff] = useState(false)
  const [customer, setCustomer] = useState(false)
@@ -23,9 +23,14 @@ export const AuthProvider = ({children}) =>{
  const [clicked, setClicked] = useState(false)
  const [total, setTotal] = useState('')
  const [showNotifications, setShowNotifications] = useState(false)
+ const [showNotificationsAll, setShowNotificationsAll] = useState(false)
  const [orderNotify, setOrderNotify] = useState([])
+ const [orderNotifys, setOrderNotifys] = useState([])
+ const [userId, setUserId] = useState('')
  const [newData, setNewData] = useState(data)
  const [display, setDisplay] = useState(false)
+ const [passwordError, setPasswordError] = useState([])
+ const [usernameError, setUsernameError] = useState([])
  const navigate = useNavigate()
 
 //  this is the code for removing the custbar component
@@ -38,13 +43,12 @@ const handleDisplay = ()=> {
     const response = await axios(notificationOrderUrl)
     const data = response.data
     setOrderNotify(data)
-    console.log(data)
+    // console.log(data)
 
   }catch(err){
     console.log('There was an error')
   }
  }
-
 
  
  const fetchFood = async ()=>{
@@ -61,6 +65,14 @@ const handleDisplay = ()=> {
 const handleMessages = ()=>{
 setShowNotifications(!showNotifications)
 }
+
+const handleAllMessages = ()=>{
+  setShowNotificationsAll(!showNotificationsAll)
+  if(showNotificationsAll){
+    setOrderNotify([])
+  }
+  }
+
 
 const handleCart = (product) => {
   const selectedItem = addItem.find((item) => item.id === product.id);
@@ -83,24 +95,75 @@ setTotal(totalItems)
 };
 
 
-// delete items 
-const handleDelete = (id)=>{
-  console.log(id)
-  const addedItem = newData.filter(item => item.id !== id)
-  localStorage.setItem('clickedItem', JSON.stringify(addedItem));
- setNewData(addedItem)
-  totalAmount
+// Increse product
+const Increase = (product)=>{
+  const selectedItem = addItem.find((item) => item.id === product.id);
+  
+  
+  if(selectedItem){
+    setAddItem(addItem.map(item => item.id === product.id ? {...selectedItem, quantity: selectedItem.quantity + 1} : item));
+  }else{
+   setAddItem([...addItem, {...product, quantity:1}])
+ 
+  }
+  
+  localStorage.setItem('clickedItem', JSON.stringify(addItem));
 }
 
+// reduce products
+// Reduce product quantity in the cart
+const Reduce = (product) => {
+  const selectedItem = addItem.find((item) => item.id === product.id);
+
+  if (selectedItem && selectedItem.quantity > 1) {
+    // Decrease quantity by 1 if it's greater than 1
+    setAddItem(
+      addItem.map((item) =>
+        item.id === product.id
+          ? { ...selectedItem, quantity: selectedItem.quantity - 1 }
+          : item
+      )
+    );
+  } else {
+    // Remove the item from the cart if its quantity is 1
+    setAddItem(addItem.filter((item) => item.id !== product.id));
+  }
+
+  // Update the total quantity in the cart
+  const totalItems = addItem
+    .map((item) => item.quantity)
+    .reduce((sum, amount) => sum + amount, 0);
+  setTotal(totalItems);
+
+  localStorage.setItem("clickedItem", JSON.stringify(addItem));
+};
+
+
+// delete items 
+// delete items 
+const handleDelete = (id)=>{
+  const updatedData = data.filter(item => item.id !== id);
+  localStorage.setItem('clickedItem', JSON.stringify(updatedData));
+  setNewData(updatedData);
+
+  // Calculate the total amount again based on updated data
+  totalAmount = data.map(prices =>{
+    const {price, quantity} = prices
+    return price * quantity
+  }).reduce((sum, amount) => sum + amount, 0).toFixed(2)
+}
+
+
  const loginUser = async (username, password) =>{
-  setLoginLoading(true)
   axios.post(loginurl, {
     username, password
   }).then(response =>{
   if(response.status === 200){
+    
     const data = response.data
     setAuthTokens(data)
     setUser(jwtDecode(data.access))
+    // setUserId(localStorage.setItem('user_id', user.user_id))
    let checkMember = jwtDecode(data.access)
    let decodedStaff = checkMember.is_staff
    let decodedCustomer = checkMember.is_customer
@@ -108,7 +171,6 @@ const handleDelete = (id)=>{
   localStorage.setItem("authtokens", JSON.stringify(data))
   {decodedCustomer && navigate("/customer/dashboard")}
   {decodedStaff && navigate("/staff/dashboard")}
-  setLoginLoading(false)
   showSuccessAlert("Login successfull")
   }else{
     showErrorAlert("Please provide correct username/password")
@@ -116,9 +178,9 @@ const handleDelete = (id)=>{
   }).catch (err => {
     console.log("Error", err)
     showErrorAlert("There was a server issue")
-    navigate("/login")
   })
  }
+ 
 
  const RegisterUser = async (email, username, password, is_staff,is_customer) =>{
  axios.post(registerurl, {
@@ -131,9 +193,21 @@ const handleDelete = (id)=>{
     }else{
         showErrorAlert(`An Error occured : ${response.status}`)
     }
- }).catch (err =>{
-    console.log(err)
+ }).catch (error =>{
+    if (error.response && error.response.data && error.response.data.password) {
+      // Access the password text from the error response data
+      const passwordErrors = error.response.data.password;
+      console.log(passwordErrors);
+      setPasswordError(passwordErrors)
     showErrorAlert("There was a server issue")
+    }
+    if(error.response && error.response.data && error.response.data.username){
+      const usernameErrors = error.response.data.username;
+      console.log(usernameErrors)
+      setUsernameError(usernameErrors)
+    showErrorAlert("There was a server issue")
+    console.log(error)
+}
  })
  }
 
@@ -197,9 +271,9 @@ const contextData = {
     loginUser, RegisterUser, logoutUser,
     showSuccessAlert, handleCart,
     setAddItem, addItem, fetchFood,
-    food, setFood, data, clicked, setClicked, total,handleMessages,
-    showNotifications, setShowNotifications,orderMsg, orderNotify, handleDelete, newData,
-    handleDisplay, display, setDisplay, setLoginLoading, Loginloading
+    food, setFood, data, clicked, setClicked, total,handleMessages,handleAllMessages,
+    showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete, newData,
+    handleDisplay, display, setDisplay,orderNotify,Increase, Reduce, passwordError, usernameError
 }
 return (
     <AuthContext.Provider value={contextData}>
