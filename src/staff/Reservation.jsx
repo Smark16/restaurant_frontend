@@ -22,7 +22,7 @@ function Reservation() {
   };
 
   // Handle Notifications
-  let url = 'ws://restaurant-backend-5.onrender.com/ws/socket-server/';
+  let url = 'wss://restaurant-backend-5.onrender.com/ws/socket-server/';
   const socket = new WebSocket(url);
 
   useEffect(() => {
