@@ -7,7 +7,7 @@ import './cust.css'
 function Notifications() {
  const [orderNotify, setOrderNotify] = useState([])
  const {showNotifications, setShowNotifications, user} = useContext(AuthContext)
- const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
+ const notificationOrderUrl =  `https://restaurant-backend-5.onrender.com/restaurant/usermsg/${user.user_id}`
 
  const orderMsg = async()=>{
   try{
