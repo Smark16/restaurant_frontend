@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
-const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
+const notificationOrderUrl = 'https://restaurant-backend-5.onrender.com/restaurant/messages'
 import { AuthContext } from '../Context/AuthContext'
 import './cust.css'
 
