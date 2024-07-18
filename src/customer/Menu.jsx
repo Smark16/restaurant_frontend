@@ -8,7 +8,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
 
-const foodUrl = 'https://restaurant-backend-5.onrender.com/restaurant/food_items';
+const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items';
+const post_user_items = 'http://127.0.0.1:8000/restaurant/user_items';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -55,6 +56,7 @@ function MenuDisplay() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [filteredFood, setFilteredFood] = useState([]);
+  const [addedItems, setAddedItems] = useState([]);
   const { handleCart } = useContext(AuthContext);
 
   const fetchFood = async () => {
@@ -80,8 +82,10 @@ function MenuDisplay() {
 
   useEffect(() => {
     fetchFood();
+
   }, []);
 
+ 
   const renderStars = (avg_rating) => {
     const stars = [];
     const roundedRating = Math.round(avg_rating);
@@ -117,12 +121,13 @@ function MenuDisplay() {
           </div>
 
           <h4 className="mt-3">Total Items ({filteredFood.length})</h4>
-          <div className="row">
+          <div className="row menu_row">
             {filteredFood.map((items) => {
               const { id, descriptions, price, image, name, avg_rating } = items;
+              
               return (
-                <div className="col-md-3 col-sm-6 mt-3 menu" key={id}>
-                  <div className="card" style={{ width: '16rem', height: '25rem' }}>
+                <div className="col-md-3 col-sm-12 mt-3 menu" key={id}>
+                  <div className="card" style={{ height: '25rem' }}>
                     <img src={image} className="img" alt={name} />
                     <div className="card-body">
                       <div className="price d-flex">
@@ -140,10 +145,10 @@ function MenuDisplay() {
                           <button className="text-center text-primary">View More</button>
                         </Link>
                         <button
-                          className="text-center text-white bg-danger"
+                          className='text-center text-white bg-danger'
                           onClick={() => handleCart(items)}
                         >
-                          Cart
+                          cart
                         </button>
                       </div>
                     </div>

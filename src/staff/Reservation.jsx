@@ -22,23 +22,23 @@ function Reservation() {
   };
 
   // Handle Notifications
-  let url = 'ws://127.0.0.1:8000/ws/socket-server/';
-  const socket = new WebSocket(url);
+  // let url = 'ws://127.0.0.1:8000/ws/socket-server/';
+  // const socket = new WebSocket(url);
 
-  useEffect(() => {
-    socket.onmessage = function (e) {
-      let data = JSON.parse(e.data);
-      console.log(data);
-      setOrderNotify([...orderNotify, data]);
-      if (data.type === 'notification') {
-        console.log(data.message);
-      }
-    };
+  // useEffect(() => {
+  //   socket.onmessage = function (e) {
+  //     let data = JSON.parse(e.data);
+  //     console.log(data);
+  //     setOrderNotify([...orderNotify, data]);
+  //     if (data.type === 'notification') {
+  //       console.log(data.message);
+  //     }
+  //   };
 
-    return () => {
-      socket.close(); // Clean up WebSocket connection when component unmounts
-    };
-  }, [orderNotify, setOrderNotify]);
+  //   return () => {
+  //     socket.close();
+  //   }
+  // }, []);
 
   const changeStatus = async (id, newStatus) => {
     const formData = new FormData()
@@ -52,10 +52,10 @@ function Reservation() {
     } catch (err) {
       console.log("There was an error changing the status:", err);
     }
-    socket.send(JSON.stringify({
-      'message': `Dear customer, your reservation is ${newStatus}`,
-      'user': id // Assuming `id` is the user id here
-    }));
+    // socket.send(JSON.stringify({
+    //   'message': `Dear customer, your reservation is ${newStatus}`,
+    //   'user': id // Assuming `id` is the user id here
+    // }));
   };
 
   useEffect(() => {

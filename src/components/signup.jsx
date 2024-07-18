@@ -11,7 +11,7 @@ function Signup() {
     email: "",
     password: "",
     is_staff: false,
-    is_customer: false,
+    is_customer:true,
   });
   // const [staff, setStaff] = useState(false)
   // const [customer, setCustomer] = useState(false)
@@ -21,24 +21,11 @@ function Signup() {
     setPerson({ ...person, [name]: value });
   };
 
-  const handleMember = (e) => {
-    const selectedValue = e.target.value
-    console.log(selectedValue)
-  if(selectedValue === 'Customer'){
-    return setPerson({...person, is_customer:true, is_staff:false})
-  }else{
-    return setPerson({...person, is_customer:false, is_staff:true})
-  }
-
-  };
   console.log(person)
   const handleSubmit = (e) => {
     e.preventDefault();
     const { email, username, password, is_staff, is_customer } = person;
-    if(!is_customer){
-      setValidate('please choose a role')
-      return
-    }
+   
     RegisterUser(email, username, password, is_staff, is_customer);
   };
 
@@ -110,15 +97,6 @@ function Signup() {
               <p className='text-danger'>{err}</p>
             )
           })}
-        </div>
-
-        <div className="mb-3">
-          <select name="members" onChange={handleMember} required>
-            <option>Choose Role</option>
-            {/* <option value="Staff">Staff</option> */}
-            <option value="Customer">Customer</option>
-          </select>
-          <p className='text-danger'>{validate}</p>
         </div>
 
         <div className="mb-3">

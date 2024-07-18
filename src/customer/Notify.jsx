@@ -1,10 +1,9 @@
-import React, { useContext, useEffect } from 'react';
-import axios from 'axios';
+import React, {useContext, useEffect} from 'react'
 import { AuthContext } from '../Context/AuthContext';
 import './cust.css';
-
-function Notifications() {
-  const { showNotifications, notifyAll, setNotifyAll, user } = useContext(AuthContext);
+import axios from 'axios';
+function Notify() {
+    const { showNotifications, notifyAll, setNotifyAll, user } = useContext(AuthContext);
 
   const orderMsg = async () => {
     try {
@@ -12,7 +11,7 @@ function Notifications() {
       const data = response.data;
       setNotifyAll(data);
     } catch (err) {
-      console.log('There was an error');
+      console.log('There was an error', err);
     }
   };
 
@@ -21,27 +20,24 @@ function Notifications() {
       orderMsg();
     }
   }, [user]);
-
   return (
-    <>
-      {showNotifications && (
-        <div className="notify bg-white p-3">
-          <p className='text-primary'>show notifications</p>
-          <ul className='ordermsg'>
+    <div>
+       <div className="p-3 bg-white">
+          <p className='text-primary text-center'>show notifications</p>
+          <ul className='mt-2'>
             {notifyAll.map((notifys) => {
               const { id, message, message_date } = notifys;
               return (
-                <li className='d-flex msg' key={id}>
-                  <p>{message}</p>
-                  <span>{message_date}</span>
+                <li className='d-flex not_list' key={id}>
+                  <p className='not_msg'>{message}</p>
+                  <span className='not_date'>{message_date}</span>
                 </li>
               );
             })}
           </ul>
         </div>
-      )}
-    </>
-  );
+    </div>
+  )
 }
 
-export default Notifications;
+export default Notify

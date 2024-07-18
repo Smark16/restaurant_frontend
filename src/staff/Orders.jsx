@@ -1,27 +1,69 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import $ from 'jquery';
 import 'datatables.net';
 import axios from 'axios';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import useHook from '../customer/customhook';
+import { AuthContext } from '../Context/AuthContext';
 
-const orderUrl = 'https://restaurant-backend-5.onrender.com/restaurant/orders';
+const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
 
 function App() {
+  const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [orderStatus, setOrderStatus] = useState(true);
+  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
+  const { notify, setNotify } = useHook(notificationOrderUrl);
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://restaurant-backend-5.onrender.com/restaurant/delete_order/${id}`);
+      await axios.delete(`http://127.0.0.1:8000/restaurant/delete_order/${id}`);
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
     } catch (err) {
-      console.log("there was an err");
+      console.log("There was an error");
     }
   };
 
-  const changeStatus = async (id, newStatus) => {
+  // Handle Notifications
+  let url = 'ws://127.0.0.1:8000/ws/socket-server/';
+  const socket = new WebSocket(url);
+
+  useEffect(() => {
+    socket.onmessage = function (e) {
+      let data = JSON.parse(e.data);
+      console.log(data);
+      setNotify((prevNotify) => [...prevNotify, data]);
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === id ? { ...order, status: newStatus } : order
+        )
+      )
+      if (data.type === 'notification') {
+        console.log(data.message);
+        Notification.requestPermission().then((perm) => {
+          if (perm === 'granted') {
+            new Notification(`Order from ${data.user.username}`, {
+              body: `${data.message}`,
+            });
+          }
+        });
+      }
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [socket]);
+
+  const changeStatus = async (id, user_id, username, newStatus) => {
     try {
-      await axios.patch(`https://restaurant-backend-5.onrender.com/restaurant/update_status/${id}`, { newStatus });
+      await axios.patch(`http://127.0.0.1:8000/restaurant/update_status/${id}`, { newStatus })
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === id ? { ...order, status: newStatus } : order
@@ -30,6 +72,10 @@ function App() {
     } catch (err) {
       console.log("There was an error changing the status");
     }
+    socket.send(JSON.stringify({
+      'message': `Dear ${username}, your Order is ${newStatus}`,
+      'user': user_id
+    }));
   };
 
   useEffect(() => {
@@ -53,8 +99,7 @@ function App() {
     if (orders.length > 0) {
       $('#myTable').DataTable();
     }
-
-  }, [orders]); 
+  }, [orders]);
 
   return (
     <div>
@@ -64,46 +109,46 @@ function App() {
             <th scope='col'>User_Name</th>
             <th scope='col'>Date</th>
             <th scope='col'>Location</th>
-            <th scope='col'>contact</th>
-            <th scope='col'>status</th>
+            <th scope='col'>Contact</th>
+            <th scope='col'>Status</th>
             <th scope='col'>Actions</th>
           </tr>
         </thead>
         <tbody>
           {orderStatus && (<h4 className='text-center mt-3'>No Orders Available</h4>)}
           {orders.map(order => {
-            const { id, contact, location, order_date, status, user } = order;
+            const { id, contact, location, order_date, status } = order;
             return (
               <tr key={id}>
-                <td scope='col'>{user}</td>
+                <td scope='col'>{order.user.username}</td>
                 <td scope='col'>{order_date}</td>
                 <td scope='col'>{location}</td>
                 <td scope='col'>{contact}</td>
                 <td scope='col'>
                   {status === 'Completed' && (
                     <span className='text-success d-flex'>
-                      <i class="bi bi-check2-circle"></i> completed
+                      <i className="bi bi-check2-circle"></i> Completed
                     </span>
                   )}
                   {status === 'Canceled' && (
                     <span className='text-danger'>
-                      canceled
+                      Canceled
                     </span>
                   )}
-                  {status === 'Pending' && (
+                  {status === 'In Progress' && (
                     <span className='text-warning d-flex'>
-                      <i class="bi bi-arrow-counterclockwise"></i> pending
+                      <i className="bi bi-arrow-counterclockwise"></i> Pending
                     </span>
                   )}
                   {!status && (
                     <span className='text-secondary'>
-                      <i class="fa fa-spinner"></i> waiting
+                      <i className="fa fa-spinner"></i> Waiting
                     </span>
                   )}
                 </td>
                 <td>
                   <div className="actions d-flex">
-                    <i class="bi bi-trash-fill" onClick={() => handleDelete(id)}></i>
+                    <i className="bi bi-trash-fill" onClick={() => handleDelete(id)}></i>
                     <div className="dropdown">
                       <button
                         className="btn btn-primary dropdown-toggle"
@@ -118,7 +163,7 @@ function App() {
                           <a
                             className="dropdown-item"
                             href="#"
-                            onClick={() => changeStatus(id, 'Completed')}
+                            onClick={() => changeStatus(id, order.user.id, order.user.username, 'Completed')}
                           >
                             Completed
                           </a>
@@ -127,7 +172,7 @@ function App() {
                           <a
                             className="dropdown-item"
                             href="#"
-                            onClick={() => changeStatus(id, 'Canceled')}
+                            onClick={() => changeStatus(id, order.user.id, order.user.username, 'Canceled')}
                           >
                             Canceled
                           </a>
@@ -136,7 +181,7 @@ function App() {
                           <a
                             className="dropdown-item"
                             href="#"
-                            onClick={() => changeStatus(id, 'Pending')}
+                            onClick={() => changeStatus(id, order.user.id, order.user.username, 'Pending')}
                           >
                             Pending
                           </a>

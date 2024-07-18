@@ -12,8 +12,8 @@ function Customer() {
   const { user,Loginloading} = useContext(AuthContext);
   const [UserReservation, setUserReservation] = useState([])
   const [Userorder, setUserOrder] = useState([])
-  const userReservation = `https://restaurant-backend-5.onrender.com/restaurant/user-reservation/${user.user_id}`
-  const userOrder = `https://restaurant-backend-5.onrender.com/restaurant/userOrder/${user.user_id}`
+  const userReservation = `http://127.0.0.1:8000/restaurant/user-reservation/${user.user_id}`
+  const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
   
   const fetchUserReservations = async ()=>{
     try{
@@ -126,11 +126,11 @@ function Customer() {
 <div className="shape-loader"></div>
 <div className='shape-overlay'></div>
 </>) : (<>
-  <div className="mainsection bg-alert alert-secondary">
+  <div className="mainsection">
     <h4 className='text-center bg-success text-white p-3 menubar'>Welcome, {user.username}</h4>
 
-<div className="result bg-white mt-2">
-  <div className="order bg-alert alert-secondary">
+<div className="result mt-2">
+  <div className="order">
     <div className="icon">
       <img src={reserve} alt="" className='cons' />
     </div>
@@ -177,8 +177,8 @@ function Customer() {
 
 <div className="more">
 <div className="graph bg-white p-2 mt-2">
-  <Chart options={options} series={series} type="line" width="500" />
-  {/* <Chart options={options} series={series} type="radar" width="500" /> */}
+  <Chart options={options} series={series} type="line" width="300" />
+  {/* \\\<Chart options={options} series={series} type="radar" width="500" /> */}
 </div>
 
 <div className="detail bg-white">

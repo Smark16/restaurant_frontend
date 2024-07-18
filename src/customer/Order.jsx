@@ -8,7 +8,7 @@ function Order() {
 const [loading, setLoading] = useState(false)
 const [orders, setOrders] = useState([])
 const {user} = useContext(AuthContext)
-const orderPlaced = `https://restaurant-backend-5.onrender.com/restaurant/userOrder/${user.user_id}`
+const orderPlaced = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
   const fetchData = async()=>{
     try{
       setLoading(true)
@@ -50,7 +50,8 @@ const orderPlaced = `https://restaurant-backend-5.onrender.com/restaurant/userOr
           <h5 className='text-center'>NO ORDERS PLACED YET</h5>
           <img src={norder} alt='no order' className='text-center norder_img'></img>
           </>) : (<>
-            <table className='table'>
+          <div className="table_container">
+          <table className='table table-striped table-hover'>
      <tr>
       <th>#</th>
       <th>Username</th>
@@ -63,15 +64,31 @@ const orderPlaced = `https://restaurant-backend-5.onrender.com/restaurant/userOr
 
      <tbody>
         {orders.map(order =>{
-          const {id, user, location, contact, status,  order_date} = order
+          const {id, location, contact, status,  order_date} = order
           return (
             <>
             <tr key={id}>
             <td>{id}</td>
-           <td>{user}</td>
+           <td>{order.user.username}</td>
            <td>{location}</td>
            <td>{contact}</td>
-           <td>{status}</td>
+           <td>
+           {status === 'Completed' && (
+                    <span className='text-success d-flex'>
+                      <i class="bi bi-check2-circle"></i> completed
+                    </span>
+                  )}
+                  {status === 'Canceled' && (
+                    <span className='text-danger'>
+                      canceled
+                    </span>
+                  )}
+                  {status === 'In Progress' && (
+                    <span className='text-warning d-flex'>
+                      <i class="bi bi-arrow-counterclockwise"></i> pending
+                    </span>
+                  )}
+            </td>
            <td>{order_date}</td>
            <td><button className='text-white text-center bg-danger' onClick={()=>handleDelete(id)}>Delete</button></td>
             </tr>
@@ -80,6 +97,8 @@ const orderPlaced = `https://restaurant-backend-5.onrender.com/restaurant/userOr
         })}
      </tbody>
     </table>
+          </div>
+           
           </>)}
              
           </>

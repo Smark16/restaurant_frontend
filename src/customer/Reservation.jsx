@@ -4,8 +4,8 @@ import axios from 'axios'
 import { AuthContext } from '../Context/AuthContext'
 import useHook from './customhook';
 
-const tables = 'https://restaurant-backend-5.onrender.com/restaurant/tables'
-const newReservation = 'https://restaurant-backend-5.onrender.com/restaurant/new_reservation'
+const tables = 'http://127.0.0.1:8000/restaurant/tables'
+const newReservation = 'http://127.0.0.1:8000/restaurant/new_reservation'
 
 function Reservations() {
 const {user, showSuccessAlert, showErrorAlert} = useContext(AuthContext)
@@ -15,7 +15,7 @@ const [result, setResult] = useState('')
 const [reserve, setReserve] = useState('')
 const [confirmed, setConfirmed] = useState(false)
 const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
-const {orderNotify, setOrderNotify} = useHook(notificationOrderUrl)
+const {notify, setNotify} = useHook(notificationOrderUrl)
 const navigate = useNavigate()
 
 
@@ -42,19 +42,22 @@ useEffect(() => {
   socket.onmessage = function (e) {
     let data = JSON.parse(e.data);
     console.log(data)
-    setOrderNotify([...orderNotify, data])
+    setNotify([...notify, data])
     if(data.type === 'notification') {
       console.log(data.message)
-    // Notification.requestPermission()
-    // .then(perm =>{
-    // if(perm === 'granted'){
-    // new Notification(`order from ${user.username}`, {
-    //   body:`${data.message}`,
-    //       })
-    //    }
-    //   })
+    Notification.requestPermission()
+    .then(perm =>{
+    if(perm === 'granted'){
+    new Notification(`order from ${user.username}`, {
+      body:`${data.message}`,
+          })
+       }
+      })
       }   
   };
+  return () => {
+    socket.close();
+  }
  
 }, []);
 
@@ -108,8 +111,8 @@ useEffect(()=>{
       <h2 className='text-center bg-success text-white p-2'>Make Your reservation</h2>
 
       <h5>{reserve}</h5>
-
-      <form onSubmit={handleSubmit}>
+<div className="form_container">
+<form onSubmit={handleSubmit}>
       <div className="mb-3">
     <label htmlFor="formGroupExampleInput" className="form-label">
       Contact
@@ -204,6 +207,8 @@ useEffect(()=>{
       </button>
   </div>
       </form>
+</div>
+     
     </>
  
   )

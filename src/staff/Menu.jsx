@@ -104,11 +104,11 @@ function Menu() {
       </div>
 
       <h4 className='mt-3'>Total Items ({filteredFood.length})</h4>
-      <div className="row">
+      <div className="row menu_row">
         {filteredFood.map(items => {
           const { id, descriptions, price, image, name } = items;
           return (
-            <div className='col-md-3 col-sm-6 mt-3' key={id}>
+            <div className='col-md-3 col-sm-12 mt-3 menu_cont' key={id}>
               <div className='card' style={{ width: '16rem', height: '20rem' }}>
                 <img src={image} className='img' alt={name} />
                 <div className='card-body'>

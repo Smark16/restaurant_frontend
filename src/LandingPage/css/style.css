@@ -121,7 +121,18 @@
         margin-top: 15px;
         border-top: 1px solid rgba(255, 255, 255, .1)
     }
-
+    .tab-pane{
+        width: 100%;
+        margin-left: -30px;
+    }
+.video_lib{
+    width: 100%;
+}
+.futer{
+    width: 100%;
+   
+    overflow-x: scroll;
+}
     .navbar-dark .navbar-nav .nav-link,
     .sticky-top.navbar-dark .navbar-nav .nav-link {
         padding: 10px 0;

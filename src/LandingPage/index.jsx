@@ -887,7 +887,7 @@ function Index() {
   {/* Reservation Start */}
   <div className="container-xxl py-5 px-0 wow fadeInUp" data-wow-delay="0.1s">
     <div className="row g-0">
-      <div className="col-md-6">
+      <div className="col-md-6 video_lib">
         <div className="video">
           <button
             type="button"
@@ -1202,7 +1202,7 @@ function Index() {
 
   {/* Footer Start */}
   <div
-    className="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn"
+    className="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn futer"
     data-wow-delay="0.1s"
   >
     <div className="container py-5">

@@ -2,12 +2,14 @@ import {createContext, useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2'
-const loginurl = 'https://restaurant-backend-5.onrender.com/restaurant/'
-const registerurl = 'https://restaurant-backend-5.onrender.com/restaurant/register'
-const foodUrl = 'https://restaurant-backend-5.onrender.com/restaurant/food_items'
-const notificationOrderUrl = 'https://restaurant-backend-5.onrender.com/restaurant/messages'
+
+const loginurl = ' http://127.0.0.1:8000/restaurant/'
+const registerurl = 'http://127.0.0.1:8000/restaurant/register'
+const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
+const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
+const post_user_items = 'http://127.0.0.1:8000/restaurant/user_items'
 import axios from 'axios'
-import { formGroupClasses } from '@mui/material';
+
 export const AuthContext = createContext()
 
 export const AuthProvider = ({children}) =>{
@@ -16,8 +18,8 @@ export const AuthProvider = ({children}) =>{
  const [authTokens, setAuthTokens] = useState(null)
  const [user, setUser] = useState(null)
  const [loading, setLoading] = useState(true)
- const [staff, setStaff] = useState(false)
- const [customer, setCustomer] = useState(false)
+ const [staff, setStaff] = useState(user ? user.is_staff : false)
+ const [customer, setCustomer] = useState(user ? user.is_customer : false)
  const [addItem, setAddItem] = useState([])
  const [food, setFood] = useState([])
  const [clicked, setClicked] = useState(false)
@@ -25,19 +27,44 @@ export const AuthProvider = ({children}) =>{
  const [showNotifications, setShowNotifications] = useState(false)
  const [showNotificationsAll, setShowNotificationsAll] = useState(false)
  const [orderNotify, setOrderNotify] = useState([])
- const [orderNotifys, setOrderNotifys] = useState([])
- const [userId, setUserId] = useState('')
  const [newData, setNewData] = useState(data)
- const [display, setDisplay] = useState(false)
+ const [display, setDisplay] = useState(true)
  const [passwordError, setPasswordError] = useState([])
  const [usernameError, setUsernameError] = useState([])
+ const [notifyAll, setNotifyAll] = useState([]);  // Centralized notifications state
+ const [noAccount, setNoAccount] = useState('')
+ 
  const navigate = useNavigate()
 
 //  this is the code for removing the custbar component
 const handleDisplay = ()=> {
   setDisplay(!display)
 }
+
+useEffect(() => {
+  if (user) {
+    const socket = new WebSocket('ws://127.0.0.1:8000/ws/socket-server/');
+    
+    socket.onopen = function(e) {
+      console.log('WebSocket connection established');
+    };
+
+    socket.onclose = function(e) {
+      console.log('WebSocket connection closed');
+    };
+
+    socket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      setNotifyAll(prev => [...prev, data]);
+    };
+
+    return () => {
+      socket.close();
+    }
+  }
+}, [user]);
  
+// this manages notificatios for all the user
  const orderMsg = async()=>{
   try{
     const response = await axios(notificationOrderUrl)
@@ -61,11 +88,15 @@ const handleDisplay = ()=> {
   }
 }
 
-
-const handleMessages = ()=>{
-setShowNotifications(!showNotifications)
+// define setNotify (the issue is here notifyall is not defined and its i dont know how to manage this notifyAll array so that it can be passed to reservation and cart.jsx component instead of distructuring ordernotify which is then not used in navbar for single user notitifications hope you get what i mean)
+const handleMessage = ()=>{
+  setShowNotifications(!showNotifications)
+  if(showNotifications){
+    setNotifyAll([])
+  }
 }
 
+// this function dispalys the notifications when clicked
 const handleAllMessages = ()=>{
   setShowNotificationsAll(!showNotificationsAll)
   if(showNotificationsAll){
@@ -76,7 +107,6 @@ const handleAllMessages = ()=>{
 
 const handleCart = (product) => {
   const selectedItem = addItem.find((item) => item.id === product.id);
-  
   
   if(selectedItem){
     setAddItem(addItem.map(item => item.id === product.id ? {...selectedItem, quantity: selectedItem.quantity + 1} : item));
@@ -91,7 +121,6 @@ const handleCart = (product) => {
 setTotal(totalItems)
 
   localStorage.setItem('clickedItem', JSON.stringify(addItem));
-  setClicked(false)
 };
 
 
@@ -144,7 +173,7 @@ const Reduce = (product) => {
 const handleDelete = (id)=>{
   const updatedData = data.filter(item => item.id !== id);
   localStorage.setItem('clickedItem', JSON.stringify(updatedData));
-  setNewData(updatedData);
+  setAddItem(updatedData);
 
   // Calculate the total amount again based on updated data
   totalAmount = data.map(prices =>{
@@ -177,6 +206,9 @@ const handleDelete = (id)=>{
   }
   }).catch (err => {
     console.log("Error", err)
+    if(err.response.data.detail){
+      setNoAccount(err.response.data.detail)
+    }
     showErrorAlert("There was a server issue")
   })
  }
@@ -249,9 +281,11 @@ const showErrorAlert =(message)=>{
 useEffect(()=>{
   orderMsg()
   fetchFood()
-    if(authTokens){
-      const decodedUser =  jwtDecode(authTokens.access)
-      setUser(decodedUser)
+  const initialTokens = JSON.parse(localStorage.getItem('authtokens'));
+    if(initialTokens){
+      const decodedUser =  jwtDecode(initialTokens.access)
+      setAuthTokens(initialTokens);
+      setUser(jwtDecode(initialTokens.access));
       if(decodedUser.is_staff){
         navigate("/staff/dashboard")
         setStaff(true)
@@ -261,7 +295,7 @@ useEffect(()=>{
       }
     }
     setLoading(false)
-}, [authTokens, loading])
+}, [])
 
 const contextData = {
     user, setUser,
@@ -271,9 +305,10 @@ const contextData = {
     loginUser, RegisterUser, logoutUser,
     showSuccessAlert, handleCart,
     setAddItem, addItem, fetchFood,
-    food, setFood, data, clicked, setClicked, total,handleMessages,handleAllMessages,
+    food, setFood, data, clicked, setClicked, total,handleAllMessages,
     showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete, newData,
-    handleDisplay, display, setDisplay,orderNotify,Increase, Reduce, passwordError, usernameError
+    handleDisplay, display, setDisplay,Increase, Reduce, passwordError, usernameError,handleMessage, notifyAll,
+    setNotifyAll,noAccount
 }
 return (
     <AuthContext.Provider value={contextData}>
@@ -281,6 +316,3 @@ return (
     </AuthContext.Provider>
 )
 }
-
-
-
