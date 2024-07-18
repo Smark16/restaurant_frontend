@@ -28,7 +28,7 @@ const orderPlaced = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
   const handleDelete = async (id)=>{
     try{
    
-      axios.delete(`http://127.0.0.1:8000/restaurant/delete_order/${id}`)
+      axios.delete(`https://restaurant-backend-5.onrender.com/restaurant/delete_order/${id}`)
 
       const deleted = orders.filter(order => order.id !== id)
       setOrders(deleted)

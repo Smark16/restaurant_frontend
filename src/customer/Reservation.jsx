@@ -15,7 +15,7 @@ const [result, setResult] = useState('')
 const [reserve, setReserve] = useState('')
 const [confirmed, setConfirmed] = useState(false)
 const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
-const {notify, setNotify} = useHook(notificationOrderUrl)
+const {orderNotify, setOrderNotify} = useHook(notificationOrderUrl)
 const navigate = useNavigate()
 
 
@@ -35,7 +35,7 @@ const handleTable =(e)=>{
 }
 
 // Handle Notifications
-let url = 'ws://127.0.0.1:8000/ws/socket-server/';
+let url = 'wss://restaurant-backend-5.onrender.com/ws/socket-server/';
 const socket = new WebSocket(url);
 useEffect(() => {
   

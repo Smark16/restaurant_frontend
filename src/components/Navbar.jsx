@@ -21,57 +21,84 @@ import Notifications from '../customer/Notifications';
 import AllNotifications from '../customer/allnotifications';
 import '../App.css';
 
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
-}));
+    const Search = styled('div')(({ theme }) => ({
+        position: 'relative',
+        borderRadius: theme.shape.borderRadius,
+        backgroundColor: alpha(theme.palette.common.white, 0.15),
+        '&:hover': {
+          backgroundColor: alpha(theme.palette.common.white, 0.25),
+        },
+        marginRight: theme.spacing(2),
+        marginLeft: 0,
+        width: '100%',
+        [theme.breakpoints.up('sm')]: {
+          marginLeft: theme.spacing(3),
+          width: 'auto',
+        },
+      }));
+      
+      const SearchIconWrapper = styled('div')(({ theme }) => ({
+        padding: theme.spacing(0, 2),
+        height: '100%',
+        position: 'absolute',
+        pointerEvents: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }));
+      
+      const StyledInputBase = styled(InputBase)(({ theme }) => ({
+        color: 'inherit',
+        '& .MuiInputBase-input': {
+          padding: theme.spacing(1, 1, 1, 0),
+          // vertical padding + font size from searchIcon
+          paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+          transition: theme.transitions.create('width'),
+          width: '100%',
+          [theme.breakpoints.up('md')]: {
+            width: '20ch',
+          },
+        },
+      }));
+      
+      function Bar() {
+        const [anchorEl, setAnchorEl] = useState(null);
+        const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+        const {user, staff, customer, clicked, setClicked, total, handleMessages,handleAllMessages,showNotificationsAll, orderNotify} = useContext(AuthContext)
+        const [notifyAll, setNotifyAll] = useState([])
+        const [showNotifications, setShowNotifications] = useState(false)
+      
+        const isMenuOpen = Boolean(anchorEl);
+        const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+      
+        const handleMobileMenuClose = () => {
+          setMobileMoreAnchorEl(null);
+        };
+      
+        useEffect(() => {
+          if (user) {
+            const fetchNotifications = async () => {
+              try {
+                const response = await fetch(`http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`);
+                const data = await response.json();
+                setNotifyAll(data);
+              } catch (error) {
+                console.error('Error fetching notifications:', error);
+              }
+            };
+      
+            fetchNotifications();
+          }
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
+        }, [user]);
+        console.log(notifyAll.length)
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-  },
-}));
-
-function Bar() {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  const { user, staff, customer, clicked, setClicked, total, showNotifications, handleDisplay, showNotificationsAll, notifyAll, setShowNotifications, setShowNotificationsAll } = useContext(AuthContext);
-
-  const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-
-  const handleMobileMenuClose = () => {
-    setMobileMoreAnchorEl(null);
-  };
+        const handleMessage = ()=>{
+          setShowNotifications(!showNotifications)
+          if(showNotifications){
+            setNotifyAll([])
+          }
+        }
 
   const handleMenuClose = () => {
     setAnchorEl(null);

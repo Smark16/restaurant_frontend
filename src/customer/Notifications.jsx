@@ -4,24 +4,26 @@ import { AuthContext } from '../Context/AuthContext';
 import './cust.css';
 
 function Notifications() {
-  const { showNotifications, notifyAll, setNotifyAll, user } = useContext(AuthContext);
+ const [orderNotify, setOrderNotify] = useState([])
+ const {showNotifications, setShowNotifications, user} = useContext(AuthContext)
+ const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
 
-  const orderMsg = async () => {
-    try {
-      const response = await axios.get(`http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`);
-      const data = response.data;
-      setNotifyAll(data);
-    } catch (err) {
-      console.log('There was an error');
-    }
-  };
+ const orderMsg = async()=>{
+  try{
+    const response = await axios(notificationOrderUrl)
+    const data = response.data
+    setOrderNotify(data)
+    console.log(data)
 
-  useEffect(() => {
-    if (user) {
-      orderMsg();
-    }
-  }, [user]);
+  }catch(err){
+    console.log('There was an error')
+  }
+ }
 
+
+ useEffect(()=>{
+  orderMsg()
+ }, [])
   return (
     <>
       {showNotifications && (
