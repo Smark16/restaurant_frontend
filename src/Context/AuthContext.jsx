@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2'
 
-const loginurl = ' http://127.0.0.1:8000/restaurant/'
-const registerurl = 'http://127.0.0.1:8000/restaurant/register'
-const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
-const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
-const post_user_items = 'http://127.0.0.1:8000/restaurant/user_items'
+const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
+const registerurl = 'https://restaurant-backend5.onrender.com/restaurant/register'
+const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
+const notificationOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/messages'
+const post_user_items = 'https://restaurant-backend5.onrender.com/restaurant/user_items'
 import axios from 'axios'
 
 export const AuthContext = createContext()
@@ -42,7 +42,7 @@ const handleDisplay = ()=> {
 
 useEffect(() => {
   if (user) {
-    const socket = new WebSocket('ws://127.0.0.1:8000/ws/socket-server/');
+    const socket = new WebSocket('wss://restaurant-backend5.onrender.com/ws/socket-server/');
     
     socket.onopen = function(e) {
       console.log('WebSocket connection established');
