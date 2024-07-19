@@ -9,19 +9,19 @@ import axios from 'axios';
 import useHook from '../customer/customhook';
 import { AuthContext } from '../Context/AuthContext';
 
-const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
+const orderUrl = 'https://restaurant-backend5.onrender.com/restaurant/orders';
 
 function App() {
   const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [orderStatus, setOrderStatus] = useState(true);
-  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
+  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
   const socketRef = useRef(null);
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/restaurant/delete_order/${id}`);
+      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_order/${id}`);
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
     } catch (err) {
       console.log("There was an error");
@@ -30,7 +30,7 @@ function App() {
 
   // Handle Notifications
   useEffect(() => {
-    const url = 'ws://127.0.0.1:8000/ws/socket-server/';
+    const url = 'wss://restaurant-backend5.onrender.com/ws/socket-server/';
     const socket = new WebSocket(url);
     socketRef.current = socket;
 
@@ -66,7 +66,7 @@ function App() {
 
   const changeStatus = async (id, user_id, username, newStatus) => {
     try {
-      await axios.patch(`http://127.0.0.1:8000/restaurant/update_status/${id}`, { newStatus })
+      await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, { newStatus })
         .then((response) => {
           console.log(response);
         })
