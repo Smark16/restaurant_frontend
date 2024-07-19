@@ -2,11 +2,11 @@ import React, {useState, useEffect} from 'react'
 import axios from 'axios'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import useHook from './customHook';
-const foodUrl = 'https://restaurant-backend-5.onrender.com/restaurant/food_items'
+const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
 
 function SingleItem() {
  const { id } = useParams()
- const singleUrl = `https://restaurant-backend-5.onrender.com/restaurant/food_items/${id}`
+ const singleUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`
  const [item, setItem] = useState(null)
  const [loading, setLoading] = useState(true)
  const {food} = useHook(foodUrl)
@@ -27,7 +27,7 @@ function SingleItem() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://restaurant-backend-5.onrender.com/restaurant/single_item/${id}`);
+      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/single_item/${id}`);
       
       navigate("/staff/dashboard/menu")
     } catch (error) {
