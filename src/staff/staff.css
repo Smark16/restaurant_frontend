@@ -149,9 +149,67 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+.seeAll {
+  margin-left: 80%;
+  cursor: pointer;
+  color: #3498db;
+  font-weight: bold;
+}
+
+.seeAll:hover {
+  color: #2980b9;
+}
+/* cards */
+.items{
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+.items li{
+  width: 200px;
+  display: flex;
+  padding: 20px;
+}
+.items li .item{
+  width: 300px;
+  padding: 20px;
+}
+.mange{
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+}
+.tables li{
+  display: flex;
+  justify-content: space-between;
+}
+.tbl_info{
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.tbl_info input{
+  margin-top: -10px;
+
+}
  @media screen and (max-width:1000px) {
   .order_table{
     width: 100%;
     overflow-x: scroll;
+  }
+  .reservations, .orderlists{
+    width: 100%;
+    overflow-x: scroll;
+  }
+  .items{
+    width: 100%;
+    overflow-x: scroll;
+  }
+  .items li{
+    width:100%;
+  }
+  .items li .item{
+    width: 100%;
   }
  }

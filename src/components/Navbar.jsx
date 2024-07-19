@@ -5,12 +5,10 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import InputBase from '@mui/material/InputBase';
 import Badge from '@mui/material/Badge';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
@@ -47,21 +45,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   justifyContent: 'center',
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-  },
-}));
-
-function Bar() {
+const Bar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const { user, staff, customer, clicked, setClicked, total, showNotifications, notifyAll, setNotifyAll, setShowNotifications, handleMessages, handleAllMessages, setShowNotificationsAll, handleDisplay, showNotificationsAll, orderNotify } = useContext(AuthContext);
@@ -72,22 +56,6 @@ function Bar() {
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
-
-  useEffect(() => {
-    if (user) {
-      const fetchNotifications = async () => {
-        try {
-          const response = await fetch(`http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`);
-          const data = await response.json();
-          setNotifyAll(data);
-        } catch (error) {
-          console.error('Error fetching notifications:', error);
-        }
-      };
-
-      fetchNotifications();
-    }
-  }, [user, setNotifyAll]);
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -101,6 +69,22 @@ function Bar() {
   const removeContent = () => {
     setClicked(true);
   };
+
+  const fetchNotifications = async (userId) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/restaurant/usermsg/${userId}`);
+      const data = await response.json();
+      setNotifyAll(data);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications(user.user_id);
+    }
+  }, [user]);
 
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
@@ -118,8 +102,7 @@ function Bar() {
       }}
       open={isMenuOpen}
       onClose={handleMenuClose}
-    >
-    </Menu>
+    />
   );
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
@@ -141,11 +124,7 @@ function Bar() {
     >
       {user && customer && (
         <MenuItem>
-          <IconButton 
-            size="large" 
-            aria-label="show items in cart" 
-            color="inherit"
-          >
+          <IconButton size="large" aria-label="show items in cart" color="inherit">
             <Link to='/customer/dashboard/cart' className='text-black'>
               {clicked ? (
                 <Badge>
@@ -161,14 +140,10 @@ function Bar() {
           <p>Cart</p>
         </MenuItem>
       )}
-  
+
       {user && staff && (
         <MenuItem>
-          <IconButton
-            size="large"
-            aria-label="show new notifications"
-            color="inherit"
-          >
+          <IconButton size="large" aria-label="show new notifications" color="inherit">
             <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
               <NotificationsIcon />
             </Badge>
@@ -179,14 +154,10 @@ function Bar() {
           <p>Notifications</p>
         </MenuItem>
       )}
-  
+
       {user && customer && (
         <MenuItem>
-          <IconButton
-            size="large"
-            aria-label="show new notifications"
-            color="inherit"
-          >
+          <IconButton size="large" aria-label="show new notifications" color="inherit">
             <Link to='/customer/dashboard/notify'>
               <Badge badgeContent={showNotifications ? 0 : notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
                 <NotificationsIcon />
@@ -201,12 +172,12 @@ function Bar() {
       )}
 
       {!user && (
-         <MenuItem>
-               <div className="mobile_links">
-                <Link to='/login'>Login</Link>
-                <Link to='/signup'>SignUp</Link>
-              </div>
-       </MenuItem>
+        <MenuItem>
+          <div className="mobile_links">
+            <Link to='/login'>Login</Link>
+            <Link to='/signup'>SignUp</Link>
+          </div>
+        </MenuItem>
       )}
     </Menu>
   );
@@ -215,7 +186,7 @@ function Bar() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          {user && (staff || customer) && (
+          {user && customer && (
             <>
               <IconButton
                 size="large"
@@ -232,43 +203,29 @@ function Bar() {
                 component="div"
                 sx={{ display: { xs: 'none', sm: 'block' } }}
               >
-                <Link to={staff ? '/staff/dashboard' : '/customer/dashboard'} className='text-white'>Dashboard</Link>
+                <Link to='/customer/dashboard' className='text-white'>Dashboard</Link>
               </Typography>
               <Box sx={{ flexGrow: 1 }} />
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                {customer && (
-                  <IconButton
-                    size="large"
-                    aria-label="show items in cart"
-                    color="inherit"
-                  >
-                    <Link to='/customer/dashboard/cart' className='text-white'>
-                      <Badge badgeContent={total} color="error" onClick={removeContent}>
-                        <ShoppingCartIcon />
-                      </Badge>
-                    </Link>
-                  </IconButton>
-                )}
+                <IconButton
+                  size="large"
+                  aria-label="show items in cart"
+                  color="inherit"
+                >
+                  <Link to='/customer/dashboard/cart' className='text-white'>
+                    <Badge badgeContent={total} color="error" onClick={removeContent}>
+                      <ShoppingCartIcon />
+                    </Badge>
+                  </Link>
+                </IconButton>
                 <IconButton
                   size="large"
                   aria-label="show new notifications"
                   color="inherit"
                 >
-                  {staff && (
-                    <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
-                      <NotificationsIcon />
-                    </Badge>
-                  )}
-                  <div className="container-notify">
-                    {showNotificationsAll && <AllNotifications />}
-                  </div>
-                  {customer && (
-                  
-                      <Badge badgeContent={showNotifications ? 0 : notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
-                        <NotificationsIcon />
-                      </Badge>
-                  
-                  )}
+                  <Badge badgeContent={showNotifications ? 0 : notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
+                    <NotificationsIcon />
+                  </Badge>
                   <div className="container-notify">
                     {showNotifications && <Notifications />}
                   </div>
@@ -281,9 +238,46 @@ function Bar() {
                   aria-haspopup="true"
                   color="inherit"
                 >
-                  <Link to='/customer/dashboard/profile' className='text-white'>
+                  <Link to='/customer/dashboard/CustomerProfile' className='text-white'>
                     <AccountCircle />
                   </Link>
+                </IconButton>
+              </Box>
+            </>
+          )}
+
+          {user && staff && (
+            <>
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                sx={{ mr: 2 }}
+              >
+                <MenuIcon onClick={handleDisplay} />
+              </IconButton>
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ display: { xs: 'none', sm: 'block' } }}
+              >
+                <Link to='/staff/dashboard' className='text-white'>Dashboard</Link>
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                <IconButton
+                  size="large"
+                  aria-label="show new notifications"
+                  color="inherit"
+                >
+                  <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
+                    <NotificationsIcon />
+                  </Badge>
+                  <div className="container-notify">
+                    {showNotificationsAll && <AllNotifications />}
+                  </div>
                 </IconButton>
               </Box>
             </>
@@ -299,8 +293,7 @@ function Bar() {
                 noWrap
                 component="div"
                 sx={{ display: { xs: 'none', sm: 'block' } }}
-              >
-              </Typography>
+              />
               <Box sx={{ flexGrow: 1 }} />
               <div className="links">
                 <Link to='/login'>Login</Link>

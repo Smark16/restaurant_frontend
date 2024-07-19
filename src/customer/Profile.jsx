@@ -182,7 +182,7 @@ function Profile() {
             );
           })}
         </div>
-        <div className="row">
+        <div className="row profile_row">
           <div className="col-md-6 p-3 profile_data">
             <div>
               <span>Status: {status ? 'Staff' : 'Customer'}</span>
@@ -207,7 +207,7 @@ function Profile() {
               <span>Date Joined: {myUser.date_joined}</span>
             </div>
           </div>
-          <form className='p-3 col-md-8 col-sm-12 profile_form' onSubmit={handleSubmit}>
+          <form className='p-3 col-md-8 profile_form' onSubmit={handleSubmit}>
             <h5 className='text-center'>Edit Profile</h5>
             {error && <div className="alert alert-danger">{error}</div>}
             <div className="row g-3 mt-3">

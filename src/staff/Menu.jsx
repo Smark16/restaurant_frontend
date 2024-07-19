@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './staff.css'
 import {Link} from 'react-router-dom'
 import axios from 'axios';
-const foodUrl = 'https://restaurant-backend-5.onrender.com/restaurant/food_items'
+const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',

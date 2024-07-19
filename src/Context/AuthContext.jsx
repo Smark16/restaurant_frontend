@@ -15,8 +15,8 @@ export const AuthContext = createContext()
 export const AuthProvider = ({children}) =>{
   const data = JSON.parse(localStorage.getItem("clickedItem")) || []
   
- const [authTokens, setAuthTokens] = useState(null)
- const [user, setUser] = useState(null)
+ const [authTokens, setAuthTokens] = useState(() => JSON.parse(localStorage.getItem('authtokens')) || null);
+ const [user, setUser] = useState(() => (authTokens ? jwtDecode(authTokens.access) : null));
  const [loading, setLoading] = useState(true)
  const [staff, setStaff] = useState(user ? user.is_staff : false)
  const [customer, setCustomer] = useState(user ? user.is_customer : false)
@@ -127,7 +127,7 @@ setTotal(totalItems)
 const Increase = (product)=>{
   const selectedItem = addItem.find((item) => item.id === product.id);
   
-  
+   
   if(selectedItem){
     setAddItem(addItem.map(item => item.id === product.id ? {...selectedItem, quantity: selectedItem.quantity + 1} : item));
   }else{
@@ -242,6 +242,15 @@ const handleDelete = (id)=>{
  })
  }
 
+ const logoutUser = () => {
+  setAuthTokens(null);
+  setUser(null);
+  localStorage.removeItem('authtokens');
+  showSuccessAlert('You have been logged out').then(() => {
+    navigate('/login');
+  });
+};
+
 
 const showSuccessAlert =(message)=>{
     Swal.fire({
@@ -298,7 +307,7 @@ const contextData = {
     food, setFood, data, clicked, setClicked, total,handleAllMessages,
     showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete,
     handleDisplay, display, setDisplay,Increase, Reduce, passwordError, usernameError,handleMessage, notifyAll,
-    setNotifyAll,noAccount
+    setNotifyAll,noAccount,logoutUser
 }
 return (
     <AuthContext.Provider value={contextData}>

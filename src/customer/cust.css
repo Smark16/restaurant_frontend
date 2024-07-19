@@ -11,12 +11,12 @@
 .order{
     display: flex;
     align-items: center;
-    gap: 5px;
-    background: rgba(255, 182, 193, 0.5);
+    gap: 2px;
+    background-color: #fff;
     border-radius: 10px;
     box-shadow: 5px 5px 5px grey;
     padding: 10px;
-    width: 200px;
+    width: 250px;
 }
 .cart{
     height:100%;
@@ -684,5 +684,21 @@ background-color: #0056b3; /* Darker shade of the primary color on hover */
   .container form{
     margin-left: -50px;
     width: 100%;
+  }
+  .profile_container{
+    width: 100%;
+    
+    overflow-x: scroll;
+  }
+  .profile_row{
+    width: 100%;
+
+  }
+  .profile_data{
+    margin-top: -80px;
+  }
+  .profile_form{
+    width: 300px;
+
   }
 }

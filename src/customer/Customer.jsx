@@ -4,58 +4,79 @@ import order from '../Images/order.png';
 import reserve from '../Images/reser.png';
 import Chart from "react-apexcharts";
 import Calendar from './calendar';
-import axios from 'axios'
+import axios from 'axios';
 
 import './cust.css';
 
 function Customer() {
-  const { user,Loginloading} = useContext(AuthContext);
-  const [UserReservation, setUserReservation] = useState([])
-  const [Userorder, setUserOrder] = useState([])
-  const userReservation = `http://127.0.0.1:8000/restaurant/user-reservation/${user.user_id}`
-  const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
-  
-  const fetchUserReservations = async ()=>{
-    try{
-      const response = await axios(userReservation)
-      const data = response.data
-      setUserReservation(data)
-    }catch(err){
-      console.log('server error', err)
-    }
-  }
+  const { user, Loginloading } = useContext(AuthContext);
+  const [UserReservation, setUserReservation] = useState([]);
+  const [expense, setExpense] = useState(0);
+  const user_order = `http://127.0.0.1:8000/restaurant/user_order/${user.user_id}`;
+  const [Userorder, setUserOrder] = useState([]);
+  const userReservation = `http://127.0.0.1:8000/restaurant/user-reservation/${user.user_id}`;
+  const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`;
 
-  const fetchUserOrder = async ()=>{
-    try{
-      const response = await axios(userOrder)
-      const data = response.data
-      setUserOrder(data)
-    }catch(err){
-      console.log('server error', err)
-    }
-  }
+  const fetchOrder = async () => {
+    try {
+      const response = await axios.get(user_order);
+      const data = response.data;
+      
+      // Calculate total expense
+      const totalExpense = data.reduce((total, order) => {
+        const orderTotal = order.menu.reduce((sum, item) => sum + item.price, 0);
+        return total + orderTotal;
+      }, 0);
 
-  useEffect(()=>{
-    fetchUserReservations()
-    fetchUserOrder()
-  }, [])
+      setExpense(totalExpense);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchUserReservations = async () => {
+    try {
+      const response = await axios.get(userReservation);
+      const data = response.data;
+      setUserReservation(data);
+    } catch (err) {
+      console.log('server error', err);
+    }
+  };
+
+  const fetchUserOrder = async () => {
+    try {
+      const response = await axios.get(userOrder);
+      const data = response.data;
+      setUserOrder(data);
+    } catch (err) {
+      console.log('server error', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserReservations();
+    fetchUserOrder();
+    fetchOrder();
+  }, []);
+
   const options = {
     colors: ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800'],
     dataLabels: {
       enabled: true,
       enabledOnSeries: undefined,
       formatter: function (val, opts) {
-          return val;
+        return val;
       },
       textAnchor: 'middle',
       distributed: false,
       offsetX: 0,
       offsetY: 0,
       style: {
-          fontSize: '14px',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          fontWeight: 'bold',
-          colors: undefined
+        fontSize: '14px',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontWeight: 'bold',
+        colors: undefined
       },
       background: {
         enabled: true,
@@ -75,12 +96,12 @@ function Customer() {
         }
       },
       dropShadow: {
-          enabled: false,
-          top: 1,
-          left: 1,
-          blur: 1,
-          color: '#000',
-          opacity: 0.45
+        enabled: false,
+        top: 1,
+        left: 1,
+        blur: 1,
+        color: '#000',
+        opacity: 0.45
       }
     },
     chart: {
@@ -122,89 +143,88 @@ function Customer() {
 
   return (
     <>
-{Loginloading ? (<>
-<div className="shape-loader"></div>
-<div className='shape-overlay'></div>
-</>) : (<>
-  <div className="mainsection">
-    <h4 className='text-center bg-success text-white p-3 menubar'>Welcome, {user.username}</h4>
+      {Loginloading ? (
+        <>
+          <div className="shape-loader"></div>
+          <div className='shape-overlay'></div>
+        </>
+      ) : (
+        <>
+          <div className="mainsection">
+            <h4 className='text-center bg-success text-white p-3 menubar'>Welcome, {user.username}</h4>
 
-<div className="result mt-2">
-  <div className="order">
-    <div className="icon">
-      <img src={reserve} alt="" className='cons' />
-    </div>
+            <div className="result mt-2">
+              <div className="order">
+                <div className="icon">
+                  <img src={reserve} alt="" className='cons' />
+                </div>
 
-    <div className="word">
-      <p className='text-black'>Total Reservations</p>
-      <h4 className='text-black'>{UserReservation.length}</h4>
-    </div>
-  </div>
+                <div className="word">
+                  <p className='text-black'>Total Reservations</p>
+                  <h4 className='text-black'>{UserReservation.length}</h4>
+                </div>
+              </div>
 
-  <div className="order">
-    <div className="icon">
-      <i className="bi bi-bar-chart-line-fill cons"></i>
-    </div>
+              <div className="order">
+                <div className="icon">
+                  <i className="bi bi-bar-chart-line-fill cons"></i>
+                </div>
 
-    <div className="word">
-      <p>Total Expense</p>
-      <h4>UGX 0.00</h4>
-    </div>
-  </div>
+                <div className="word">
+                  <p>Total Expense</p>
+                  <h4>UGX {expense.toFixed(2)}</h4>
+                </div>
+              </div>
 
-  <div className="order">
-    <div className="icon">
-      <img src={order} alt="" className='cons' />
-    </div>
+              <div className="order">
+                <div className="icon">
+                  <img src={order} alt="" className='cons' />
+                </div>
 
-    <div className="word">
-      <p>Total Order</p>
-      <h4>{Userorder.length}</h4>
-    </div>
-  </div>
+                <div className="word">
+                  <p>Total Order</p>
+                  <h4>{Userorder.length}</h4>
+                </div>
+              </div>
 
-  <div className="order">
-    <div className="icon">
-      <i className="bi bi-wallet cons"></i>
-    </div>
+              <div className="order">
+                <div className="icon">
+                  <i className="bi bi-wallet cons"></i>
+                </div>
 
-    <div className="word">
-      <p>Wallet</p>
-      <h4>UGX 0.00</h4>
-    </div>
-  </div>
-</div>
+                <div className="word">
+                  <p>Wallet</p>
+                  <h4>UGX 0.00</h4>
+                </div>
+              </div>
+            </div>
 
-<div className="more">
-<div className="graph bg-white p-2 mt-2">
-  <Chart options={options} series={series} type="line" width="300" />
-  {/* \\\<Chart options={options} series={series} type="radar" width="500" /> */}
-</div>
+            <div className="more">
+              <div className="graph bg-white p-2 mt-2">
+                <Chart options={options} series={series} type="line" width="300" />
+              </div>
 
-<div className="detail bg-white">
+              <div className="detail bg-white">
+                <div className="calendar">
+                  <Calendar />
+                </div>
+                <h4 className='text-center'>Product Details</h4>
+                <ul className='list'>
+                  <li className='d-flex'>
+                    <span>Completed Orders</span>
+                    <h6 className='text-white bg-success p-2'>23</h6>
+                  </li>
 
-  <div className="calendar">
-    <Calendar/>
-  </div>
-  <h4 className='text-center'>Product Details</h4>
-  <ul className='list'>
-    <li className='d-flex'>
-      <span>Completed Orders</span>
-      <h6 className='text-white bg-success p-2'>23</h6>
-    </li>
-
-    <li className='d-flex'>
-      <span>Resevation Status</span>
-      <h6 className='text-white bg-primary p-2'>Pending</h6>
-    </li>
-  </ul>
-</div>
-</div>
-
-    </div>
-
-
-</>)}
+                  <li className='d-flex'>
+                    <span>Resevation Status</span>
+                    <h6 className='text-white bg-primary p-2'>Pending</h6>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
