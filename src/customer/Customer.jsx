@@ -12,10 +12,10 @@ function Customer() {
   const { user, Loginloading } = useContext(AuthContext);
   const [UserReservation, setUserReservation] = useState([]);
   const [expense, setExpense] = useState(0);
-  const user_order = `http://127.0.0.1:8000/restaurant/user_order/${user.user_id}`;
+  const user_order = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user.user_id}`;
   const [Userorder, setUserOrder] = useState([]);
-  const userReservation = `http://127.0.0.1:8000/restaurant/user-reservation/${user.user_id}`;
-  const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`;
+  const userReservation = `https://restaurant-backend5.onrender.com/restaurant/user-reservation/${user.user_id}`;
+  const userOrder = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
 
   const fetchOrder = async () => {
     try {
