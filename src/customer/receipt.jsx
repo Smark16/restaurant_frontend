@@ -10,7 +10,7 @@ function Receipt() {
   const [loading, setLoading] = useState(true);
   const [userOrder, setUserOrder] = useState(null);
   const [loader, setLoader] = useState(false);
-  const userOrderUrl = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`;
+  const userOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
   console.log(userOrderUrl);
 
   const itemExpense = data.reduce((accumulator, item) => {
