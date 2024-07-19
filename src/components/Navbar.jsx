@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -21,84 +21,73 @@ import Notifications from '../customer/Notifications';
 import AllNotifications from '../customer/allnotifications';
 import '../App.css';
 
-    const Search = styled('div')(({ theme }) => ({
-        position: 'relative',
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: alpha(theme.palette.common.white, 0.15),
-        '&:hover': {
-          backgroundColor: alpha(theme.palette.common.white, 0.25),
-        },
-        marginRight: theme.spacing(2),
-        marginLeft: 0,
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-          marginLeft: theme.spacing(3),
-          width: 'auto',
-        },
-      }));
-      
-      const SearchIconWrapper = styled('div')(({ theme }) => ({
-        padding: theme.spacing(0, 2),
-        height: '100%',
-        position: 'absolute',
-        pointerEvents: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }));
-      
-      const StyledInputBase = styled(InputBase)(({ theme }) => ({
-        color: 'inherit',
-        '& .MuiInputBase-input': {
-          padding: theme.spacing(1, 1, 1, 0),
-          // vertical padding + font size from searchIcon
-          paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-          transition: theme.transitions.create('width'),
-          width: '100%',
-          [theme.breakpoints.up('md')]: {
-            width: '20ch',
-          },
-        },
-      }));
-      
-      function Bar() {
-        const [anchorEl, setAnchorEl] = useState(null);
-        const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-        const {user, staff, customer, clicked, setClicked, total, handleMessages,handleAllMessages,showNotificationsAll, orderNotify} = useContext(AuthContext)
-        const [notifyAll, setNotifyAll] = useState([])
-        const [showNotifications, setShowNotifications] = useState(false)
-      
-        const isMenuOpen = Boolean(anchorEl);
-        const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-      
-        const handleMobileMenuClose = () => {
-          setMobileMoreAnchorEl(null);
-        };
-      
-        useEffect(() => {
-          if (user) {
-            const fetchNotifications = async () => {
-              try {
-                const response = await fetch(`http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`);
-                const data = await response.json();
-                setNotifyAll(data);
-              } catch (error) {
-                console.error('Error fetching notifications:', error);
-              }
-            };
-      
-            fetchNotifications();
-          }
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginRight: theme.spacing(2),
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(3),
+    width: 'auto',
+  },
+}));
 
-        }, [user]);
-        console.log(notifyAll.length)
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
 
-        const handleMessage = ()=>{
-          setShowNotifications(!showNotifications)
-          if(showNotifications){
-            setNotifyAll([])
-          }
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('md')]: {
+      width: '20ch',
+    },
+  },
+}));
+
+function Bar() {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+  const { user, staff, customer, clicked, setClicked, total, showNotifications, notifyAll, setNotifyAll, setShowNotifications, handleMessages, handleAllMessages, setShowNotificationsAll, handleDisplay, showNotificationsAll, orderNotify } = useContext(AuthContext);
+
+  const isMenuOpen = Boolean(anchorEl);
+  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const handleMobileMenuClose = () => {
+    setMobileMoreAnchorEl(null);
+  };
+
+  useEffect(() => {
+    if (user) {
+      const fetchNotifications = async () => {
+        try {
+          const response = await fetch(`http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`);
+          const data = await response.json();
+          setNotifyAll(data);
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
         }
+      };
+
+      fetchNotifications();
+    }
+  }, [user, setNotifyAll]);
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -199,9 +188,9 @@ import '../App.css';
             color="inherit"
           >
             <Link to='/customer/dashboard/notify'>
-            <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
-              <NotificationsIcon />
-            </Badge>
+              <Badge badgeContent={showNotifications ? 0 : notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
+                <NotificationsIcon />
+              </Badge>
             </Link>
             <div className="container-notify">
               {showNotifications && <Notifications />}
@@ -254,15 +243,9 @@ import '../App.css';
                     color="inherit"
                   >
                     <Link to='/customer/dashboard/cart' className='text-white'>
-                      {clicked ? (
-                        <Badge>
-                          <ShoppingCartIcon />
-                        </Badge>
-                      ) : (
-                        <Badge badgeContent={total} color="error" onClick={removeContent}>
-                          <ShoppingCartIcon />
-                        </Badge>
-                      )}
+                      <Badge badgeContent={total} color="error" onClick={removeContent}>
+                        <ShoppingCartIcon />
+                      </Badge>
                     </Link>
                   </IconButton>
                 )}
@@ -276,14 +259,18 @@ import '../App.css';
                       <NotificationsIcon />
                     </Badge>
                   )}
+                  <div className="container-notify">
+                    {showNotificationsAll && <AllNotifications />}
+                  </div>
                   {customer && (
-                    <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
-                      <NotificationsIcon />
-                    </Badge>
+                  
+                      <Badge badgeContent={showNotifications ? 0 : notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
+                        <NotificationsIcon />
+                      </Badge>
+                  
                   )}
                   <div className="container-notify">
-                    {staff && showNotificationsAll && <AllNotifications />}
-                    {customer && showNotifications && <Notifications />}
+                    {showNotifications && <Notifications />}
                   </div>
                 </IconButton>
                 <IconButton
@@ -294,7 +281,7 @@ import '../App.css';
                   aria-haspopup="true"
                   color="inherit"
                 >
-                  <Link to={staff ? '/staff/dashboard/profile' : '/customer/dashboard/CustomerProfile'} className='text-white'>
+                  <Link to='/customer/dashboard/profile' className='text-white'>
                     <AccountCircle />
                   </Link>
                 </IconButton>

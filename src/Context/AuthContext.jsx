@@ -27,7 +27,6 @@ export const AuthProvider = ({children}) =>{
  const [showNotifications, setShowNotifications] = useState(false)
  const [showNotificationsAll, setShowNotificationsAll] = useState(false)
  const [orderNotify, setOrderNotify] = useState([])
- const [newData, setNewData] = useState(data)
  const [display, setDisplay] = useState(true)
  const [passwordError, setPasswordError] = useState([])
  const [usernameError, setUsernameError] = useState([])
@@ -117,7 +116,7 @@ const handleCart = (product) => {
   const totalItems = addItem.map(item => {
     const {quantity} = item
     return quantity
-  }).reduce((sum, amount) => sum + amount, 1)
+  }).reduce((sum, amount) => sum + amount, 0)
 setTotal(totalItems)
 
   localStorage.setItem('clickedItem', JSON.stringify(addItem));
@@ -243,15 +242,6 @@ const handleDelete = (id)=>{
  })
  }
 
-const logoutUser = ()=>{
-setAuthTokens(null)
-setUser(null)
-localStorage.removeItem("authtokens")
-showSuccessAlert("You have been logged out")
-.then(()=>{
-  navigate("/login")
-})
-}
 
 const showSuccessAlert =(message)=>{
     Swal.fire({
@@ -302,11 +292,11 @@ const contextData = {
     authTokens, setAuthTokens,
     staff, setStaff,
     customer, setCustomer,
-    loginUser, RegisterUser, logoutUser,
+    loginUser, RegisterUser,
     showSuccessAlert, handleCart,
     setAddItem, addItem, fetchFood,
     food, setFood, data, clicked, setClicked, total,handleAllMessages,
-    showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete, newData,
+    showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete,
     handleDisplay, display, setDisplay,Increase, Reduce, passwordError, usernameError,handleMessage, notifyAll,
     setNotifyAll,noAccount
 }

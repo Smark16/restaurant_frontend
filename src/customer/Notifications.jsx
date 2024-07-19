@@ -1,18 +1,19 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
 import './cust.css';
+import useHook from './customhook';
 
 function Notifications() {
- const [orderNotify, setOrderNotify] = useState([])
- const {showNotifications, setShowNotifications, user} = useContext(AuthContext)
+ const {showNotifications, user} = useContext(AuthContext)
  const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
+ const {notifyAll, setNotifyAll} = useHook(notificationOrderUrl)
 
  const orderMsg = async()=>{
   try{
     const response = await axios(notificationOrderUrl)
     const data = response.data
-    setOrderNotify(data)
+    setNotifyAll(data)
     console.log(data)
 
   }catch(err){

@@ -11,159 +11,131 @@ const OrderItem = 'http://127.0.0.1:8000/restaurant/post_OrderItems';
 const placedOrder = 'http://127.0.0.1:8000/restaurant/placed_orders';
 
 function Cart() {
-  const {data, user,handleDelete, newData, Increase, Reduce} = useContext(AuthContext)   
-  console.log(newData)
-  const [info, setInfo] = useState({location:"", contact:""})
-  const [orderId, setOrderId] = useState('')
-  const [Userorder, setUserOrder] = useState([])
-  const [dispReceipt, setDispReceipt] = useState(false)
-  const [loader, setLoader] = useState(false)
-  const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`
-  const notificationOrderUrl =  `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
-const {orderNotify, setOrderNotify} = useHook(notificationOrderUrl)
-  // const userOrder = `https://restaurant-backend-5.onrender.com/restaurant/userOrder/${user.user_id}`
+  const { data, user, handleDelete, setAddItem, addItem, Increase, Reduce } = useContext(AuthContext);
+  const [info, setInfo] = useState({ location: "", contact: "" });
+  const [orderId, setOrderId] = useState('');
+  const [loader, setLoader] = useState(false);
+  const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`;
+  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
+  const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
+  const navigate = useNavigate();
 
-
-  // calculate expense for individual item
   const itemExpense = data.reduce((accumulator, item) => {
     const { name, quantity, price } = item;
     const totalExpense = parseFloat(price * quantity);
-
+    
     if (!accumulator[name]) {
       accumulator[name] = 0;
     }
-
+    
     accumulator[name] += totalExpense;
-
+    
     return accumulator;
   }, {});
 
-  // for (const itemName in itemExpense) {
-  //   if (itemExpense.hasOwnProperty(itemName)) {
-  //     console.log(`${itemName}: shs. ${itemExpense[itemName].toFixed(2)}`);
-  //   }
-  // }
-
-  const fetchUserOrder = async ()=>{
-    try{
-      const response = await axios(userOrder)
-      const data = response.data
-      setUserOrder(data)
-    }catch(err){
-      console.log('server error', err)
-    }
-  }
-
-  useEffect(()=>{
-    fetchUserOrder()
-  }, [])
-
-const handleChange = (e) =>{
-  const {name, value} = e.target
-  setInfo({...info, [name]:value})
-  console.log(name, value)
-}
-
-// Handle Notifications
-let url = 'ws://127.0.0.1:8000/ws/socket-server/';
-const socket = new WebSocket(url);
-useEffect(() => {
-  
-  socket.onmessage = function (e) {
-    let data = JSON.parse(e.data);
-    console.log(data)  
-    setOrderNotify([...orderNotify, data])
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInfo({ ...info, [name]: value });
+    console.log(name, value);
   };
 
- 
-}, []);
-const overlay = document.querySelector('.overlay')
-const modalform = document.querySelector('.modal-form')
-const modalall = document.querySelector('.modal-all')
+  useEffect(() => {
+    const url = 'ws://127.0.0.1:8000/ws/socket-server/';
+    const socket = new WebSocket(url);
 
-const removeOverlay = ()=>{
-  overlay.classList.remove('overlay')
-  modalform.style.display = 'none';
-  modalall.style.display = 'none';
-}
+    socket.onopen = function(e) {
+      console.log('WebSocket connection established');
+    };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  const formData = new FormData();
-  formData.append('user', user.user_id)
-  formData.append('location', info.location);
-  formData.append('contact', info.contact);
-    
-  axios.post(placedOrder, formData)
-  .then(res =>{
-    setOrderId(res.data.id)
-  }).catch (err =>{
-    console.log(err)
-  })
-console.log(orderId)
-  const orderItemData = new FormData()
-  const total_item = newData.map(item => {
-    const {quantity} = item
-    return quantity
-}).reduce((acc, amount) => acc + amount, 1)
-console.log(total_item)
-  newData.forEach(Order_item =>{
-    console.log(Order_item)
-    orderItemData.append('user', user.user_id)
-    orderItemData.append('order', orderId )
-    orderItemData.append('menu', Order_item.id)
-    orderItemData.append('total_quantity', total_item)
-  })
-  axios
-    .post(OrderItem, orderItemData, {
-      headers: {
-        'Content-Type': 'multipart/form-data' // Set the content type for multipart form data
+    socket.onclose = function(e) {
+      console.log('WebSocket connection closed');
+    };
+
+    socket.onmessage = function(e) {
+      let data = JSON.parse(e.data);
+      console.log(data);  // Ensure this logs data when the message event is triggered
+      setNotifyAll(prevNotifyAll => [...prevNotifyAll, data]);
+
+      if (data.type === 'notification') {
+        Notification.requestPermission().then((perm) => {
+          if (perm === 'granted') {
+            new Notification(`Order from ${user.username}`, {
+              body: `${data.message}`,
+            });
+          }
+        });
       }
-    })
-    .then((res) => {
-      console.log(res);
-      alert('order confirmed successfully')
-    })
-    .catch((err) => {
+    };
+
+    // Cleanup function to close the WebSocket connection
+    return () => {
+      socket.close();
+    };
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoader(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('user', user.user_id);
+      formData.append('location', info.location);
+      formData.append('contact', info.contact);
+
+      const orderResponse = await axios.post(placedOrder, formData);
+      const newOrderId = orderResponse.data.id;
+      setOrderId(newOrderId);
+
+      const orderItemData = new FormData();
+      orderItemData.append('user', user.user_id);
+      orderItemData.append('order', newOrderId);
+
+      for (const Order_item of data) {
+        const menuQuantityUpdate = `http://127.0.0.1:8000/restaurant/update_quantity/${Order_item.id}`;
+        const quantityData = new FormData();
+        quantityData.append("quantity", Order_item.quantity);
+
+        await axios.patch(menuQuantityUpdate, quantityData)
+          .then(res => {
+            console.log(res);
+          }).catch(err => {
+            console.log(err);
+          });
+
+        orderItemData.append('menu', Order_item.id);
+      }
+
+      await axios.post(OrderItem, orderItemData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(response => {
+        if (response.status === 201) {
+          navigate("/customer/dashboard/receipt");
+        }
+      });
+
+      const socket = new WebSocket('ws://127.0.0.1:8000/ws/socket-server/');
+      socket.onopen = () => {
+        socket.send(JSON.stringify({
+          'message': `${user.username} has placed an order`,
+          'user': `${user.user_id}`
+        }));
+        socket.close();
+      };
+
+    } catch (err) {
       console.log('There was an error', err);
-    });
-
-socket.send(JSON.stringify({
-  'message': `${user.username} has placed an order`,
-  'user':`${user.user_id}`
-}))
-setDispReceipt(true)
-};
-
-const removeModal = ()=>{
-  setDispReceipt(false)
-}
-const Download = () => {
-  setLoader(true);
-  const capture = document.querySelector('.modal-form');
-  const options = {
-    scrollY: -window.scrollY, // Fixes issue with capturing scrollable elements
-    scale: 2, // Increase scale for higher resolution
-    useCORS: true // Enable cross-origin resource sharing (CORS)
+    } finally {
+      setLoader(false);
+    }
   };
 
-  html2canvas(capture, options).then((canvas) => {
-    const imgData = canvas.toDataURL('image/png'); /* Convert canvas to image URL */
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const componentWidth = doc.internal.pageSize.getWidth();
-    const componentHeight = doc.internal.pageSize.getHeight();
-    doc.addImage(imgData, 'PNG', 0, 0, componentWidth, componentHeight);
-    setLoader(false);
-    doc.save('receipt.pdf'); // Save PDF with the name 'receipt.pdf'
-  });
-};
-
-
-const totalAmount = data.map(prices =>{
-  const {price, quantity} = prices
-  return price * quantity
-}).reduce((sum, amount) => sum + amount, 0).toFixed(2)
-
+  const totalAmount = data.map(prices => {
+    const { price, quantity } = prices;
+    return price * quantity;
+  }).reduce((sum, amount) => sum + amount, 0).toFixed(2);
 
   return (
     <>
@@ -185,12 +157,12 @@ const totalAmount = data.map(prices =>{
                     <div className="content">
                       <p>UGX. {price}</p>
                       <div className="symb">
-                        <button className='bg-danger text-white text-center' onClick={()=>Reduce(sele)}>-</button>
+                        <button className='bg-danger text-white text-center' onClick={() => Reduce(sele)}>-</button>
                         <span>{quantity}</span>
-                        <button className='bg-primary text-white text-center'onClick={()=>Increase(sele)}>+</button>
+                        <button className='bg-primary text-white text-center' onClick={() => Increase(sele)}>+</button>
                       </div>
                       <div className="btns">
-                        <button className='bg-danger text-white text-center' onClick={()=>handleDelete(id)}>Delete</button>
+                        <button className='bg-danger text-white text-center' onClick={() => handleDelete(id)}>Delete</button>
                       </div>
                     </div>
                   </div>
@@ -202,23 +174,21 @@ const totalAmount = data.map(prices =>{
               <form className='mt-2' onSubmit={handleSubmit}>
                 <div className='row'>
                   <div className='col'>
-                    <TextField 
-                      id="outlined-basic" 
-                      label="Location" 
-                      variant="outlined" 
+                    <TextField
+                      id="outlined-basic"
+                      label="Location"
+                      variant="outlined"
                       name='location'
                       value={info.location}
                       onChange={handleChange}
                       required
                     />
                   </div>
-
-
                   <div className='col'>
-                    <TextField 
-                      id="outlined-basic" 
-                      label="Phone" 
-                      variant="outlined" 
+                    <TextField
+                      id="outlined-basic"
+                      label="Phone"
+                      variant="outlined"
                       name='contact'
                       type='number'
                       value={info.contact}
@@ -244,8 +214,8 @@ const totalAmount = data.map(prices =>{
                   </div>
                 </div>
                 <div className='sendOrder text-center'>
-                  <button className='bg-primary text-center text-white mt-5' type='submit'>
-                    {confirm ? 'Confirming...' : 'Confirm Order'}
+                  <button className='bg-primary text-center text-white mt-5' type='submit' disabled={loader}>
+                    {loader ? 'Confirming...' : 'Confirm Order'}
                   </button>
                 </div>
               </form>

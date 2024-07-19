@@ -1,8 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import $ from 'jquery';
 import 'datatables.net';
-import axios from 'axios';
+import 'datatables.net-bs4';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import axios from 'axios';
 import useHook from '../customer/customhook';
 import { AuthContext } from '../Context/AuthContext';
 
@@ -13,7 +16,8 @@ function App() {
   const [orders, setOrders] = useState([]);
   const [orderStatus, setOrderStatus] = useState(true);
   const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
-  const { notify, setNotify } = useHook(notificationOrderUrl);
+  const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
+  const socketRef = useRef(null);
 
   const handleDelete = async (id) => {
     try {
@@ -25,24 +29,28 @@ function App() {
   };
 
   // Handle Notifications
-  let url = 'ws://127.0.0.1:8000/ws/socket-server/';
-  const socket = new WebSocket(url);
-
   useEffect(() => {
-    socket.onmessage = function (e) {
+    const url = 'ws://127.0.0.1:8000/ws/socket-server/';
+    const socket = new WebSocket(url);
+    socketRef.current = socket;
+
+    socket.onopen = function(e) {
+      console.log('WebSocket connection established');
+    };
+
+    socket.onclose = function(e) {
+      console.log('WebSocket connection closed');
+    };
+
+    socket.onmessage = function(e) {
       let data = JSON.parse(e.data);
-      console.log(data);
-      setNotify((prevNotify) => [...prevNotify, data]);
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === id ? { ...order, status: newStatus } : order
-        )
-      )
-      if (data.type === 'notification') {
-        console.log(data.message);
+      console.log(data);  // Ensure this logs data when the message event is triggered
+      setNotifyAll(prevNotify => [...prevNotify, data]);
+
+      if (data.type === 'notification' && data.user.user_id !== user.user_id) {
         Notification.requestPermission().then((perm) => {
           if (perm === 'granted') {
-            new Notification(`Order from ${data.user.username}`, {
+            new Notification('Restaurant management System', {
               body: `${data.message}`,
             });
           }
@@ -50,10 +58,11 @@ function App() {
       }
     };
 
+    // Cleanup function to close the WebSocket connection
     return () => {
       socket.close();
     };
-  }, [socket]);
+  }, []);
 
   const changeStatus = async (id, user_id, username, newStatus) => {
     try {
@@ -72,7 +81,7 @@ function App() {
     } catch (err) {
       console.log("There was an error changing the status");
     }
-    socket.send(JSON.stringify({
+    socketRef.current.send(JSON.stringify({
       'message': `Dear ${username}, your Order is ${newStatus}`,
       'user': user_id
     }));
@@ -86,7 +95,6 @@ function App() {
           throw new Error('Network response was not ok');
         }
         const result = response.data;
-        console.log(result);
         setOrders(result);
         setOrderStatus(result.length === 0);
       } catch (error) {
@@ -102,7 +110,7 @@ function App() {
   }, [orders]);
 
   return (
-    <div>
+    <div className='order_table res_container'>
       <table border="2" id="myTable" className='table myTable table-striped table-hover'>
         <thead>
           <tr>

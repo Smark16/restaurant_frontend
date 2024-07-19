@@ -393,6 +393,15 @@ background-color: #0056b3; /* Darker shade of the primary color on hover */
   .not_list{
     border-bottom: 1px solid #ccc;
   }
+  .profile_form{
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-left: 40px;
+    border-radius: 10px;
+  }
+.profile_data{
+  margin-left: 100px;
+}
   .not_msg{
     width: 90%;
     white-space: nowrap;
