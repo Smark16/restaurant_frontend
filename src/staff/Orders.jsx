@@ -9,7 +9,7 @@ import axios from 'axios';
 import useHook from '../customer/customhook';
 import { AuthContext } from '../Context/AuthContext';
 
-const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
+const orderUrl = 'https://restaurant-backend5.onrender.com/restaurant/orders';
 
 function App() {
   const { user } = useContext(AuthContext);
@@ -20,14 +20,14 @@ function App() {
   const [usermadeItems, setUserMadeItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
+  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
 
   const socketRef = useRef(null);
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/restaurant/delete_order/${id}`);
+      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_order/${id}`);
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
     } catch (err) {
       console.log("There was an error");
@@ -70,7 +70,7 @@ function App() {
 
   const changeStatus = async (id, user_id, username, newStatus) => {
     try {
-      await axios.patch(`http://127.0.0.1:8000/restaurant/update_status/${id}`, { newStatus });
+      await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, { newStatus });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === id ? { ...order, status: newStatus } : order
@@ -100,7 +100,7 @@ function App() {
   };
 
   const showOrder = async (id, user_id) => {
-    const madeOrdersUrl = `http://127.0.0.1:8000/restaurant/user_order/${user_id}`;
+    const madeOrdersUrl = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user_id}`;
 
     try {
       const response = await axios.get(madeOrdersUrl);
@@ -240,7 +240,7 @@ function App() {
                   const { image, price, name, quantity } = item;
                   return (
                     <div key={item.id} className="order-item">
-                      <img src={`http://127.0.0.1:8000/${image}`} alt={name} />
+                      <img src={`https://restaurant-backend5.onrender.com/${image}`} alt={name} />
                       <div className="item-details">
                         <h5>{name}</h5>
                         <p>{quantity}</p>
