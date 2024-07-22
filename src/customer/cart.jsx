@@ -7,16 +7,16 @@ import TextField from '@mui/material/TextField';
 import { useNavigate } from 'react-router-dom';
 import useHook from './customhook';
 
-const OrderItem = 'http://127.0.0.1:8000/restaurant/post_OrderItems';
-const placedOrder = 'http://127.0.0.1:8000/restaurant/placed_orders';
+const OrderItem = 'https://restaurant-backend5.onrender.com/restaurant/post_OrderItems';
+const placedOrder = 'https://restaurant-backend5.onrender.com/restaurant/placed_orders';
 
 function Cart() {
   const { data, user, handleDelete, setAddItem, addItem, Increase, Reduce } = useContext(AuthContext);
   const [info, setInfo] = useState({ location: "", contact: "" });
   const [orderId, setOrderId] = useState('');
   const [loader, setLoader] = useState(false);
-  const userOrder = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`;
-  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
+  const userOrder = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
+  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
   const navigate = useNavigate();
 
@@ -40,7 +40,7 @@ function Cart() {
   };
 
   useEffect(() => {
-    const url = 'ws://127.0.0.1:8000/ws/socket-server/';
+    const url = 'wss://restaurant-backend5.onrender.com/ws/socket-server/';
     const socket = new WebSocket(url);
 
     socket.onopen = function(e) {
@@ -92,7 +92,7 @@ function Cart() {
       orderItemData.append('order', newOrderId);
 
       for (const Order_item of data) {
-        const menuQuantityUpdate = `http://127.0.0.1:8000/restaurant/update_quantity/${Order_item.id}`;
+        const menuQuantityUpdate = `https://restaurant-backend5.onrender.com/restaurant/update_quantity/${Order_item.id}`;
         const quantityData = new FormData();
         quantityData.append("quantity", Order_item.quantity);
 
@@ -116,7 +116,7 @@ function Cart() {
         }
       });
 
-      const socket = new WebSocket('ws://127.0.0.1:8000/ws/socket-server/');
+      const socket = new WebSocket('wss://restaurant-backend5.onrender.com/ws/socket-server/');
       socket.onopen = () => {
         socket.send(JSON.stringify({
           'message': `${user.username} has placed an order`,

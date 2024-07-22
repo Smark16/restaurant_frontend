@@ -4,8 +4,8 @@ import axios from 'axios'
 import { AuthContext } from '../Context/AuthContext'
 import useHook from './customhook';
 
-const tables = 'http://127.0.0.1:8000/restaurant/tables'
-const newReservation = 'http://127.0.0.1:8000/restaurant/new_reservation'
+const tables = 'https://restaurant-backend5.onrender.com/restaurant/tables'
+const newReservation = 'https://restaurant-backend5.onrender.com/restaurant/new_reservation'
 
 function Reservations() {
   const { user, showSuccessAlert, showErrorAlert } = useContext(AuthContext)
@@ -14,7 +14,7 @@ function Reservations() {
   const [result, setResult] = useState('')
   const [reserve, setReserve] = useState('')
   const [confirmed, setConfirmed] = useState(false)
-  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`
+  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl)
   const navigate = useNavigate()
   const socketRef = useRef(null);
@@ -35,7 +35,7 @@ function Reservations() {
   }
 // let url = 'wss://restaurant-backend-5.onrender.com/ws/socket-server/';
   useEffect(() => {
-    const url = 'ws://127.0.0.1:8000/ws/socket-server/';
+    const url = 'wss://restaurant-backend5.onrender.com/ws/socket-server/';
     const socket = new WebSocket(url);
     socketRef.current = socket; // Assigning the WebSocket instance to socketRef.current
 

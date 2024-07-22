@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
-const reservationUrl = 'http://127.0.0.1:8000/restaurant/reservation';
-const userUrl = 'http://127.0.0.1:8000/restaurant/users';
-const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items';
-const latestOrderUrl = 'http://127.0.0.1:8000/restaurant/latest_orders';
-const orderItemsUrl = 'http://127.0.0.1:8000/restaurant/order_items';
+const orderUrl = 'https://restaurant-backend5.onrender.com/restaurant/orders';
+const reservationUrl = 'https://restaurant-backend5.onrender.com/restaurant/reservation';
+const userUrl = 'https://restaurant-backend5.onrender.com/restaurant/users';
+const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items';
+const latestOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/latest_orders';
+const orderItemsUrl = 'https://restaurant-backend5.onrender.com/restaurant/order_items';
 
 function useHook() {
     const [orders, setOrders] = useState([]);

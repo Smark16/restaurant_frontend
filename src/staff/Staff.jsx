@@ -8,10 +8,10 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import useHook from './customHook';
 
-const orderItemsUrl = 'http://127.0.0.1:8000/restaurant/order_items';
-const tablesUrl = 'http://127.0.0.1:8000/restaurant/tables';
-const postTableUrl = 'http://127.0.0.1:8000/restaurant/post_table';
-const patchTableStatusUrl = 'http://127.0.0.1:8000/restaurant/table_status/';
+const orderItemsUrl = 'https://restaurant-backend5.onrender.com/restaurant/order_items';
+const tablesUrl = 'https://restaurant-backend5.onrender.com/restaurant/tables';
+const postTableUrl = 'https://restaurant-backend5.onrender.com/restaurant/post_table';
+const patchTableStatusUrl = 'https://restaurant-backend5.onrender.com/restaurant/table_status/';
 
 function Staff() {
     const { orders, loading, reservations, customer, latest, Revenue, avg } = useHook();

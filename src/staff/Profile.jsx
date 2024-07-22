@@ -4,7 +4,7 @@ import { AuthContext } from '../Context/AuthContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-const ProfileUrl = 'http://127.0.0.1:8000/restaurant/profiles';
+const ProfileUrl = 'https://restaurant-backend5.onrender.com/restaurant/profiles';
 
 function Profile() {
   const { user } = useContext(AuthContext);
@@ -14,10 +14,10 @@ function Profile() {
   const [myUser, setMyUser] = useState({ username: "", is_staff: "", is_customer: "" });
   const [error, setError] = useState('');
 
-  const updateProfileUrl = `http://127.0.0.1:8000/restaurant/update_profile/${user.user_id}`;
-  const url = `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`;
-  const updateUsernameUrl = 'http://127.0.0.1:8000/restaurant/update-username';
-  const userUrl = `http://127.0.0.1:8000/restaurant/single_user/${user.user_id}`;
+  const updateProfileUrl = `https://restaurant-backend5.onrender.com/restaurant/update_profile/${user.user_id}`;
+  const url = `https://restaurant-backend5.onrender.com/restaurant/profile/${user.user_id}`;
+  const updateUsernameUrl = 'https://restaurant-backend5.onrender.com/restaurant/update-username';
+  const userUrl = `https://restaurant-backend5.onrender.com/restaurant/single_user/${user.user_id}`;
 
   const fetchProfiles = async () => {
     try {

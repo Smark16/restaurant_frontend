@@ -8,8 +8,8 @@ function UpdateItem() {
   const navigate = useNavigate()
 //   const [product, setProduct] = useState({name:"", price:"", desc:"", image:null})
   const [item, setItem] = useState({name:"", price:"", descriptions:"", image:null})
-  const singleUrl = `https://restaurant-backend-5.onrender.com/restaurant/food_items/${id}`
-  const url = `https://restaurant-backend-5.onrender.com/restaurant/update_order/${id}`
+  const singleUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`
+  const url = `https://restaurant-backend5.onrender.com/restaurant/update_order/${id}`
 
   const fetchData = async ()=>{
     try{

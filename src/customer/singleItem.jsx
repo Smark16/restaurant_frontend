@@ -4,8 +4,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
 import './cust.css';
 
-const rates = 'https://restaurant-backend-5.onrender.com/restaurant/rates';
-const postReview = 'https://restaurant-backend-5.onrender.com/restaurant/post_review';
+const rates = 'https://restaurant-backend5.onrender.com/restaurant/rates';
+const postReview = 'https://restaurant-backend5.onrender.com/restaurant/post_review';
 
 function SingleMenu() {
   const { id } = useParams();

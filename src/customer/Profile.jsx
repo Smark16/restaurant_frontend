@@ -6,14 +6,14 @@ import useAxios from '../components/useAxios';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
-const ProfileUrl = 'http://127.0.0.1:8000/restaurant/profiles';
-const changePassword = 'http://127.0.0.1:8000/restaurant/change-password/';
+const ProfileUrl = 'https://restaurant-backend5.onrender.com/restaurant/profiles';
+const changePassword = 'https://restaurant-backend5.onrender.com/restaurant/change-password/';
 
 function Profile() {
   const { user } = useContext(AuthContext);
   const axiosInstance = useAxios();
-  const getUser = `http://127.0.0.1:8000/restaurant/get_user/${user.user_id}`;
-  const updateUser = `http://127.0.0.1:8000/restaurant/update_user/${user.user_id}`;
+  const getUser = `https://restaurant-backend5.onrender.com/restaurant/get_user/${user.user_id}`;
+  const updateUser = `https://restaurant-backend5.onrender.com/restaurant/update_user/${user.user_id}`;
   const [status, setStatus] = useState('');
   const [profileImage, setProfileImage] = useState([]);
   const [profile, setProfile] = useState({ email: "", location: "", contact: "", image: null });
@@ -26,8 +26,8 @@ function Profile() {
   const [showModal, setShowModal] = useState(false);
   const [update, setUpdate] = useState(false)
 
-  const updateProfileUrl = `http://127.0.0.1:8000/restaurant/update_profile/${user.user_id}`;
-  const url = `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`;
+  const updateProfileUrl = `https://restaurant-backend5.onrender.com/restaurant/update_profile/${user.user_id}`;
+  const url = `https://restaurant-backend5.onrender.com/restaurant/profile/${user.user_id}`;
   
   const fetchProfiles = async () => {
     try {

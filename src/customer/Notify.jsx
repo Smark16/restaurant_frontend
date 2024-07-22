@@ -7,7 +7,7 @@ function Notify() {
 
   const orderMsg = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`);
+      const response = await axios.get(`https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`);
       const data = response.data;
       setNotifyAll(data);
     } catch (err) {

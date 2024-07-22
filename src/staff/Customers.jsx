@@ -5,7 +5,7 @@ import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
 import axios from 'axios';
-const menuUrl = 'https://restaurant-backend-5.onrender.com/restaurant/food_items'
+const menuUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
 
 function Customers() {
   useEffect(() => {

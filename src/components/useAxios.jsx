@@ -4,7 +4,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import {jwtDecode} from 'jwt-decode';
 
-const baseURL = 'http://127.0.0.1:8000/restaurant'
+const baseURL = 'https://restaurant-backend5.onrender.com/restaurant'
 
 //we want to create refresh tokens
 const useAxios =()=>{
@@ -24,7 +24,7 @@ axiosInstance.interceptors.request.use(async (req) => {
 
     try {
         // Sending a request to refresh the access token
-        const response = await axios.post("http://127.0.0.1:8000/api/token/refresh/", {
+        const response = await axios.post("https://restaurant-backend5.onrender.com/api/token/refresh/", {
             refresh: authTokens.refresh,
         });
 
