@@ -189,6 +189,15 @@
   align-items: center;
   gap: 2px;
 }
+.bi{
+  cursor: pointer;
+} 
+.bi-trash-fill:hover{
+ color: red;
+}
+.bi-eye:hover{
+color: green;
+}
 .tbl_info input{
   margin-top: -10px;
 

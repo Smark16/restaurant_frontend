@@ -5,25 +5,24 @@ import { AuthContext } from '../Context/AuthContext'
 import './cust.css'
 
 function AllNotifications() {
- const [orderNotify, setOrderNotify] = useState([])
- const {showNotificationsAll} = useContext(AuthContext)
+ const {showNotificationsAll, orderNotify} = useContext(AuthContext)
  
- const orderMsg = async()=>{
-  try{
-    const response = await axios(notificationOrderUrl)
-    const data = response.data
-    setOrderNotify(data)
-    console.log(data)
+//  const orderMsg = async()=>{
+//   try{
+//     const response = await axios(notificationOrderUrl)
+//     const data = response.data
+//     setOrderNotify(data)
+//     console.log(data)
 
-  }catch(err){
-    console.log('There was an error')
-  }
- }
+//   }catch(err){
+//     console.log('There was an error')
+//   }
+//  }
 
 
- useEffect(()=>{
-  orderMsg()
- }, [])
+//  useEffect(()=>{
+//   orderMsg()
+//  }, [])
   return (
     <>
     {showNotificationsAll && (<>

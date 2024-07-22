@@ -24,7 +24,7 @@ function Customer() {
       
       // Calculate total expense
       const totalExpense = data.reduce((total, order) => {
-        const orderTotal = order.menu.reduce((sum, item) => sum + item.price, 0);
+        const orderTotal = order.menu.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         return total + orderTotal;
       }, 0);
 

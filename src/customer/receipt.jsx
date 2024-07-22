@@ -6,25 +6,14 @@ import html2canvas from 'html2canvas';
 import axios from 'axios';
 
 function Receipt() {
-  const { data, user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [userOrder, setUserOrder] = useState(null);
   const [loader, setLoader] = useState(false);
-  const userOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
-  console.log(userOrderUrl);
+  const [madeOrder, setMadeOrder] = useState([]);
 
-  const itemExpense = data.reduce((accumulator, item) => {
-    const { name, quantity, price } = item;
-    const totalExpense = parseFloat(price * quantity);
-
-    if (!accumulator[name]) {
-      accumulator[name] = 0;
-    }
-
-    accumulator[name] += totalExpense;
-
-    return accumulator;
-  }, {});
+  const userOrderUrl = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`;
+  const madeOrdersUrl = `http://127.0.0.1:8000/restaurant/user_order/${user.user_id}`; // Ensure this URL is correct
 
   const fetchUserOrder = async () => {
     try {
@@ -35,13 +24,41 @@ function Receipt() {
       }
       setLoading(false);
     } catch (err) {
-      console.log('server error', err);
+      console.error('server error', err);
       setLoading(false);
     }
   };
 
+  const fetchOrder = async () => {
+    try {
+      const response = await axios.get(madeOrdersUrl);
+      const data = response.data;
+      setMadeOrder(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const itemExpense = madeOrder
+    .filter(order => order.order.id === userOrder?.id)
+    .reduce((accumulator, order) => {
+      order.menu.forEach(item => {
+        const { name, quantity, price } = item;
+        const totalExpense = parseFloat(price * quantity);
+
+        if (!accumulator[name]) {
+          accumulator[name] = 0;
+        }
+
+        accumulator[name] += totalExpense;
+      });
+
+      return accumulator;
+    }, {});
+
   useEffect(() => {
     fetchUserOrder();
+    fetchOrder();
   }, []);
 
   const Download = () => {
@@ -60,9 +77,10 @@ function Receipt() {
     });
   };
 
-  const totalAmount = data
-    .map((prices) => prices.price * prices.quantity)
-    .reduce((sum, amount) => sum + amount, 0)
+  const totalAmount = madeOrder
+    .filter(order => order.order.id === userOrder?.id)
+    .flatMap(order => order.menu)
+    .reduce((sum, item) => sum + item.price * item.quantity, 0)
     .toFixed(2);
 
   return (

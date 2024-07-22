@@ -9,7 +9,6 @@ import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
 
 const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items';
-const post_user_items = 'https://restaurant-backend5.onrender.com/restaurant/user_items';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -82,10 +81,8 @@ function MenuDisplay() {
 
   useEffect(() => {
     fetchFood();
-
   }, []);
 
- 
   const renderStars = (avg_rating) => {
     const stars = [];
     const roundedRating = Math.round(avg_rating);
@@ -98,6 +95,11 @@ function MenuDisplay() {
       );
     }
     return stars;
+  };
+
+  const handleAddToCart = (item) => {
+    handleCart(item);
+    setAddedItems([...addedItems, item.id]); // Track the added item by its ID
   };
 
   return (
@@ -124,7 +126,8 @@ function MenuDisplay() {
           <div className="row menu_row">
             {filteredFood.map((items) => {
               const { id, descriptions, price, image, name, avg_rating } = items;
-              
+              const isAdded = addedItems.includes(id);
+
               return (
                 <div className="col-md-3 col-sm-12 mt-3 menu" key={id}>
                   <div className="card" style={{ height: '25rem' }}>
@@ -145,10 +148,10 @@ function MenuDisplay() {
                           <button className="text-center text-primary">View More</button>
                         </Link>
                         <button
-                          className='text-center text-white bg-danger'
-                          onClick={() => handleCart(items)}
+                          className={`text-center text-white ${isAdded ? 'bg-success' : 'bg-danger'}`}
+                          onClick={() => handleAddToCart(items)}
                         >
-                          cart
+                          {isAdded ? 'Added' : 'Cart'}
                         </button>
                       </div>
                     </div>

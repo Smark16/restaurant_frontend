@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import './cust.css';
 import { AuthContext } from '../Context/AuthContext';
 import axios from 'axios';
@@ -7,17 +7,18 @@ import TextField from '@mui/material/TextField';
 import { useNavigate } from 'react-router-dom';
 import useHook from './customhook';
 
-const OrderItem = 'https://restaurant-backend5.onrender.com/restaurant/post_OrderItems';
-const placedOrder = 'https://restaurant-backend5.onrender.com/restaurant/placed_orders';
+const OrderItem = 'http://127.0.0.1:8000/restaurant/post_OrderItems';
+const placedOrder = 'http://127.0.0.1:8000/restaurant/placed_orders';
 
 function Cart() {
-  const { data, user, handleDelete, setAddItem, addItem, Increase, Reduce } = useContext(AuthContext);
+  const { data, user, handleDelete, setAddItem, setTotal, Increase, Reduce, total } = useContext(AuthContext);
   const [info, setInfo] = useState({ location: "", contact: "" });
   const [orderId, setOrderId] = useState('');
   const [loader, setLoader] = useState(false);
   const userOrder = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
   const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
+  const socketRef = useRef(null);
   const navigate = useNavigate();
 
   const itemExpense = data.reduce((accumulator, item) => {
@@ -42,6 +43,7 @@ function Cart() {
   useEffect(() => {
     const url = 'wss://restaurant-backend5.onrender.com/ws/socket-server/';
     const socket = new WebSocket(url);
+    socketRef.current = socket; // Assigning the WebSocket instance to socketRef.current
 
     socket.onopen = function(e) {
       console.log('WebSocket connection established');
@@ -92,7 +94,7 @@ function Cart() {
       orderItemData.append('order', newOrderId);
 
       for (const Order_item of data) {
-        const menuQuantityUpdate = `https://restaurant-backend5.onrender.com/restaurant/update_quantity/${Order_item.id}`;
+        const menuQuantityUpdate = `http://127.0.0.1:8000/restaurant/update_quantity/${Order_item.id}`;
         const quantityData = new FormData();
         quantityData.append("quantity", Order_item.quantity);
 
@@ -112,18 +114,19 @@ function Cart() {
         }
       }).then(response => {
         if (response.status === 201) {
+          setAddItem([])
+          setTotal("")
+          localStorage.removeItem("clickedItem")
           navigate("/customer/dashboard/receipt");
         }
       });
 
-      const socket = new WebSocket('wss://restaurant-backend5.onrender.com/ws/socket-server/');
-      socket.onopen = () => {
-        socket.send(JSON.stringify({
+      if (socketRef.current) {
+        socketRef.current.send(JSON.stringify({
           'message': `${user.username} has placed an order`,
           'user': `${user.user_id}`
         }));
-        socket.close();
-      };
+      }
 
     } catch (err) {
       console.log('There was an error', err);
@@ -131,11 +134,6 @@ function Cart() {
       setLoader(false);
     }
   };
-
-  const totalAmount = data.map(prices => {
-    const { price, quantity } = prices;
-    return price * quantity;
-  }).reduce((sum, amount) => sum + amount, 0).toFixed(2);
 
   return (
     <>
@@ -210,7 +208,7 @@ function Cart() {
                   </ul>
                   <div className='total bg-primary text-white p-3'>
                     <h4>Total</h4>
-                    <span>UGX {totalAmount}</span>
+                    <span>UGX {total}</span>
                   </div>
                 </div>
                 <div className='sendOrder text-center'>

@@ -48,10 +48,10 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 const Bar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  const { user, staff, customer, clicked, setClicked, total, showNotifications, notifyAll, setNotifyAll, setShowNotifications, handleMessages, handleAllMessages, setShowNotificationsAll, handleDisplay, showNotificationsAll, orderNotify } = useContext(AuthContext);
-
+  const { user, staff, customer, clicked, setClicked, orderNotify, total, showNotifications, notifyAll, setNotifyAll, setShowNotifications, handleMessages, handleAllMessages, setShowNotificationsAll, handleDisplay, showNotificationsAll } = useContext(AuthContext);
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  console.log(showNotifications)
 
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -72,7 +72,7 @@ const Bar = () => {
 
   const fetchNotifications = async (userId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/restaurant/usermsg/${userId}`);
+      const response = await fetch(`https://restaurant-backend5.onrender.com/restaurant/usermsg/${userId}`);
       const data = await response.json();
       setNotifyAll(data);
     } catch (error) {
@@ -126,14 +126,12 @@ const Bar = () => {
         <MenuItem>
           <IconButton size="large" aria-label="show items in cart" color="inherit">
             <Link to='/customer/dashboard/cart' className='text-black'>
-              {clicked ? (
-                <Badge>
-                  <ShoppingCartIcon />
-                </Badge>
-              ) : (
+              {total > 0 ? (
                 <Badge badgeContent={total} color="error" onClick={removeContent}>
                   <ShoppingCartIcon />
                 </Badge>
+              ) : (
+                <ShoppingCartIcon />
               )}
             </Link>
           </IconButton>
@@ -144,7 +142,7 @@ const Bar = () => {
       {user && staff && (
         <MenuItem>
           <IconButton size="large" aria-label="show new notifications" color="inherit">
-            <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
+            <Badge badgeContent={orderNotify.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
               <NotificationsIcon />
             </Badge>
             <div className="container-notify">
@@ -159,9 +157,15 @@ const Bar = () => {
         <MenuItem>
           <IconButton size="large" aria-label="show new notifications" color="inherit">
             <Link to='/customer/dashboard/notify'>
-              <Badge badgeContent={showNotifications ? 0 : notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
-                <NotificationsIcon />
-              </Badge>
+              {showNotifications ? (
+                <Badge badgeContent={0} color="error" onClick={() => setShowNotifications(!showNotifications)}>
+                  <NotificationsIcon />
+                </Badge>
+              ) : (
+                <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
+                  <NotificationsIcon />
+                </Badge>
+              )}
             </Link>
             <div className="container-notify">
               {showNotifications && <Notifications />}
@@ -213,9 +217,13 @@ const Bar = () => {
                   color="inherit"
                 >
                   <Link to='/customer/dashboard/cart' className='text-white'>
-                    <Badge badgeContent={total} color="error" onClick={removeContent}>
+                    {total > 0 ? (
+                      <Badge badgeContent={total} color="error" onClick={removeContent}>
+                        <ShoppingCartIcon />
+                      </Badge>
+                    ) : (
                       <ShoppingCartIcon />
-                    </Badge>
+                    )}
                   </Link>
                 </IconButton>
                 <IconButton
@@ -272,7 +280,7 @@ const Bar = () => {
                   aria-label="show new notifications"
                   color="inherit"
                 >
-                  <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
+                  <Badge badgeContent={orderNotify.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
                     <NotificationsIcon />
                   </Badge>
                   <div className="container-notify">

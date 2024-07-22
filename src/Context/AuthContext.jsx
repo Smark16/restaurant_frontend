@@ -104,83 +104,85 @@ const handleAllMessages = ()=>{
   }
 
 
-const handleCart = (product) => {
-  const selectedItem = addItem.find((item) => item.id === product.id);
+  const handleCart = (product) => {
+    setAddItem((prevAddItem) => {
+      const selectedItem = prevAddItem.find((item) => item.id === product.id);
   
-  if(selectedItem){
-    setAddItem(addItem.map(item => item.id === product.id ? {...selectedItem, quantity: selectedItem.quantity + 1} : item));
-  }else{
-   setAddItem([...addItem, {...product, quantity:1}])
- 
-  }
-  const totalItems = addItem.map(item => {
-    const {quantity} = item
-    return quantity
-  }).reduce((sum, amount) => sum + amount, 0)
-setTotal(totalItems)
+      let newAddItem;
+      if (selectedItem) {
+        newAddItem = prevAddItem.map((item) =>
+          item.id === product.id ? { ...selectedItem, quantity: selectedItem.quantity + 1 } : item
+        );
+      } else {
+        newAddItem = [...prevAddItem, { ...product, quantity: 1 }];
+      }
+  
+      const totalItems = newAddItem.reduce((sum, item) => sum + item.quantity, 0);
+      setTotal(totalItems);
+  
+      // Update localStorage after the state update
+      localStorage.setItem('clickedItem', JSON.stringify(newAddItem));
+      
+      return newAddItem;
+    });
+  };
+  
 
-  localStorage.setItem('clickedItem', JSON.stringify(addItem));
-};
-
-
+console.log(total)
 // Increse product
-const Increase = (product)=>{
-  const selectedItem = addItem.find((item) => item.id === product.id);
-  
-   
-  if(selectedItem){
-    setAddItem(addItem.map(item => item.id === product.id ? {...selectedItem, quantity: selectedItem.quantity + 1} : item));
-  }else{
-   setAddItem([...addItem, {...product, quantity:1}])
- 
-  }
-  
-  localStorage.setItem('clickedItem', JSON.stringify(addItem));
-}
-
-// reduce products
-// Reduce product quantity in the cart
-const Reduce = (product) => {
-  const selectedItem = addItem.find((item) => item.id === product.id);
-
-  if (selectedItem && selectedItem.quantity > 1) {
-    // Decrease quantity by 1 if it's greater than 1
-    setAddItem(
-      addItem.map((item) =>
-        item.id === product.id
-          ? { ...selectedItem, quantity: selectedItem.quantity - 1 }
-          : item
-      )
+const Increase = (product) => {
+  setAddItem((prevAddItem) => {
+    const updatedAddItem = prevAddItem.map(item => 
+      item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
     );
-  } else {
-    // Remove the item from the cart if its quantity is 1
-    setAddItem(addItem.filter((item) => item.id !== product.id));
-  }
+    
+    localStorage.setItem('clickedItem', JSON.stringify(updatedAddItem));
+    return updatedAddItem;
+  });
 
   // Update the total quantity in the cart
-  const totalItems = addItem
-    .map((item) => item.quantity)
-    .reduce((sum, amount) => sum + amount, 0);
+  const totalItems = addItem.reduce((sum, item) => sum + item.quantity, 0);
   setTotal(totalItems);
+};
 
-  localStorage.setItem("clickedItem", JSON.stringify(addItem));
+// reduce products
+const Reduce = (product) => {
+  setAddItem((prevAddItem) => {
+    const selectedItem = prevAddItem.find(item => item.id === product.id);
+
+    let updatedAddItem;
+    if (selectedItem && selectedItem.quantity > 1) {
+      updatedAddItem = prevAddItem.map(item => 
+        item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item
+      );
+    } else {
+      updatedAddItem = prevAddItem.filter(item => item.id !== product.id);
+    }
+
+    localStorage.setItem('clickedItem', JSON.stringify(updatedAddItem));
+    return updatedAddItem;
+  });
+
+  // Update the total quantity in the cart
+  const totalItems = addItem.reduce((sum, item) => sum + item.quantity, 0);
+  setTotal(totalItems);
 };
 
 
 // delete items 
-// delete items 
-const handleDelete = (id)=>{
+const handleDelete = (id) => {
   const updatedData = data.filter(item => item.id !== id);
   localStorage.setItem('clickedItem', JSON.stringify(updatedData));
   setAddItem(updatedData);
 
   // Calculate the total amount again based on updated data
-  totalAmount = data.map(prices =>{
-    const {price, quantity} = prices
-    return price * quantity
-  }).reduce((sum, amount) => sum + amount, 0).toFixed(2)
-}
+  const totalAmount = updatedData.map(prices => {
+    const { quantity } = prices;
+    return quantity;
+  }).reduce((sum, amount) => sum + amount, 0);
 
+  setTotal(totalAmount); // Update the state with the new total amount
+};
 
  const loginUser = async (username, password) =>{
   axios.post(loginurl, {
@@ -196,7 +198,7 @@ const handleDelete = (id)=>{
    let decodedStaff = checkMember.is_staff
    let decodedCustomer = checkMember.is_customer
    console.log(decodedStaff, decodedCustomer)
-  localStorage.setItem("authtokens", JSON.stringify(data))
+  localStorage.setItem('authtokens', JSON.stringify(data))
   {decodedCustomer && navigate("/customer/dashboard")}
   {decodedStaff && navigate("/staff/dashboard")}
   showSuccessAlert("Login successfull")
@@ -280,21 +282,21 @@ const showErrorAlert =(message)=>{
 useEffect(()=>{
   orderMsg()
   fetchFood()
-  const initialTokens = JSON.parse(localStorage.getItem('authtokens'));
-    if(initialTokens){
-      const decodedUser =  jwtDecode(initialTokens.access)
-      setAuthTokens(initialTokens);
-      setUser(jwtDecode(initialTokens.access));
-      if(decodedUser.is_staff){
-        navigate("/staff/dashboard")
-        setStaff(true)
-      }else if(decodedUser.is_customer){
-        navigate("/customer/dashboard")
-        setCustomer(true)
-      }
+  if(authTokens){
+    const decodedUser =  jwtDecode(authTokens.access)
+    setUser(decodedUser);
+    setStaff(decodedUser.is_staff)
+    setCustomer(decodedUser.is_customer)
+    if(decodedUser.is_staff){
+      navigate("/staff/dashboard")
+      setStaff(true)
+    }else if(decodedUser.is_customer){
+      navigate("/customer/dashboard")
+      setCustomer(true)
     }
-    setLoading(false)
-}, [])
+  }
+  setLoading(false)     
+}, [authTokens])
 
 const contextData = {
     user, setUser,
@@ -307,7 +309,7 @@ const contextData = {
     food, setFood, data, clicked, setClicked, total,handleAllMessages,
     showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete,
     handleDisplay, display, setDisplay,Increase, Reduce, passwordError, usernameError,handleMessage, notifyAll,
-    setNotifyAll,noAccount,logoutUser
+    setNotifyAll,noAccount,logoutUser, setTotal
 }
 return (
     <AuthContext.Provider value={contextData}>

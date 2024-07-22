@@ -11,9 +11,9 @@ function SingleMenu() {
   const { id } = useParams();
   const { user } = useContext(AuthContext);
   const [userReview, setUserReview] = useState('');
-  const singleUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`;
-  const productReview = `http://127.0.0.1:8000/restaurant/product_review/${id}`;
-  const url = `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`;
+  const singleUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`;
+  const productReview = `https://restaurant-backend5.onrender.com/restaurant/product_review/${id}`;
+  const url = `https://restaurant-backend5.onrender.com/restaurant/profile/${user.user_id}`;
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const { handleCart } = useContext(AuthContext);

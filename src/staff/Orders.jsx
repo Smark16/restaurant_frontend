@@ -9,42 +9,47 @@ import axios from 'axios';
 import useHook from '../customer/customhook';
 import { AuthContext } from '../Context/AuthContext';
 
-const orderUrl = 'https://restaurant-backend5.onrender.com/restaurant/orders';
+const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
 
 function App() {
   const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [orderStatus, setOrderStatus] = useState(true);
-  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
+  const [showModal, setShowModal] = useState(false);
+  const [madeOrder, setMadeOrder] = useState([]);
+  const [usermadeItems, setUserMadeItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
+
   const socketRef = useRef(null);
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_order/${id}`);
+      await axios.delete(`http://127.0.0.1:8000/restaurant/delete_order/${id}`);
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
     } catch (err) {
       console.log("There was an error");
     }
   };
 
-  // Handle Notifications
   useEffect(() => {
     const url = 'wss://restaurant-backend5.onrender.com/ws/socket-server/';
     const socket = new WebSocket(url);
     socketRef.current = socket;
 
-    socket.onopen = function(e) {
+    socket.onopen = function (e) {
       console.log('WebSocket connection established');
     };
 
-    socket.onclose = function(e) {
+    socket.onclose = function (e) {
       console.log('WebSocket connection closed');
     };
 
-    socket.onmessage = function(e) {
+    socket.onmessage = function (e) {
       let data = JSON.parse(e.data);
-      console.log(data);  // Ensure this logs data when the message event is triggered
+      console.log(data);
       setNotifyAll(prevNotify => [...prevNotify, data]);
 
       if (data.type === 'notification' && data.user !== user.user_id) {
@@ -58,7 +63,6 @@ function App() {
       }
     };
 
-    // Cleanup function to close the WebSocket connection
     return () => {
       socket.close();
     };
@@ -66,13 +70,7 @@ function App() {
 
   const changeStatus = async (id, user_id, username, newStatus) => {
     try {
-      await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, { newStatus })
-        .then((response) => {
-          console.log(response);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+      await axios.patch(`http://127.0.0.1:8000/restaurant/update_status/${id}`, { newStatus });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === id ? { ...order, status: newStatus } : order
@@ -87,23 +85,43 @@ function App() {
     }));
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios(orderUrl);
-        if (response.status !== 200) {
-          throw new Error('Network response was not ok');
-        }
-        const result = response.data;
-        setOrders(result);
-        setOrderStatus(result.length === 0);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+  const fetchData = async () => {
+    try {
+      const response = await axios(orderUrl);
+      if (response.status !== 200) {
+        throw new Error('Network response was not ok');
       }
-    };
+      const result = response.data;
+      setOrders(result);
+      setOrderStatus(result.length === 0);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
+  const showOrder = async (id, user_id) => {
+    const madeOrdersUrl = `http://127.0.0.1:8000/restaurant/user_order/${user_id}`;
+
+    try {
+      const response = await axios.get(madeOrdersUrl);
+      const data = response.data;
+      setMadeOrder(data);
+
+      const userItems = data.find(order => order.order.id === id);
+      console.log(userItems.menu)
+      setUserMadeItems(userItems.menu);
+      setLoading(false);
+      setShowModal(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+// console.log(madeOrder)
+  useEffect(() => {
     fetchData();
+  }, []);
 
+  useEffect(() => {
     if (orders.length > 0) {
       $('#myTable').DataTable();
     }
@@ -157,6 +175,7 @@ function App() {
                 <td>
                   <div className="actions d-flex">
                     <i className="bi bi-trash-fill" onClick={() => handleDelete(id)}></i>
+                    <i className="bi bi-eye" onClick={() => showOrder(id, order.user.id)}></i>
                     <div className="dropdown">
                       <button
                         className="btn btn-primary dropdown-toggle"
@@ -203,6 +222,38 @@ function App() {
           })}
         </tbody>
       </table>
+
+      {showModal && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal">
+            <div className="custom-modal-header">
+              <h5 className="custom-modal-title">View The Orders</h5>
+              <button type="button" className="close" onClick={() => setShowModal(false)}>
+                &times;
+              </button>
+            </div>
+            <div className="custom-modal-body">
+              {loading ? (
+                <p>Loading...</p>
+              ) : (
+                usermadeItems.map(item => {
+                  const { image, price, name, quantity } = item;
+                  return (
+                    <div key={item.id} className="order-item">
+                      <img src={`http://127.0.0.1:8000/${image}`} alt={name} />
+                      <div className="item-details">
+                        <h5>{name}</h5>
+                        <p>{quantity}</p>
+                        <p>Price: {price}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

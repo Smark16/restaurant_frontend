@@ -82,7 +82,7 @@ function Reservation() {
     }
 
     socketRef.current.send(JSON.stringify({
-      'message': `Dear ${username}, your Order is ${newStatus}`,
+      'message': `Dear ${username}, your reservation is ${newStatus}`,
       'user': user_id
     }));
   };
