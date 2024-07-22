@@ -47,7 +47,7 @@ function App() {
       console.log(data);  // Ensure this logs data when the message event is triggered
       setNotifyAll(prevNotify => [...prevNotify, data]);
 
-      if (data.type === 'notification' && data.user.user_id !== user.user_id) {
+      if (data.type === 'notification' && data.user !== user.user_id) {
         Notification.requestPermission().then((perm) => {
           if (perm === 'granted') {
             new Notification('Restaurant management System', {
