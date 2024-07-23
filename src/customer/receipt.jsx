@@ -12,8 +12,8 @@ function Receipt() {
   const [loader, setLoader] = useState(false);
   const [madeOrder, setMadeOrder] = useState([]);
 
-  const userOrderUrl = `http://127.0.0.1:8000/restaurant/userOrder/${user.user_id}`;
-  const madeOrdersUrl = `http://127.0.0.1:8000/restaurant/user_order/${user.user_id}`; // Ensure this URL is correct
+  const userOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
+  const madeOrdersUrl = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user.user_id}`; // Ensure this URL is correct
 
   const fetchUserOrder = async () => {
     try {
