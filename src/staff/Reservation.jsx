@@ -30,7 +30,7 @@ function Reservation() {
 
   // Handle Notifications
   useEffect(() => {
-    const url = 'wss://restaurant-backend5.onrender.com/ws/socket-server/';
+    const url = `wss://restaurant-backend5.onrender.com/ws/socket-server/${user.user_id}/`;
     const socket = new WebSocket(url);
     socketRef.current = socket;
 

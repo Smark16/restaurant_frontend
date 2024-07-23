@@ -33,9 +33,9 @@ function App() {
       console.log("There was an error");
     }
   };
-
   useEffect(() => {
-    const url = 'wss://restaurant-backend5.onrender.com/ws/socket-server/';
+    const userId = user.user_id;  // Assuming `user_id` is available in your context or props
+    const url = `wss://restaurant-backend5.onrender.com/ws/socket-server/${userId}/`;
     const socket = new WebSocket(url);
     socketRef.current = socket;
 
@@ -52,10 +52,10 @@ function App() {
       console.log(data);
       setNotifyAll(prevNotify => [...prevNotify, data]);
 
-      if (data.type === 'notification' && data.user !== user.user_id) {
+      if (data.type === 'notification') {
         Notification.requestPermission().then((perm) => {
           if (perm === 'granted') {
-            new Notification('Restaurant management System', {
+            new Notification('Restaurant Management System', {
               body: `${data.message}`,
             });
           }
@@ -66,7 +66,7 @@ function App() {
     return () => {
       socket.close();
     };
-  }, []);
+}, []);
 
   const changeStatus = async (id, user_id, username, newStatus) => {
     try {
@@ -100,6 +100,7 @@ function App() {
   };
 
   const showOrder = async (id, user_id) => {
+    setShowModal(true)
     const madeOrdersUrl = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user_id}`;
 
     try {
@@ -240,7 +241,7 @@ function App() {
                   const { image, price, name, quantity } = item;
                   return (
                     <div key={item.id} className="order-item">
-                      <img src={`https://restaurant-backend5.onrender.com${image}`} alt={name} />
+                      <img src={`https://restaurant-backend5.onrender.com${image}`} alt={name} className='modalImg'/>
                       <div className="item-details">
                         <h5>{name}</h5>
                         <p>{quantity}</p>
