@@ -100,7 +100,7 @@ function App() {
   };
 
   const showOrder = async (id, user_id) => {
-    const madeOrdersUrl = `http://127.0.0.1:8000/restaurant/user_order/${user_id}`;
+    const madeOrdersUrl = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user_id}`;
 
     try {
       setLoading(true)
@@ -240,7 +240,7 @@ function App() {
                   const { image, price, name, quantity } = item;
                   return (
                     <div key={item.id} className="order-item">
-                      <img src={`http://127.0.0.1:8000/${image}`} alt={name} />
+                      <img src={`https://restaurant-backend5.onrender.com${image}`} alt={name} />
                       <div className="item-details">
                         <h5>{name}</h5>
                         <p>{quantity}</p>
