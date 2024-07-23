@@ -100,9 +100,11 @@ function App() {
   };
 
   const showOrder = async (id, user_id) => {
+    setShowModal(true);
     const madeOrdersUrl = `http://127.0.0.1:8000/restaurant/user_order/${user_id}`;
 
     try {
+      setLoading(true)
       const response = await axios.get(madeOrdersUrl);
       const data = response.data;
       setMadeOrder(data);
@@ -111,7 +113,6 @@ function App() {
       console.log(userItems.menu)
       setUserMadeItems(userItems.menu);
       setLoading(false);
-      setShowModal(true);
     } catch (err) {
       console.error(err);
     }
@@ -240,7 +241,7 @@ function App() {
                   const { image, price, name, quantity } = item;
                   return (
                     <div key={item.id} className="order-item">
-                      <img src={`http://127.0.0.1:8000/${image}`} alt={name} />
+                      <img src={`http://127.0.0.1:8000${image}`} alt={name} className='modalImg'/>
                       <div className="item-details">
                         <h5>{name}</h5>
                         <p>{quantity}</p>

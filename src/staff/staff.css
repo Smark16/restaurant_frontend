@@ -198,6 +198,15 @@
 .bi-eye:hover{
 color: green;
 }
+.modalImg{
+  width: 100px;
+  height: 100px;
+}
+.order-item{
+  display: flex;
+  border-bottom: 1px solid #ccc;
+  justify-content: space-between;
+}
 .tbl_info input{
   margin-top: -10px;
 
