@@ -6,8 +6,8 @@ import Swal from 'sweetalert2'
 const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
 const registerurl = 'https://restaurant-backend5.onrender.com/restaurant/register'
 const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
-const notificationOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/messages'
-const post_user_items = 'https://restaurant-backend5.onrender.com/restaurant/user_items'
+const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
+
 import axios from 'axios'
 
 export const AuthContext = createContext()
@@ -42,8 +42,10 @@ const handleDisplay = ()=> {
 
 useEffect(() => {
   if (user) {
-    const socket = new WebSocket('wss://restaurant-backend5.onrender.com/ws/socket-server/');
-    
+
+    const socket = new WebSocket(user.is_staff 
+      ? `ws://127.0.0.1:8000/ws/admin/${user.user_id}/`
+      : `ws://127.0.0.1:8000/ws/customer/${user.user_id}/`)
     socket.onopen = function(e) {
       console.log('WebSocket connection established');
     };
@@ -214,36 +216,6 @@ const handleDelete = (id) => {
   })
  }
  
-
- const RegisterUser = async (email, username, password, is_staff,is_customer) =>{
- axios.post(registerurl, {
-  username, password, email, is_staff, is_customer
- }).then(response =>{
-    console.log(response)
-    if(response.status === 201){
-       navigate("/login")
-       showSuccessAlert("Registration successFull, you can Login now")
-    }else{
-        showErrorAlert(`An Error occured : ${response.status}`)
-    }
- }).catch (error =>{
-    if (error.response && error.response.data && error.response.data.password) {
-      // Access the password text from the error response data
-      const passwordErrors = error.response.data.password;
-      console.log(passwordErrors);
-      setPasswordError(passwordErrors)
-    showErrorAlert("There was a server issue")
-    }
-    if(error.response && error.response.data && error.response.data.username){
-      const usernameErrors = error.response.data.username;
-      console.log(usernameErrors)
-      setUsernameError(usernameErrors)
-    showErrorAlert("There was a server issue")
-    console.log(error)
-}
- })
- }
-
  const logoutUser = () => {
   setAuthTokens(null);
   setUser(null);

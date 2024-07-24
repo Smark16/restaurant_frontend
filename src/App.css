@@ -41,6 +41,19 @@ justify-content: center;
 .container .signImage{
   position: relative;
 }
+.container_sign{
+  margin: auto;
+  display: flex;
+  justify-content: center;
+ 
+}
+.container_sign form{
+  background-color: #fff;
+  padding: 20px;
+}
+.container_sign .signImage{
+  position: relative;
+}
 .signImage img{
   width: 100%;
 }

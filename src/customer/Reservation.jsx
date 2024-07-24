@@ -2,20 +2,18 @@ import React, { useContext, useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import { AuthContext } from '../Context/AuthContext'
-import useHook from './customhook';
 
-const tables = 'https://restaurant-backend5.onrender.com/restaurant/tables'
+const tables = 'http://127.0.0.1:8000/restaurant/tables'
 const newReservation = 'https://restaurant-backend5.onrender.com/restaurant/new_reservation'
 
 function Reservations() {
-  const { user, showSuccessAlert, showErrorAlert } = useContext(AuthContext)
+  const { user, showSuccessAlert, showErrorAlert, notifyAll, setNotifyAll } = useContext(AuthContext)
   const [reservation, setReservation] = useState({ contact: "", Email: "", party_size: "", table: "", reservation_date: "" })
   const [table, setTable] = useState([])
   const [result, setResult] = useState('')
   const [reserve, setReserve] = useState('')
   const [confirmed, setConfirmed] = useState(false)
-  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`
-  const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl)
+  
   const navigate = useNavigate()
   const socketRef = useRef(null);
 
@@ -35,7 +33,7 @@ function Reservations() {
   }
 // let url = 'wss://restaurant-backend-5.onrender.com/ws/socket-server/';
   useEffect(() => {
-    const url = `wss://restaurant-backend5.onrender.com/ws/socket-server/${user.user_id}/`;
+    const url = `ws://127.0.0.1:8000/ws/admin/1/`;
     const socket = new WebSocket(url);
     socketRef.current = socket; // Assigning the WebSocket instance to socketRef.current
 
@@ -51,7 +49,7 @@ function Reservations() {
       let data = JSON.parse(e.data);
       console.log(data);  // Ensure this logs data when the message event is triggered
       setNotifyAll(prevNotifyAll => [...prevNotifyAll, data]);
-
+    console.log(notifyAll)
       if (data.type === 'notification') {
         Notification.requestPermission().then((perm) => {
           if (perm === 'granted') {
@@ -102,7 +100,7 @@ function Reservations() {
 
     if (socketRef.current) {
       socketRef.current.send(JSON.stringify({
-        'message': `${user.username} has made a reservation`,
+        'message': `${user.username}, a reservation has been made`,
         'user': `${user.user_id}`
       }));
     }

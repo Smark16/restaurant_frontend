@@ -7,48 +7,62 @@ import useHook from './customhook';
 
 function Notifications() {
   const { showNotifications, user } = useContext(AuthContext);
-  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
+  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
+  const [loading, setLoading] = useState(false);
 
   const orderMsg = async () => {
     try {
-      const response = await axios(notificationOrderUrl);
+      setLoading(true);
+      const response = await axios.get(notificationOrderUrl); // Use axios.get for GET requests
       const data = response.data;
       setNotifyAll(data);
     } catch (err) {
-      console.log('There was an error');
+      console.error('There was an error fetching notifications', err);
+    } finally {
+      setLoading(false); // Ensure loading is set to false regardless of success or failure
     }
   };
 
   useEffect(() => {
-    orderMsg();
-  }, []);
+    if (user) {
+      orderMsg();
+    }
+  }, [user]); // Dependency array includes user to refetch if user changes
+
+  if (!showNotifications) {
+    return null; // Return null if notifications should not be shown
+  }
 
   return (
-    <>
-      {showNotifications && (
-        <div className="notify bg-white p-3">
-          <p className='text-primary'>Show Notifications</p>
-          <ul className='ordermsg'>
-            {notifyAll.map((notifys) => {
+    <div className="notify bg-white p-3">
+      <p className='text-primary'>Show Notifications</p>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <ul className='ordermsg'>
+          {notifyAll.length > 0 ? (
+            notifyAll.map((notifys) => {
               const { id, message, message_date } = notifys;
               // Format the message_date using moment
-              const relativeDate = moment(message_date).fromNow();
+              // const relativeDate = moment(message_date).fromNow();
 
               return (
                 <li className='d-flex msg' key={id}>
                   <div>
-                  <p>{message}</p>
-                  <span>{relativeDate}</span>
+                    <p>{message}</p>
+                    {/* <span>{relativeDate}</span> */}
                   </div>
-                   <span>{message_date}</span>
+                  <span>{message_date}</span>
                 </li>
               );
-            })}
-          </ul>
-        </div>
+            })
+          ) : (
+            <p className='text-black'>No notifications available</p>
+          )}
+        </ul>
       )}
-    </>
+    </div>
   );
 }
 

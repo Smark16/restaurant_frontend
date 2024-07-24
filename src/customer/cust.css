@@ -479,11 +479,12 @@ background-color: #0056b3; /* Darker shade of the primary color on hover */
     z-index: 10;
     margin-left:-450px;
     width: 490px;
-    max-height: 400px;
+    height: 500px;
     margin-top: 30px;
     overflow-y: scroll;
     box-shadow: 5px 5px 5px 5px rgb(163, 138, 138);
   }
+ 
   .single-cart{
     height: 30px;
     margin-top: 25px;

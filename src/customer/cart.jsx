@@ -5,21 +5,19 @@ import axios from 'axios';
 import 'react-phone-input-2/lib/style.css';
 import TextField from '@mui/material/TextField';
 import { useNavigate } from 'react-router-dom';
-import useHook from './customhook';
 
 const OrderItem = 'https://restaurant-backend5.onrender.com/restaurant/post_OrderItems';
 const placedOrder = 'https://restaurant-backend5.onrender.com/restaurant/placed_orders';
 
 function Cart() {
-  const { data, user, handleDelete, setAddItem, setTotal, Increase, Reduce, total } = useContext(AuthContext);
+  const { data, user, handleDelete, setAddItem, setTotal, Increase, Reduce, total, setNotifyAll, notifyAll } = useContext(AuthContext);
   const [info, setInfo] = useState({ location: "", contact: "" });
   const [orderId, setOrderId] = useState('');
   const [loader, setLoader] = useState(false);
-  const userOrder = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
-  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
-  const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
-  const socketRef = useRef(null);
+
+  // const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
   const navigate = useNavigate();
+  const socketRef = useRef(null);
 
   const itemExpense = data.reduce((accumulator, item) => {
     const { name, quantity, price } = item;
@@ -37,27 +35,26 @@ function Cart() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInfo({ ...info, [name]: value });
-    console.log(name, value);
   };
 
   useEffect(() => {
-    const url = `wss://restaurant-backend5.onrender.com/ws/socket-server/${user.user_id}/`;
+    const url = `ws://127.0.0.1:8000/ws/admin/${user.user_id}/`;
     const socket = new WebSocket(url);
     socketRef.current = socket; // Assigning the WebSocket instance to socketRef.current
 
-    socket.onopen = function(e) {
+    socket.onopen = function (e) {
       console.log('WebSocket connection established');
     };
 
-    socket.onclose = function(e) {
+    socket.onclose = function (e) {
       console.log('WebSocket connection closed');
     };
 
-    socket.onmessage = function(e) {
+    socket.onmessage = function (e) {
       let data = JSON.parse(e.data);
       console.log(data);  // Ensure this logs data when the message event is triggered
       setNotifyAll(prevNotifyAll => [...prevNotifyAll, data]);
-
+     console.log(notifyAll)
       if (data.type === 'notification') {
         Notification.requestPermission().then((perm) => {
           if (perm === 'granted') {
@@ -114,24 +111,24 @@ function Cart() {
         }
       }).then(response => {
         if (response.status === 201) {
-          setAddItem([])
-          setTotal("")
-          localStorage.removeItem("clickedItem")
+          setAddItem([]);
+          setTotal("");
+          localStorage.removeItem("clickedItem");
           navigate("/customer/dashboard/receipt");
         }
       });
-
-      if (socketRef.current) {
-        socketRef.current.send(JSON.stringify({
-          'message': `${user.username} has placed an order`,
-          'user': `${user.user_id}`
-        }));
-      }
 
     } catch (err) {
       console.log('There was an error', err);
     } finally {
       setLoader(false);
+    }
+
+    if (socketRef.current) {
+      socketRef.current.send(JSON.stringify({
+        'message': `${user.username}, an order has been placed `,
+        'user': `${user.user_id}`
+      }));
     }
   };
 

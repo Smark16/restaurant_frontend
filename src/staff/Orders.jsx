@@ -6,84 +6,20 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import axios from 'axios';
-import useHook from '../customer/customhook';
+
 import { AuthContext } from '../Context/AuthContext';
 
-const orderUrl = 'https://restaurant-backend5.onrender.com/restaurant/orders';
+const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
 
 function App() {
-  const { user } = useContext(AuthContext);
+  const { user, setNotifyAll, notifyAll } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [orderStatus, setOrderStatus] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [madeOrder, setMadeOrder] = useState([]);
   const [usermadeItems, setUserMadeItems] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
-  const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
-
-  const socketRef = useRef(null);
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_order/${id}`);
-      setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
-    } catch (err) {
-      console.log("There was an error");
-    }
-  };
-  useEffect(() => {
-    const userId = user.user_id;  // Assuming `user_id` is available in your context or props
-    const url = `wss://restaurant-backend5.onrender.com/ws/socket-server/${userId}/`;
-    const socket = new WebSocket(url);
-    socketRef.current = socket;
-
-    socket.onopen = function (e) {
-      console.log('WebSocket connection established');
-    };
-
-    socket.onclose = function (e) {
-      console.log('WebSocket connection closed');
-    };
-
-    socket.onmessage = function (e) {
-      let data = JSON.parse(e.data);
-      console.log(data);
-      setNotifyAll(prevNotify => [...prevNotify, data]);
-
-      if (data.type === 'notification') {
-        Notification.requestPermission().then((perm) => {
-          if (perm === 'granted') {
-            new Notification('Restaurant Management System', {
-              body: `${data.message}`,
-            });
-          }
-        });
-      }
-    };
-
-    return () => {
-      socket.close();
-    };
-}, []);
-
-  const changeStatus = async (id, user_id, username, newStatus) => {
-    try {
-      await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, { newStatus });
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === id ? { ...order, status: newStatus } : order
-        )
-      );
-    } catch (err) {
-      console.log("There was an error changing the status");
-    }
-    socketRef.current.send(JSON.stringify({
-      'message': `Dear ${username}, your Order is ${newStatus}`,
-      'user': user_id
-    }));
-  };
+  const [userId, setUserId] = useState('');
 
   const fetchData = async () => {
     try {
@@ -99,25 +35,92 @@ function App() {
     }
   };
 
+  const socketRef = useRef(null);
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_order/${id}`);
+      setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
+    } catch (err) {
+      console.log("There was an error");
+    }
+  };
+
+  const changeStatus = async (id, user_id, username, newStatus) => {
+    setUserId(user_id);
+    try {
+      await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, { newStatus });
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === id ? { ...order, status: newStatus } : order
+        )
+      );
+      // Ensure the WebSocket connection is open before sending a message
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        socketRef.current.send(JSON.stringify({
+          'message': `Dear ${username}, your Order is ${newStatus}`,
+          'user': user_id
+        }));
+      }
+    } catch (err) {
+      console.log("There was an error changing the status");
+    }
+  };
+
+  useEffect(() => {
+    
+    const url = `ws://127.0.0.1:8000/ws/customer/11/`;
+    const socket = new WebSocket(url);
+    socketRef.current = socket;
+
+    socket.onopen = function (e) {
+      console.log('WebSocket connection established');
+    };
+
+    socket.onclose = function (e) {
+      console.log('WebSocket connection closed');
+    };
+
+    socket.onmessage = function (e) {
+      let data = JSON.parse(e.data);
+      console.log(data);
+      setNotifyAll(prevNotify => [...prevNotify, data]);
+      
+      if (data.type === 'notification') {
+        Notification.requestPermission().then((perm) => {
+          if (perm === 'granted') {
+            new Notification('Restaurant Management System', {
+              body: `${data.message}`,
+            });
+          }
+        });
+      }
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []); 
+
   const showOrder = async (id, user_id) => {
-    setShowModal(true)
+    setShowModal(true);
     const madeOrdersUrl = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user_id}`;
 
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await axios.get(madeOrdersUrl);
       const data = response.data;
       setMadeOrder(data);
 
       const userItems = data.find(order => order.order.id === id);
-      console.log(userItems.menu)
       setUserMadeItems(userItems.menu);
       setLoading(false);
     } catch (err) {
       console.error(err);
+      setLoading(false); // Ensure loading is set to false even on error
     }
   };
-// console.log(madeOrder)
+
   useEffect(() => {
     fetchData();
   }, []);

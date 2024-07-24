@@ -7,16 +7,15 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
-import useHook from '../customer/customhook';
+
 
 const reservationUrl = 'https://restaurant-backend5.onrender.com/restaurant/reservation';
 
 function Reservation() {
-  const { user } = useContext(AuthContext);
+  const { user, notifyAll, setNotifyAll } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [orderStatus, setOrderStatus] = useState(true);
-  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
-  const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
+  
   const socketRef = useRef(null);
 
   const handleDelete = async (id) => {
@@ -30,7 +29,7 @@ function Reservation() {
 
   // Handle Notifications
   useEffect(() => {
-    const url = `wss://restaurant-backend5.onrender.com/ws/socket-server/${user.user_id}/`;
+    const url = `ws://127.0.0.1:8000/ws/customer/11/`;
     const socket = new WebSocket(url);
     socketRef.current = socket;
 
