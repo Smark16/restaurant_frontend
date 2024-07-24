@@ -7,7 +7,7 @@ import useHook from './customhook';
 
 function Notifications() {
   const { showNotifications, user } = useContext(AuthContext);
-  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
+  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
   const [loading, setLoading] = useState(false);
 

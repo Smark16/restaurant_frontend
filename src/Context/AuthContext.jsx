@@ -4,9 +4,8 @@ import { jwtDecode } from 'jwt-decode';
 import Swal from 'sweetalert2'
 
 const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
-const registerurl = 'https://restaurant-backend5.onrender.com/restaurant/register'
 const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
-const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
+const notificationOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/messages'
 
 import axios from 'axios'
 
@@ -28,8 +27,6 @@ export const AuthProvider = ({children}) =>{
  const [showNotificationsAll, setShowNotificationsAll] = useState(false)
  const [orderNotify, setOrderNotify] = useState([])
  const [display, setDisplay] = useState(true)
- const [passwordError, setPasswordError] = useState([])
- const [usernameError, setUsernameError] = useState([])
  const [notifyAll, setNotifyAll] = useState([]);  // Centralized notifications state
  const [noAccount, setNoAccount] = useState('')
  
@@ -44,8 +41,8 @@ useEffect(() => {
   if (user) {
 
     const socket = new WebSocket(user.is_staff 
-      ? `ws://127.0.0.1:8000/ws/admin/${user.user_id}/`
-      : `ws://127.0.0.1:8000/ws/customer/${user.user_id}/`)
+      ? `wss://restaurant-backend5.onrender.com/ws/admin/${user.user_id}/`
+      : `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`)
     socket.onopen = function(e) {
       console.log('WebSocket connection established');
     };

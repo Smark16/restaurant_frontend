@@ -9,7 +9,7 @@ import axios from 'axios';
 
 import { AuthContext } from '../Context/AuthContext';
 
-const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
+const orderUrl = 'https://restaurant-backend5.onrender.com/restaurant/orders';
 
 function App() {
   const { user, setNotifyAll, notifyAll } = useContext(AuthContext);
@@ -68,7 +68,7 @@ function App() {
 
   useEffect(() => {
     
-    const url = `ws://127.0.0.1:8000/ws/customer/${user.user_id}/`;
+    const url = `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`;
     const socket = new WebSocket(url);
     socketRef.current = socket;
 

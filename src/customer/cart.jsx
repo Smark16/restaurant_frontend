@@ -38,7 +38,7 @@ function Cart() {
   };
 
   useEffect(() => {
-    const url = `ws://127.0.0.1:8000/ws/admin/${user.user_id}/`;
+    const url = `wss://restaurant-backend5.onrender.com/ws/admin/${user.user_id}/`;
     const socket = new WebSocket(url);
     socketRef.current = socket; // Assigning the WebSocket instance to socketRef.current
 
