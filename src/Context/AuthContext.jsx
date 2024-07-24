@@ -216,15 +216,6 @@ const handleDelete = (id) => {
   })
  }
  
- const logoutUser = () => {
-  setAuthTokens(null);
-  setUser(null);
-  localStorage.removeItem('authtokens');
-  showSuccessAlert('You have been logged out').then(() => {
-    navigate('/login');
-  });
-};
-
 
 const showSuccessAlert =(message)=>{
     Swal.fire({
@@ -275,13 +266,13 @@ const contextData = {
     authTokens, setAuthTokens,
     staff, setStaff,
     customer, setCustomer,
-    loginUser, RegisterUser,
+    loginUser,
     showSuccessAlert, handleCart,
     setAddItem, addItem, fetchFood,
     food, setFood, data, clicked, setClicked, total,handleAllMessages,
     showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete,
     handleDisplay, display, setDisplay,Increase, Reduce, passwordError, usernameError,handleMessage, notifyAll,
-    setNotifyAll,noAccount,logoutUser, setTotal
+    setNotifyAll,noAccount,setTotal
 }
 return (
     <AuthContext.Provider value={contextData}>

@@ -1,8 +1,11 @@
 import React, { useContext, useEffect } from 'react';
-import Swal from 'sweetalert2'; // Import SweetAlert
 import { AuthContext } from '../Context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Import SweetAlert
+
 function Logout() {
     const { setUser, setAuthTokens } = useContext(AuthContext);
+    const navigate = useNavigate()
 
     useEffect(() => {
         // Function to handle logout and show alert
@@ -16,7 +19,7 @@ function Logout() {
                 text: 'You have been logged out.',
                 confirmButtonText: 'OK'
             })
-                window.location.href = '/'; // Redirect to login page
+                navigate('/login') // Redirect to login page
             
         };
 
@@ -28,4 +31,3 @@ function Logout() {
 }
 
 export default Logout;
-

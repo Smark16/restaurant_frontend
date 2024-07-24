@@ -47,7 +47,6 @@ function App() {
   };
 
   const changeStatus = async (id, user_id, username, newStatus) => {
-    setUserId(user_id);
     try {
       await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, { newStatus });
       setOrders((prevOrders) =>
@@ -69,7 +68,7 @@ function App() {
 
   useEffect(() => {
     
-    const url = `ws://127.0.0.1:8000/ws/customer/11/`;
+    const url = `ws://127.0.0.1:8000/ws/customer/${user.user_id}/`;
     const socket = new WebSocket(url);
     socketRef.current = socket;
 

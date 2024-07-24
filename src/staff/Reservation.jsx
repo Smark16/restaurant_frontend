@@ -29,7 +29,7 @@ function Reservation() {
 
   // Handle Notifications
   useEffect(() => {
-    const url = `ws://127.0.0.1:8000/ws/customer/11/`;
+    const url = `ws://127.0.0.1:8000/ws/customer/${user.user_id}/`;
     const socket = new WebSocket(url);
     socketRef.current = socket;
 

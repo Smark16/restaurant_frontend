@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../Context/AuthContext';
 import order from '../Images/order.png';
 import reserve from '../Images/reser.png';
-import Chart from "react-apexcharts";
+// import Chart from "react-apexcharts";
 import Calendar from './calendar';
 import axios from 'axios';
-
+import { Link } from 'react-router-dom';
 import './cust.css';
 
 function Customer() {
@@ -14,14 +14,49 @@ function Customer() {
   const [expense, setExpense] = useState(0);
   const user_order = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user.user_id}`;
   const [Userorder, setUserOrder] = useState([]);
-  const userReservation = `https://restaurant-backend5.onrender.com/restaurant/user-reservation/${user.user_id}`;
   const userOrder = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
+  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const orderPlaced = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
+  const userReservation = `https://restaurant-backend5.onrender.com/restaurant/user-reservation/${user.user_id}`;
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(orderPlaced);
+      const data = response.data;
+      setOrders(data);
+      setLoading(false);
+    } catch (err) {
+      console.log("Error occurred");
+      setLoading(false);
+    }
+  };
+
+  const fetchReservations = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(userReservation);
+      const data = response.data;
+      setReservations(data);
+      setLoading(false);
+    } catch (err) {
+      console.log("Error occurred");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    fetchReservations();
+  }, []);
 
   const fetchOrder = async () => {
     try {
       const response = await axios.get(user_order);
       const data = response.data;
-      
+
       // Calculate total expense
       const totalExpense = data.reduce((total, order) => {
         const orderTotal = order.menu.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -34,112 +69,9 @@ function Customer() {
     }
   };
 
-  const fetchUserReservations = async () => {
-    try {
-      const response = await axios.get(userReservation);
-      const data = response.data;
-      setUserReservation(data);
-    } catch (err) {
-      console.log('server error', err);
-    }
-  };
-
-  const fetchUserOrder = async () => {
-    try {
-      const response = await axios.get(userOrder);
-      const data = response.data;
-      setUserOrder(data);
-    } catch (err) {
-      console.log('server error', err);
-    }
-  };
-
   useEffect(() => {
-    fetchUserReservations();
-    fetchUserOrder();
     fetchOrder();
   }, []);
-
-  const options = {
-    colors: ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800'],
-    dataLabels: {
-      enabled: true,
-      enabledOnSeries: undefined,
-      formatter: function (val, opts) {
-        return val;
-      },
-      textAnchor: 'middle',
-      distributed: false,
-      offsetX: 0,
-      offsetY: 0,
-      style: {
-        fontSize: '14px',
-        fontFamily: 'Helvetica, Arial, sans-serif',
-        fontWeight: 'bold',
-        colors: undefined
-      },
-      background: {
-        enabled: true,
-        foreColor: '#fff',
-        padding: 4,
-        borderRadius: 2,
-        borderWidth: 1,
-        borderColor: '#fff',
-        opacity: 0.9,
-        dropShadow: {
-          enabled: false,
-          top: 1,
-          left: 1,
-          blur: 1,
-          color: '#000',
-          opacity: 0.45
-        }
-      },
-      dropShadow: {
-        enabled: false,
-        top: 1,
-        left: 1,
-        blur: 1,
-        color: '#000',
-        opacity: 0.45
-      }
-    },
-    chart: {
-      id: "basic-bar"
-    },
-    xaxis: {
-      categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999],
-      title: {
-        text: 'Months',
-        style: {
-          fontSize: '16px',
-          fontWeight: 600,
-          cssClass: 'apexcharts-xaxis-title',
-        },
-      },
-    },
-    yaxis: {
-      title: {
-        text: 'Expenses',
-        style: {
-          fontSize: '16px',
-          fontWeight: 600,
-          cssClass: 'apexcharts-yaxis-title',
-        },
-      },
-    },
-  };
-
-  const series = [
-    {
-      name: "series-1",
-      data: [30, 40, 45, 50, 49, 60, 70, 91]
-    },
-    {
-      name: "series-2",
-      data: [3, 60, 57, 46, 50, 45, 80, 92]
-    }
-  ];
 
   return (
     <>
@@ -161,7 +93,7 @@ function Customer() {
 
                 <div className="word">
                   <p className='text-black'>Total Reservations</p>
-                  <h4 className='text-black'>{UserReservation.length}</h4>
+                  <h4 className='text-black'>{reservations.length}</h4>
                 </div>
               </div>
 
@@ -201,7 +133,114 @@ function Customer() {
 
             <div className="more">
               <div className="graph bg-white p-2 mt-2">
-                <Chart options={options} series={series} type="line" width="300" />
+                {/* <Chart options={options} series={series} type="line" width="300" /> */}
+                <div className="orders">
+                  <p className='text-center text-primary'>Made Orders</p>
+                  {loading ? (
+                    <p>Loading...</p>
+                  ) : orders.length === 0 ? (
+                    <p className='alert alert-info text-center'>No Activities!!!</p>
+                  ) : (
+                    <table className='table table-striped table-hover'>
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Username</th>
+                          <th>Location</th>
+                          <th>Contact</th>
+                          <th>Status</th>
+                          <th>Order Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orders.slice(0, 3).map(order => {
+                          const { id, location, contact, status, order_date } = order;
+                          return (
+                            <tr key={id}>
+                              <td>{id}</td>
+                              <td>{order.user.username}</td>
+                              <td>{location}</td>
+                              <td>{contact}</td>
+                              <td>
+                                {status === 'Completed' && (
+                                  <span className='text-success d-flex'>
+                                    <i className="bi bi-check2-circle"></i> Completed
+                                  </span>
+                                )}
+                                {status === 'Canceled' && (
+                                  <span className='text-danger'>
+                                    Canceled
+                                  </span>
+                                )}
+                                {status === 'In Progress' && (
+                                  <span className='text-warning d-flex'>
+                                    <i className="bi bi-arrow-counterclockwise"></i> In Progress
+                                  </span>
+                                )}
+                              </td>
+                              <td>{order_date}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                  <p className='text-primary seeAll'><Link to='/customer/dashboard/customerOrder'>See All <i className="bi bi-arrow-right-circle-fill"></i></Link></p>
+                </div>
+
+                <div className="reservation mt-3">
+                  <p className='text-primary text-center'>Made Reservations</p>
+                  {loading ? (
+                    <p>Loading...</p>
+                  ) : reservations.length === 0 ? (
+                    <p className='alert alert-info text-center'>No Reservations!!!</p>
+                  ) : (
+                    <table className='table table-striped table-hover'>
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Username</th>
+                          <th>Table</th>
+                          <th>contact</th>
+                          <th>party size</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {reservations.slice(0, 3).map(reservation => {
+                          const { id, table, contact, party_size, status } = reservation;
+                          return (
+                            <tr key={id}>
+                              <td>{id}</td>
+                              <td>{reservation.user.username}</td>
+                              <td>{table}</td>
+                              <td>{contact}</td>
+                              <td>{party_size}</td>
+                              <td>
+                                {status === 'Accepted' && (
+                                  <span className='text-success'>
+                                    Confirmed
+                                  </span>
+                                )}
+                                {status === 'Rejected' && (
+                                  <span className='text-danger'>
+                                    Canceled
+                                  </span>
+                                )}
+                                {status === 'Pending' && (
+                                  <span className='text-warning'>
+                                    Pending
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                
+                </div>
               </div>
 
               <div className="detail bg-white">
@@ -216,7 +255,7 @@ function Customer() {
                   </li>
 
                   <li className='d-flex'>
-                    <span>Resevation Status</span>
+                    <span>Reservation Status</span>
                     <h6 className='text-white bg-primary p-2'>Pending</h6>
                   </li>
                 </ul>
