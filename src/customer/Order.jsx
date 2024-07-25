@@ -43,7 +43,7 @@ const orderPlaced = `https://restaurant-backend5.onrender.com/restaurant/userOrd
     <h4 className='text-center text-white bg-success p-2'>CheckOut Your Placed Orders</h4>
 
     {loading ? (<div className='text-center'>
-          <span className="loader"></span>
+          <span className="menuloader"></span>
         </div>) : (
           <>
           {orders.length === 0 ? (<>

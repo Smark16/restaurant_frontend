@@ -237,17 +237,19 @@ function App() {
             </div>
             <div className="custom-modal-body">
               {loading ? (
-                <p>Loading...</p>
+                <span className='loader'></span>
               ) : (
                 usermadeItems.map(item => {
                   const { image, price, name, quantity } = item;
                   return (
                     <div key={item.id} className="order-item">
+                      <div className="block d-flex">
                       <img src={`https://restaurant-backend5.onrender.com${image}`} alt={name} className='modalImg'/>
-                      <div className="item-details">
                         <h5>{name}</h5>
-                        <p>{quantity}</p>
+                      </div>
+                      <div className="item-details">
                         <p>Price: {price}</p>
+                        <span className='p-3'>{quantity}</span>
                       </div>
                     </div>
                   );

@@ -11,11 +11,13 @@ const OrderItem = 'https://restaurant-backend5.onrender.com/restaurant/post_Orde
 const placedOrder = 'https://restaurant-backend5.onrender.com/restaurant/placed_orders';
 
 function Checkout() {
-  const { data, user, handleDelete, setAddItem, setTotal, Increase, Reduce, total, setNotifyAll, notifyAll } = useContext(AuthContext);
+  const { data, user, setAddItem, setTotal, setNotifyAll, notifyAll } = useContext(AuthContext);
   const [info, setInfo] = useState({ location: "", contact: "" });
   const [orderId, setOrderId] = useState('');
   const [loader, setLoader] = useState(false);
+  const [loading, setLoading] = useState(false)
   const [instantPayment, setInstantPayment] = useState(false); // State to track instant payment option
+  const [orderError, setOrderError] = useState('')
   const navigate = useNavigate();
   const socketRef = useRef(null);
 
@@ -110,24 +112,31 @@ function Checkout() {
     setInfo({ ...info, [name]: value });
   };
 
+  const handleInfo = async(e)=>{
+    e.preventDefault();
+    setLoading(true)
+    const formData = new FormData();
+    formData.append('user', user.user_id);
+    formData.append('location', info.location);
+    formData.append('contact', info.contact);
+
+    const orderResponse = await axios.post(placedOrder, formData);
+    if(orderResponse.status === 201){
+      setLoading(false)
+      setInfo({ location: "", contact: ""})
+    }
+    const newOrderId = orderResponse.data.id;
+    setOrderId(newOrderId);
+  }
   // form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoader(true);
 
     try {
-      const formData = new FormData();
-      formData.append('user', user.user_id);
-      formData.append('location', info.location);
-      formData.append('contact', info.contact);
-
-      const orderResponse = await axios.post(placedOrder, formData);
-      const newOrderId = orderResponse.data.id;
-      setOrderId(newOrderId);
-
       const orderItemData = new FormData();
       orderItemData.append('user', user.user_id);
-      orderItemData.append('order', newOrderId);
+      orderItemData.append('order', orderId);
 
       for (const Order_item of data) {
         const menuQuantityUpdate = `https://restaurant-backend5.onrender.com/restaurant/update_quantity/${Order_item.id}`;
@@ -159,6 +168,9 @@ function Checkout() {
 
     } catch (err) {
       console.log('There was an error', err);
+      if(err.response.data){
+        setOrderError('Please Fill In All The Required Credentials')
+      }
     } finally {
       setLoader(false);
     }
@@ -172,10 +184,11 @@ function Checkout() {
   };
 
   return (
-    <div className='checkout_page'>
-      <div className='otherInfo col-sm-12 p-2'>
+    <div className='checkout_page row'>
+      {orderError && (<p className='alert alert-warning text-center'>{orderError}</p>)}
+      <div className='otherInfo col-md-7 col-sm-12 p-2'>
         <h4 className='text-center text-white bg-primary p-2 mt-2'>Additional Information</h4>
-        <form className='mt-2' onSubmit={handleSubmit}>
+        <form className='mt-2' onSubmit={handleInfo}>
           <div className='row'>
             <div className="mb-3">
               <label htmlFor="formGroupExampleInput" className="form-label">
@@ -209,25 +222,11 @@ function Checkout() {
                 required
               />
             </div>
-          </div>
-          <div className='checkout mt-4'>
-            <h3 className='text-center bg-primary p-3 text-white'>CHECKOUT ITEMS</h3>
-            <h5 className='text-center check-item'>{data.length} ITEMS</h5>
-            <ul>
-              {Object.keys(itemExpense).map((itemName) => (
-                <li key={itemName}>
-                  <p>{itemName}</p>
-                  <span>UGX {itemExpense[itemName].toFixed(2)}</span>
-                </li>
-              ))}
-            </ul>
-            <div className='total bg-primary text-white p-3'>
-              <h4>Total</h4>
-              <span>UGX {totalAmount}</span>
-            </div>
-          </div>
-
-          <div className="payment">
+          </div> 
+          <button type='submit' className='info text-white text-center w-50 p-2'>{loading ? 'saving...' : 'save'}</button>
+        </form>
+        
+        <div className="payment">
             <p>Choose Delivery Options</p>
 
             <ul>
@@ -257,14 +256,34 @@ function Checkout() {
       )}
             </ul>
           </div>
-          <div className='sendOrder text-center'>
+      </div>
+
+<div className='checkout col-md-4 bg-white'>
+           <form onSubmit={handleSubmit}>
+            <h3 className='text-center bg-primary p-3 text-white'>CHECKOUT ITEMS</h3>
+            <h5 className='text-center check-item'>{data.length} ITEMS</h5>
+            <ul>
+              {Object.keys(itemExpense).map((itemName) => (
+                <li key={itemName}>
+                  <p>{itemName}</p>
+                  <span>UGX {itemExpense[itemName].toFixed(2)}</span>
+                </li>
+              ))}
+            </ul>
+            <div className='total bg-primary text-white p-3'>
+              <h4>Total</h4>
+              <span>UGX {totalAmount}</span>
+            </div>
+
+            <div className='sendOrder text-center'>
             <button className='btn btn-primary text-center text-white mt-5' type='submit' disabled={loader}>
               {loader ? 'Confirming...' : 'Confirm Order'}
             </button>
           </div>
-        </form>
-      </div>
+</form>
+          </div>
      
+      
     </div>
   );
 }

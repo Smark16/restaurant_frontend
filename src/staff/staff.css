@@ -198,6 +198,10 @@
 .bi-eye:hover{
 color: green;
 }
+.item-details span{
+  border:1px solid #ddd;
+  text-align: center;
+}
 .modalImg{
   width: 100px;
   height: 100px;

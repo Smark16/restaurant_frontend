@@ -35,7 +35,7 @@ function Cart() {
         <>
           <h2 className='alert alert-info text-black text-center p-2'>My Orders</h2>
           <div className='row cart_row'>
-            <div className='cart text-center mt-3 selectedItems bg-white col-md-6 col-sm-12 p-3'>
+            <div className='cart text-center mt-3 selectedItems bg-white col-md-6 p-3'>
               {data.map((sele) => {
                 const { id, name, price, image, quantity } = sele;
                 return (
@@ -47,11 +47,7 @@ function Cart() {
                       <h4>{name}</h4>                     
                       </div>
                     </div>
-                    <div className="content">
                       <p>UGX. {price}</p>
-                      
-                    </div>
-                   
                   </div>
                   <div className="remove">
                     <i className="bi bi-trash-fill text-danger" onClick={() => handleDelete(id)}> Remove</i>

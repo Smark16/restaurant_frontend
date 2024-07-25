@@ -137,7 +137,7 @@ function Customer() {
                 <div className="orders">
                   <p className='text-center text-primary'>Made Orders</p>
                   {loading ? (
-                    <p>Loading...</p>
+                    <span className='loader'></span>
                   ) : orders.length === 0 ? (
                     <p className='alert alert-info text-center'>No Activities!!!</p>
                   ) : (
@@ -191,7 +191,7 @@ function Customer() {
                 <div className="reservation mt-3">
                   <p className='text-primary text-center'>Made Reservations</p>
                   {loading ? (
-                    <p>Loading...</p>
+                    <span className='loader'></span>
                   ) : reservations.length === 0 ? (
                     <p className='alert alert-info text-center'>No Reservations!!!</p>
                   ) : (

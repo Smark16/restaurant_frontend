@@ -41,17 +41,19 @@
 
 }
 
-.content p, .symb{
+.symb{
   font-weight: bolder;
   margin-left: 200px;
 }
-.content{
-  display: block;
+.cartcont p{
+  font-size: 20px;
 }
 .checkout_page{
   margin: auto;
-  width: 800px;
+  width: 100%;
   height: 100%;
+  display: flex;
+  gap: 10px;
 }
 .btns {
   display: flex;
@@ -60,6 +62,9 @@
 }
 .check-item{
   font-weight: bolder;
+}
+.info{
+  background-color: rgb(243, 196, 108);
 }
 .checkout ul li{
 display: flex;
@@ -70,8 +75,11 @@ align-items: center;
   font-weight: 900;
 }
 .checkout ul li p{
-  font-weight: 400;
-  
+  font-weight: 400; 
+}
+.checkout{
+  border: 1px solid #ccc;
+  padding: 10px;
 }
 .total{
   display: flex;
@@ -257,8 +265,7 @@ background-color: #0056b3; /* Darker shade of the primary color on hover */
   height: 100px;
   border: 5px dotted black;
   border-radius: 50%;
-  margin-left: -25%;
-  margin-top: 30px;
+  margin-left: 48%;
   display: inline-block;
   position: relative;
   box-sizing: border-box;
@@ -447,10 +454,7 @@ background-color: #0056b3; /* Darker shade of the primary color on hover */
  .line li{
   cursor:pointer;
  }
-  .content{
-    width: 100%;
-    padding: 2rem;
-  }
+ 
   .active{
     color:var(--text-color);
     font-weight: 600;
@@ -676,6 +680,20 @@ background-color: #0056b3; /* Darker shade of the primary color on hover */
    align-items: center;
    justify-content: center;
   }
+  .div{
+    width: 100%;
+  }
+  .cart{
+    width: 100%;
+  }
+  .symb{
+    margin-left: -20px;
+  }
+
+  .cartcont{
+    width: 100%;
+  }
+ 
   .checkout_page{
     width: 100%;
   }
