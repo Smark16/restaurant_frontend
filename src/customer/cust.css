@@ -25,33 +25,33 @@
 .cartcont {
   display: flex;
   align-items: center;
-  gap:5px;
-  border: 2px solid rgb(248, 225, 225);
+  justify-content: space-between;
   padding: 5px;
-  border-radius: 10px;
-  box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.1);
 }
-
+.div{
+  border-bottom: 1px solid #ccc;
+}
+.remove{
+  display: flex;
+  justify-content: space-between;
+}
 .cartimg {
   width: 70px;
   height: 70px; 
-  border-radius: 50%;
+
 }
 
-.content p{
-  color: green;
+.content p, .symb{
   font-weight: bolder;
+  margin-left: 200px;
 }
 .content{
-  display: flex;
-  height: 100px;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
+  display: block;
 }
-.symb{
-  display: flex;
-  gap: 5px;
+.checkout_page{
+  margin: auto;
+  width: 800px;
+  height: 100%;
 }
 .btns {
   display: flex;
@@ -65,7 +65,13 @@
 display: flex;
 justify-content: space-between;
 align-items: center;
-font-weight: 900;
+}
+.checkout ul li span{
+  font-weight: 900;
+}
+.checkout ul li p{
+  font-weight: 400;
+  
 }
 .total{
   display: flex;
@@ -126,6 +132,17 @@ font-weight: 900;
 button{
   border: none;
   border-radius: 10px;
+}
+.reduce, .increase{
+  width: 30px;
+  height: 30px;
+}
+.symb{
+  display: flex;
+  gap: 5px;
+}
+.reduce{
+  background-color: rgb(245, 211, 149);
 }
 .modal-form button{
   margin-left: 50%;
@@ -248,6 +265,11 @@ background-color: #0056b3; /* Darker shade of the primary color on hover */
   animation: rotation 2s linear infinite;
 }
 
+.payment{
+  border-top: 1px solid #ccc;
+  margin-top: 10px;
+  padding: 10px;
+}
 /* Keyframes for loader animation */
 @keyframes rotation {
   0% {
@@ -653,6 +675,9 @@ background-color: #0056b3; /* Darker shade of the primary color on hover */
    display: flex;
    align-items: center;
    justify-content: center;
+  }
+  .checkout_page{
+    width: 100%;
   }
   .single-info{
     margin-left: 30px;

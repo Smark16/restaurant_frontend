@@ -268,7 +268,7 @@ const contextData = {
     setAddItem, addItem, fetchFood,
     food, setFood, data, clicked, setClicked, total,handleAllMessages,
     showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete,
-    handleDisplay, display, setDisplay,Increase, Reduce, passwordError, usernameError,handleMessage, notifyAll,
+    handleDisplay, display, setDisplay,Increase, Reduce, handleMessage, notifyAll,
     setNotifyAll,noAccount,setTotal
 }
 return (

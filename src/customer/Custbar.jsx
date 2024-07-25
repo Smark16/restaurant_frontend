@@ -37,10 +37,10 @@ function Custbar() {
         <p><Link to='CustomerReservation'>Reservation</Link></p>
     </li>
 
-    <li>
+    {/* <li>
        <i class="bi bi-credit-card"></i>
         <p><Link to='CustomerPayment'>Payment</Link></p>
-    </li>
+    </li> */}
 
     <li>
        <i class="bi bi-box-arrow-right"></i>

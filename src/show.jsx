@@ -42,6 +42,7 @@ import Index from './LandingPage';
 import Receipt from './customer/receipt';
 import { AuthContext } from './Context/AuthContext';
 import Notify from './customer/Notify';
+import Checkout from './customer/checkout';
 
 
 function Show() {
@@ -119,6 +120,7 @@ function Show() {
                         <Route path='cart' element={<Cart/>}/>
                         <Route path='receipt' element={<Receipt/>}/>
                         <Route path='notify' element={<Notify/>}/>
+                        <Route path='Checkout' element={<Checkout/>}/>
                         <Route path='/logout' element={<Logout/>}></Route>
                       </Routes>
                     </div>

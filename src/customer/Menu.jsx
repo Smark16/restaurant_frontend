@@ -7,6 +7,7 @@ import './cust.css';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
+import Swal from 'sweetalert2';
 
 const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items';
 
@@ -100,7 +101,19 @@ function MenuDisplay() {
   const handleAddToCart = (item) => {
     handleCart(item);
     setAddedItems([...addedItems, item.id]); // Track the added item by its ID
+    showSuccessAlert("item added to cart")
   };
+  const showSuccessAlert =(message)=>{
+    Swal.fire({
+        title:message,
+        icon:"success",
+        timer:6000,
+        toast:true,
+        position:'top',
+        timerProgressBar:true,
+        showConfirmButton:true,
+    })
+}
 
   return (
     <>
