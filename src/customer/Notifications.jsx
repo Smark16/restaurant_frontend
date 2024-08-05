@@ -7,7 +7,7 @@ import useHook from './customhook';
 
 function Notifications() {
   const { showNotifications, user } = useContext(AuthContext);
-  const notificationOrderUrl = `https://restaurant-backend5.onrender.com/restaurant/usermsg/${user.user_id}`;
+  const notificationOrderUrl = `http://127.0.0.1:8000/restaurant/usermsg/${user.user_id}`;
   const { notifyAll, setNotifyAll } = useHook(notificationOrderUrl);
   const [loading, setLoading] = useState(false);
 
@@ -16,6 +16,7 @@ function Notifications() {
       setLoading(true);
       const response = await axios.get(notificationOrderUrl); // Use axios.get for GET requests
       const data = response.data;
+      console.log(data)
       setNotifyAll(data);
     } catch (err) {
       console.error('There was an error fetching notifications', err);

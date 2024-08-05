@@ -1,11 +1,12 @@
 import {createContext, useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+//import { tokenGeneration } from '../components/firebase';
 import Swal from 'sweetalert2'
 
-const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
-const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
-const notificationOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/messages'
+const loginurl = 'http://127.0.0.1:8000/restaurant/'
+const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
+const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
 
 import axios from 'axios'
 
@@ -29,6 +30,7 @@ export const AuthProvider = ({children}) =>{
  const [display, setDisplay] = useState(true)
  const [notifyAll, setNotifyAll] = useState([]);  // Centralized notifications state
  const [noAccount, setNoAccount] = useState('')
+ //const {messaging, generateToken} = tokenGeneration()
  
  const navigate = useNavigate()
 
@@ -200,6 +202,7 @@ const handleDelete = (id) => {
   localStorage.setItem('authtokens', JSON.stringify(data))
   {decodedCustomer && navigate("/customer/dashboard")}
   {decodedStaff && navigate("/staff/dashboard")}
+  //generateToken();
   showSuccessAlert("Login successfull")
   }else{
     showErrorAlert("Please provide correct username/password")
@@ -269,7 +272,7 @@ const contextData = {
     food, setFood, data, clicked, setClicked, total,handleAllMessages,
     showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete,
     handleDisplay, display, setDisplay,Increase, Reduce, handleMessage, notifyAll,
-    setNotifyAll,noAccount,setTotal
+    setNotifyAll,noAccount,setTotal,setOrderNotify
 }
 return (
     <AuthContext.Provider value={contextData}>

@@ -7,8 +7,8 @@ import TextField from '@mui/material/TextField';
 import { useNavigate } from 'react-router-dom';
 import { FlutterWaveButton, closePaymentModal } from 'flutterwave-react-v3';
 
-const OrderItem = 'https://restaurant-backend5.onrender.com/restaurant/post_OrderItems';
-const placedOrder = 'https://restaurant-backend5.onrender.com/restaurant/placed_orders';
+const OrderItem = 'http://127.0.0.1:8000/restaurant/post_OrderItems';
+const placedOrder = 'http://127.0.0.1:8000/restaurant/placed_orders';
 
 function Checkout() {
   const { data, user, setAddItem, setTotal, setNotifyAll, notifyAll } = useContext(AuthContext);
@@ -70,42 +70,6 @@ function Checkout() {
     return accumulator;
   }, {});
 
-  // websockets
-  useEffect(() => {
-    const url = `wss://restaurant-backend5.onrender.com/ws/admin/${user.user_id}/`;
-    const socket = new WebSocket(url);
-    socketRef.current = socket; // Assigning the WebSocket instance to socketRef.current
-
-    socket.onopen = function (e) {
-      console.log('WebSocket connection established');
-    };
-
-    socket.onclose = function (e) {
-      console.log('WebSocket connection closed');
-    };
-
-    socket.onmessage = function (e) {
-      let data = JSON.parse(e.data);
-      console.log(data); // Ensure this logs data when the message event is triggered
-      setNotifyAll(prevNotifyAll => [...prevNotifyAll, data]);
-      console.log(notifyAll);
-      if (data.type === 'notification') {
-        Notification.requestPermission().then((perm) => {
-          if (perm === 'granted') {
-            new Notification(`Order from ${user.username}`, {
-              body: `${data.message}`,
-            });
-          }
-        });
-      }
-    };
-
-    // Cleanup function to close the WebSocket connection
-    return () => {
-      socket.close();
-    };
-  }, []);
-
   // handleChange
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -139,7 +103,7 @@ function Checkout() {
       orderItemData.append('order', orderId);
 
       for (const Order_item of data) {
-        const menuQuantityUpdate = `https://restaurant-backend5.onrender.com/restaurant/update_quantity/${Order_item.id}`;
+        const menuQuantityUpdate = `http://127.0.0.1:8000/restaurant/update_quantity/${Order_item.id}`;
         const quantityData = new FormData();
         quantityData.append("quantity", Order_item.quantity);
 
@@ -173,13 +137,6 @@ function Checkout() {
       }
     } finally {
       setLoader(false);
-    }
-
-    if (socketRef.current) {
-      socketRef.current.send(JSON.stringify({
-        'message': `${user.username}, an order has been placed `,
-        'user': `${user.user_id}`
-      }));
     }
   };
 

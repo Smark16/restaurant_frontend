@@ -2,18 +2,25 @@ import React, { useContext, useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import { AuthContext } from '../Context/AuthContext'
+// import { tokenGeneration } from '../components/firebase';
+// import { onMessage } from 'firebase/messaging';
+// import toast, { Toaster } from 'react-hot-toast';
+import useAxios from '../components/useAxios';
 
-const tables = 'https://restaurant-backend5.onrender.com/restaurant/tables'
-const newReservation = 'https://restaurant-backend5.onrender.com/restaurant/new_reservation'
+const tables = 'http://127.0.0.1:8000/restaurant/tables'
+const newReservation = 'http://127.0.0.1:8000/restaurant/new_reservation'
 
 function Reservations() {
   const { user, showSuccessAlert, showErrorAlert, notifyAll, setNotifyAll } = useContext(AuthContext)
+  // const {messaging, generateToken} = tokenGeneration()
+  const axiosInstance = useAxios();
   const [reservation, setReservation] = useState({ contact: "", Email: "", party_size: "", table: "", reservation_date: "" })
   const [table, setTable] = useState([])
   const [result, setResult] = useState('')
   const [reserve, setReserve] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   
+ 
   const navigate = useNavigate()
   const socketRef = useRef(null);
 
@@ -31,43 +38,8 @@ function Reservations() {
     const tableNo = e.target.value
     setReservation({ ...reservation, table: tableNo })
   }
-// let url = 'wss://restaurant-backend-5.onrender.com/ws/socket-server/';
-  useEffect(() => {
-    const url = `wss://restaurant-backend5.onrender.com/ws/admin/${user.user_id}/`;
-    const socket = new WebSocket(url);
-    socketRef.current = socket; // Assigning the WebSocket instance to socketRef.current
 
-    socket.onopen = function (e) {
-      console.log('WebSocket connection established');
-    };
-
-    socket.onclose = function (e) {
-      console.log('WebSocket connection closed');
-    };
-
-    socket.onmessage = function (e) {
-      let data = JSON.parse(e.data);
-      console.log(data);  // Ensure this logs data when the message event is triggered
-      setNotifyAll(prevNotifyAll => [...prevNotifyAll, data]);
-    console.log(notifyAll)
-      if (data.type === 'notification') {
-        Notification.requestPermission().then((perm) => {
-          if (perm === 'granted') {
-            new Notification(`Order from ${user.username}`, {
-              body: `${data.message}`,
-            });
-          }
-        });
-      }
-    };
-
-    // Cleanup function to close the WebSocket connection
-    return () => {
-      socket.close();
-    };
-  }, []);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault()
     const formData = new FormData()
     formData.append("user", user.user_id)
@@ -77,7 +49,7 @@ function Reservations() {
     formData.append("table", reservation.table)
     formData.append("reservation_date", reservation.reservation_date)
 
-    axios.post(newReservation, formData)
+    await axios.post(newReservation, formData)
       .then(res => {
         if (res.status === 200) {
           setResult(res.data.response)
@@ -98,12 +70,6 @@ function Reservations() {
         setConfirmed(false)
       })
 
-    if (socketRef.current) {
-      socketRef.current.send(JSON.stringify({
-        'message': `${user.username}, a reservation has been made`,
-        'user': `${user.user_id}`
-      }));
-    }
   }
 
   console.log(result)
@@ -118,6 +84,7 @@ function Reservations() {
 
   return (
     <>
+    {/* <Toaster position='top-right'/> */}
       <h2 className='text-center bg-success text-white p-2'>Make Your reservation</h2>
 
       <h5>{reserve}</h5>

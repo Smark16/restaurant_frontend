@@ -1,24 +1,33 @@
 import React, { useContext, useEffect, useState } from 'react';
 import '../staff/staff.css';
 import { AuthContext } from '../Context/AuthContext';
-import { Link } from 'react-router-dom';
+import useAxios from '../components/useAxios';
 import axios from 'axios';
-
-const ProfileUrl = 'https://restaurant-backend5.onrender.com/restaurant/profiles';
+import Swal from 'sweetalert2';
+const ProfileUrl = 'http://127.0.0.1:8000/restaurant/profiles';
+const changePassword = 'http://127.0.0.1:8000/restaurant/change-password/';
 
 function Profile() {
   const { user } = useContext(AuthContext);
-  const [status, setStatus] = useState('');
+  const axiosInstance = useAxios();
+  const updateUser = `http://127.0.0.1:8000/restaurant/update_user/${user.user_id}`;
+  const getUser = `https://restaurant-backend5.onrender.com/restaurant/get_user/${user.user_id}`;
+  const [status, setStatus] = useState(false);
   const [profileImage, setProfileImage] = useState([]);
-  const [profile, setProfile] = useState({ full_name: "", email: "", location: "", contact: "", gender: "", image: null });
-  const [myUser, setMyUser] = useState({ username: "", is_staff: "", is_customer: "" });
+  const [profile, setProfile] = useState({ email: "", location: "", contact: "", image: null });
+  const [myUser, setMyUser] = useState({ username: "", is_staff: "", is_customer: "",date_joined:"", email:"" });
   const [error, setError] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [update, setUpdate] = useState(false)
 
-  const updateProfileUrl = `https://restaurant-backend5.onrender.com/restaurant/update_profile/${user.user_id}`;
-  const url = `https://restaurant-backend5.onrender.com/restaurant/profile/${user.user_id}`;
-  const updateUsernameUrl = 'https://restaurant-backend5.onrender.com/restaurant/update-username';
-  const userUrl = `https://restaurant-backend5.onrender.com/restaurant/single_user/${user.user_id}`;
-
+  const updateProfileUrl = `http://127.0.0.1:8000/restaurant/update_profile/${user.user_id}`;
+  const url = `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`;
+  
+ 
   const fetchProfiles = async () => {
     try {
       const response = await axios.get(ProfileUrl);
@@ -42,13 +51,14 @@ function Profile() {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(userUrl);
+      const response = await axios.get(getUser);
       const data = response.data;
-      setMyUser([...profile, data]);
+      setMyUser(data);
     } catch (err) {
       console.log("there was a server error");
     }
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,24 +74,26 @@ function Profile() {
     setProfile({ ...profile, image: selectedFile });
   };
 
-  const handleGender = (e) => {
-    const gender = e.target.value;
-    setProfile({ ...profile, gender });
-  };
-
+ 
   const handleUser = (e) => {
     const { name, value } = e.target;
     setMyUser({ ...myUser, [name]: value });
   };
 
+ 
   const handleSubmit = async (e) => {
+    setUpdate(true)
     e.preventDefault();
     const formData = new FormData();
-    formData.append('full_name', profile.full_name);
-    formData.append('email', profile.email);
+    const userData = new FormData()
+    userData.append('username', myUser.username);
+    userData.append('email', myUser.email);
+    userData.append("date_joined", myUser.date_joined)
+    formData.append("is_staff", myUser.is_staff)
+    formData.append("is_customer", myUser.is_customer)
     formData.append('location', profile.location);
     formData.append('contact', profile.contact);
-    formData.append('gender', profile.gender);
+    formData.append('email', profile.email)
   
     // Only append the image if it has been changed
     if (profile.image && typeof profile.image !== 'string') {
@@ -89,31 +101,62 @@ function Profile() {
     }
   
     try {
-      await axios.put(updateProfileUrl, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      const userdata = { username: myUser.username };
-      await axios.put(updateUsernameUrl, userdata);
-      setError('');
-      await profileData();
-      await fetchUser();
-    } catch (error) {
-      setError('Try Refreshing The page so that you updates are displayed');
-      console.log("there was a", error);
+      const res = await axiosInstance.put(updateProfileUrl, formData);
+      const userres = await axiosInstance.put(updateUser, userData)
+
+      if (res.status === 201 && userres.status === 200) {
+        showSuccessAlert("Profile Updated");
+        setUpdate(false)
+      }
+    } catch (err) {
+      console.log('There is an error', err);
     }
   };
+
+  const showSuccessAlert = (message) => {
+    Swal.fire({
+      title: message,
+      icon: "success",
+      timer: 2000,
+    });
+  };
+
+  const handlePassword = async (e) => {
+    e.preventDefault();
+    setStatus(true)
+
+    if (newPassword !== confirmPassword) {
+      setMessage("Passwords do not match");
+      setStatus(false)
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("old_password", oldPassword);
+    formData.append("password", newPassword);
+    formData.append("password2", confirmPassword);
+
+    try {
+      const response = await axiosInstance.put(changePassword, formData);
+      setMessage(response.data.message);
+      setStatus(false)
+    } catch (error) {
+      const errorMsg = error.response.data;
+      if (errorMsg.old_password) {
+        setMessage(errorMsg.old_password);
+      } else {
+        setMessage("An error occurred. Please try again.");
+      }
+      setStatus(false)
+    }
+  };
+
 
   useEffect(() => {
     fetchProfiles();
     profileData();
     fetchUser();
-    if (user.is_staff) {
-      setStatus(true);
-    } else {
-      setStatus(false);
-    }
+   
   }, [user]);
 
   return (
@@ -137,43 +180,35 @@ function Profile() {
         </div>
         <div className="row">
           <div className="col-md-5">
+          <div>
+              <span>Status: {user.is_staff ? 'Staff' : 'Customer'}</span>
+            </div>
+           
             <div>
-              <span>Status: {status ? 'Staff' : 'Customer'}</span>
+              <span>Username: {myUser.username}</span>
             </div>
             <div>
-              <span>FullName: {user.full_name}</span>
+              <span>Email: {myUser.email}</span>
             </div>
+
             <div>
-              <span>Username: {user.username}</span>
+              <span>Contact: {profile.contact}</span>
             </div>
+           
             <div>
-              <span>Email: {user.email}</span>
+              <span>Location: {profile.location}</span>
             </div>
+
             <div>
-              <span>Contact: {user.contact}</span>
+              <span>Date Joined: {myUser.date_joined}</span>
             </div>
-            <div>
-              <span>Gender: {user.gender}</span>
-            </div>
-            <div>
-              <span>Location: {user.location}</span>
-            </div>
+
           </div>
-          <form className='mt-3 p-3 col-md-8' onSubmit={handleSubmit}>
+          <form className='p-3 col-md-8' onSubmit={handleSubmit}>
             <h5 className='text-center'>Edit Profile</h5>
             {error && <div className="alert alert-danger">{error}</div>}
             <div className="row g-3 mt-3">
-              <div className="col">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Full Name"
-                  aria-label="Full Name"
-                  name='full_name'
-                  value={profile.full_name}
-                  onChange={handleChange}
-                />
-              </div>
+             
               <div className="col">
                 <input
                   type="text"
@@ -195,17 +230,11 @@ function Profile() {
                   placeholder="Email"
                   aria-label="Email"
                   name='email'
-                  value={profile.email}
+                  value={myUser.email}
                   onChange={handleChange}
                 />
               </div>
-              <div className="col">
-                <select className="form-control" value={profile.gender} onChange={handleGender}>
-                  <option value="">Choose Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </div>
+            
             </div>
 
             <div className="row g-3 mt-3">
@@ -233,19 +262,73 @@ function Profile() {
               </div>
             </div>
 
-            <div className="row g-3 mt-3">
-              <div className="col">
-                {/* <Link to='/staff/dashboard/password_reset'>
-                  <button type="button" className='bg-dark text-center text-white'>Reset Password</button>
-                </Link> */}
-              </div>
-              <div className="col">
-                <button className='bg-primary text-center text-white' type='submit'>Save Profile</button>
-              </div>
+            <div className="pro_btns mt-2">
+              <button type="submit" className="btn btn-primary">
+                {update ? 'Updating...' : 'Update Profile'}
+              </button>
+              <button type="button" className="btn bg-black text-white" onClick={() => setShowModal(true)}>
+                Reset Password
+              </button>
             </div>
           </form>
         </div>
       </div>
+
+       {/* Custom Modal */}
+       {showModal && (
+        <div className="custom-modal-overlay">
+          <div className="custom-modal">
+            <div className="custom-modal-header">
+              <h5 className="custom-modal-title">Change Password</h5>
+              <button type="button" className="close" onClick={() => setShowModal(false)}>
+                &times;
+              </button>
+            </div>
+            <div className="custom-modal-body">
+              <form onSubmit={ handlePassword}>
+                <div className="mb-3">
+                  <label htmlFor="oldPassword" className="form-label">Old Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="oldPassword"
+                    name='oldPassword'
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="newPassword" className="form-label">New Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="newPassword"
+                    name='newPassword'
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="confirmPassword"
+                    name='confirmPassword'
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary">
+                  {status ? 'reseting...' : 'Update Password'}
+              
+                  </button>
+                {message && <div className="alert alert-info mt-3">{message}</div>}
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

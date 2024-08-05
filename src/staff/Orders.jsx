@@ -6,13 +6,16 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import axios from 'axios';
+import useAxios from '../components/useAxios';
 
 import { AuthContext } from '../Context/AuthContext';
 
-const orderUrl = 'https://restaurant-backend5.onrender.com/restaurant/orders';
+const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
 
 function App() {
-  const { user, setNotifyAll, notifyAll } = useContext(AuthContext);
+  const { user, setNotifyAll, notifyAll, authTokens } = useContext(AuthContext);
+  console.log(authTokens)
+  const axiosInstance = useAxios()
   const [orders, setOrders] = useState([]);
   const [orderStatus, setOrderStatus] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -48,62 +51,20 @@ function App() {
 
   const changeStatus = async (id, user_id, username, newStatus) => {
     try {
-      await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, { newStatus });
+      await axiosInstance.patch(`http://127.0.0.1:8000/restaurant/update_status/${id}`, { newStatus });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === id ? { ...order, status: newStatus } : order
         )
       );
-      // Ensure the WebSocket connection is open before sending a message
-      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-        socketRef.current.send(JSON.stringify({
-          'message': `Dear ${username}, your Order is ${newStatus}`,
-          'user': user_id
-        }));
-      }
     } catch (err) {
       console.log("There was an error changing the status");
     }
   };
 
-  useEffect(() => {
-    
-    const url = `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`;
-    const socket = new WebSocket(url);
-    socketRef.current = socket;
-
-    socket.onopen = function (e) {
-      console.log('WebSocket connection established');
-    };
-
-    socket.onclose = function (e) {
-      console.log('WebSocket connection closed');
-    };
-
-    socket.onmessage = function (e) {
-      let data = JSON.parse(e.data);
-      console.log(data);
-      setNotifyAll(prevNotify => [...prevNotify, data]);
-      
-      if (data.type === 'notification') {
-        Notification.requestPermission().then((perm) => {
-          if (perm === 'granted') {
-            new Notification('Restaurant Management System', {
-              body: `${data.message}`,
-            });
-          }
-        });
-      }
-    };
-
-    return () => {
-      socket.close();
-    };
-  }, []); 
-
   const showOrder = async (id, user_id) => {
     setShowModal(true);
-    const madeOrdersUrl = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user_id}`;
+    const madeOrdersUrl = `http://127.0.0.1:8000/restaurant/user_order/${user_id}`;
 
     try {
       setLoading(true);

@@ -1,6 +1,6 @@
 // App.jsx
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {Route, Routes} from 'react-router-dom';
 import './App.css';
 import Bar from './components/Navbar';
@@ -43,12 +43,32 @@ import Receipt from './customer/receipt';
 import { AuthContext } from './Context/AuthContext';
 import Notify from './customer/Notify';
 import Checkout from './customer/checkout';
+import { tokenGeneration } from './components/firebase';
+import { onMessage } from 'firebase/messaging';
+import toast, { Toaster } from 'react-hot-toast';
 
 
 function Show() {
-  const {display} = useContext(AuthContext)
+  const {display, setNotifyAll, setOrderNotify} = useContext(AuthContext)
+  const {messaging, generateToken} = tokenGeneration()
+  useEffect(() => {
+    generateToken();
+
+    onMessage(messaging, (payload) => {
+      console.log('Received payload:', payload);
+
+      if (payload.notification && payload.notification.body) {
+        toast(payload.notification.body);
+        setNotifyAll((prev) => [...prev, payload.notification.body]);
+        setOrderNotify((prev) => [...prev, payload.notification.body])
+      } else {
+        console.error('Notification payload is incorrect or missing');
+      }
+    });
+  }, [messaging, generateToken]);
   return (
     <>
+     <Toaster position='top-right'/> 
           <Bar />
           <Routes>
             {/* Public Routes */}

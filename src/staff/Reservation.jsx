@@ -8,8 +8,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
 
-
-const reservationUrl = 'https://restaurant-backend5.onrender.com/restaurant/reservation';
+const reservationUrl = 'http://127.0.0.1:8000/restaurant/reservation';
 
 function Reservation() {
   const { user, notifyAll, setNotifyAll } = useContext(AuthContext);
@@ -18,6 +17,9 @@ function Reservation() {
   
   const socketRef = useRef(null);
 
+  // useEffect(()=>{
+  //   generateToken()
+  // }), []
   const handleDelete = async (id) => {
     try {
       await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/reservation/${id}`);
@@ -28,47 +30,47 @@ function Reservation() {
   };
 
   // Handle Notifications
-  useEffect(() => {
-    const url = `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`;
-    const socket = new WebSocket(url);
-    socketRef.current = socket;
+  // useEffect(() => {
+  //   const url = `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`;
+  //   const socket = new WebSocket(url);
+  //   socketRef.current = socket;
 
-    socket.onopen = function(e) {
-      console.log('WebSocket connection established');
-    };
+  //   socket.onopen = function(e) {
+  //     console.log('WebSocket connection established');
+  //   };
 
-    socket.onclose = function(e) {
-      console.log('WebSocket connection closed');
-    };
+  //   socket.onclose = function(e) {
+  //     console.log('WebSocket connection closed');
+  //   };
 
-    socket.onmessage = function(e) {
-      let data = JSON.parse(e.data);
-      console.log(data);  // Ensure this logs data when the message event is triggered
-      setNotifyAll(prevNotify => [...prevNotify, data]);
+  //   socket.onmessage = function(e) {
+  //     let data = JSON.parse(e.data);
+  //     console.log(data);  // Ensure this logs data when the message event is triggered
+  //     setNotifyAll(prevNotify => [...prevNotify, data]);
 
-      if (data.type === 'notification' && data.user.user_id !== user.user_id) {
-        Notification.requestPermission().then((perm) => {
-          if (perm === 'granted') {
-            new Notification('Restaurant management System', {
-              body: `${data.message}`,
-            });
-          }
-        });
-      }
-    };
+  //     if (data.type === 'notification' && data.user.user_id !== user.user_id) {
+  //       Notification.requestPermission().then((perm) => {
+  //         if (perm === 'granted') {
+  //           new Notification('Restaurant management System', {
+  //             body: `${data.message}`,
+  //           });
+  //         }
+  //       });
+  //     }
+  //   };
 
-    // Cleanup function to close the WebSocket connection
-    return () => {
-      socket.close();
-    };
-  }, []);
+  //   // Cleanup function to close the WebSocket connection
+  //   return () => {
+  //     socket.close();
+  //   };
+  // }, []);
 
   const changeStatus = async (id,user_id, username, newStatus) => {
     const formData = new FormData();
     formData.append("newStatus", newStatus);
     
     try {
-      const response = await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_reservation/${id}`, formData);
+      const response = await axios.patch(`http://127.0.0.1:8000/restaurant/update_reservation/${id}`, formData);
       console.log(response);
       setOrders((prevOrders) => 
         prevOrders.map((order) =>
@@ -80,10 +82,10 @@ function Reservation() {
       console.log("There was an error changing the status:", err);
     }
 
-    socketRef.current.send(JSON.stringify({
-      'message': `Dear ${username}, your reservation is ${newStatus}`,
-      'user': user_id
-    }));
+    // socketRef.current.send(JSON.stringify({
+    //   'message': `Dear ${username}, your reservation is ${newStatus}`,
+    //   'user': user_id
+    // }));
   };
 
   useEffect(() => {
@@ -118,7 +120,6 @@ function Reservation() {
             <th scope='col'>Table</th>
             <th scope='col'>Date</th>
             <th scope='col'>Party_size</th>
-            <th scope='col'>Requests</th>
             <th scope='col'>Status</th>
             <th scope='col'>Actions</th>
           </tr>
@@ -134,7 +135,6 @@ function Reservation() {
                 <td scope='col'>{table}</td>
                 <td scope='col'>{reservation_date}</td>
                 <td scope='col'>{party_size}</td>
-                <td scope='col'>{order.requests}</td>
                 <td scope='col'>
                   {status === 'Accepted' && (<span className='text-success d-flex'><i className="bi bi-check2-circle"></i> Accepted</span>)}
                   {status === 'Rejected' && (<span className='text-danger'>Rejected</span>)}
