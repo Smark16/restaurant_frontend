@@ -8,7 +8,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
 
-const reservationUrl = 'http://127.0.0.1:8000/restaurant/reservation';
+const reservationUrl = 'https://restaurant-backend5.onrender.com/restaurant/reservation';
 
 function Reservation() {
   const { user, notifyAll, setNotifyAll } = useContext(AuthContext);
@@ -70,7 +70,7 @@ function Reservation() {
     formData.append("newStatus", newStatus);
     
     try {
-      const response = await axios.patch(`http://127.0.0.1:8000/restaurant/update_reservation/${id}`, formData);
+      const response = await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_reservation/${id}`, formData);
       console.log(response);
       setOrders((prevOrders) => 
         prevOrders.map((order) =>

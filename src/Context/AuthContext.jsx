@@ -4,9 +4,9 @@ import { jwtDecode } from 'jwt-decode';
 //import { tokenGeneration } from '../components/firebase';
 import Swal from 'sweetalert2'
 
-const loginurl = 'http://127.0.0.1:8000/restaurant/'
-const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
-const notificationOrderUrl = 'http://127.0.0.1:8000/restaurant/messages'
+const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
+const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
+const notificationOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/messages'
 
 import axios from 'axios'
 
@@ -39,30 +39,30 @@ const handleDisplay = ()=> {
   setDisplay(!display)
 }
 
-useEffect(() => {
-  if (user) {
+// useEffect(() => {
+//   if (user) {
 
-    const socket = new WebSocket(user.is_staff 
-      ? `wss://restaurant-backend5.onrender.com/ws/admin/${user.user_id}/`
-      : `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`)
-    socket.onopen = function(e) {
-      console.log('WebSocket connection established');
-    };
+//     const socket = new WebSocket(user.is_staff 
+//       ? `wss://restaurant-backend5.onrender.com/ws/admin/${user.user_id}/`
+//       : `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`)
+//     socket.onopen = function(e) {
+//       console.log('WebSocket connection established');
+//     };
 
-    socket.onclose = function(e) {
-      console.log('WebSocket connection closed');
-    };
+//     socket.onclose = function(e) {
+//       console.log('WebSocket connection closed');
+//     };
 
-    socket.onmessage = function(e) {
-      const data = JSON.parse(e.data);
-      setNotifyAll(prev => [...prev, data]);
-    };
+//     socket.onmessage = function(e) {
+//       const data = JSON.parse(e.data);
+//       setNotifyAll(prev => [...prev, data]);
+//     };
 
-    return () => {
-      socket.close();
-    }
-  }
-}, [user]);
+//     return () => {
+//       socket.close();
+//     }
+//   }
+// }, [user]);
  
 // this manages notificatios for all the user
  const orderMsg = async()=>{

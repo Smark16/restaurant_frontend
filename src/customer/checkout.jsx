@@ -7,8 +7,8 @@ import TextField from '@mui/material/TextField';
 import { useNavigate } from 'react-router-dom';
 import { FlutterWaveButton, closePaymentModal } from 'flutterwave-react-v3';
 
-const OrderItem = 'http://127.0.0.1:8000/restaurant/post_OrderItems';
-const placedOrder = 'http://127.0.0.1:8000/restaurant/placed_orders';
+const OrderItem = 'https://restaurant-backend5.onrender.com/restaurant/post_OrderItems';
+const placedOrder = 'https://restaurant-backend5.onrender.com/restaurant/placed_orders';
 
 function Checkout() {
   const { data, user, setAddItem, setTotal, setNotifyAll, notifyAll } = useContext(AuthContext);
@@ -103,7 +103,7 @@ function Checkout() {
       orderItemData.append('order', orderId);
 
       for (const Order_item of data) {
-        const menuQuantityUpdate = `http://127.0.0.1:8000/restaurant/update_quantity/${Order_item.id}`;
+        const menuQuantityUpdate = `https://restaurant-backend5.onrender.com/restaurant/update_quantity/${Order_item.id}`;
         const quantityData = new FormData();
         quantityData.append("quantity", Order_item.quantity);
 

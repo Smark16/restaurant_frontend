@@ -10,7 +10,6 @@ import './cust.css';
 
 function Customer() {
   const { user, Loginloading } = useContext(AuthContext);
-  const [UserReservation, setUserReservation] = useState([]);
   const [expense, setExpense] = useState(0);
   const user_order = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user.user_id}`;
   const [Userorder, setUserOrder] = useState([]);

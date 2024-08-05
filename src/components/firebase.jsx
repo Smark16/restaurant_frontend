@@ -32,7 +32,7 @@ const generateToken = async () => {
                 vapidKey: "BNK4QUakbgI1EuK6GXomrSYe8bWdoYNhDFH0mHtM5oRSL2prjMV8K8sUDWZjgxv_-WSm-Y67Q7bVdlusq13Lizg"
             });
             if (fcm_token && user) {
-                await axios.patch(`http://127.0.0.1:8000/restaurant/fcm_token/${user.user_id}`, {fcm_token})
+                await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/fcm_token/${user.user_id}`, {fcm_token})
             } else {
                 console.warn('No FCM token received.');
             }

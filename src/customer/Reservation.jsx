@@ -7,8 +7,8 @@ import { AuthContext } from '../Context/AuthContext'
 // import toast, { Toaster } from 'react-hot-toast';
 import useAxios from '../components/useAxios';
 
-const tables = 'http://127.0.0.1:8000/restaurant/tables'
-const newReservation = 'http://127.0.0.1:8000/restaurant/new_reservation'
+const tables = 'https://restaurant-backend5.onrender.com/restaurant/tables'
+const newReservation = 'https://restaurant-backend5.onrender.com/restaurant/new_reservation'
 
 function Reservations() {
   const { user, showSuccessAlert, showErrorAlert, notifyAll, setNotifyAll } = useContext(AuthContext)

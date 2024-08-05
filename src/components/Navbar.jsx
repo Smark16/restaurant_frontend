@@ -72,7 +72,7 @@ const Bar = () => {
 
   const fetchNotifications = async (userId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/restaurant/usermsg/${userId}`);
+      const response = await fetch(`https://restaurant-backend5.onrender.com/restaurant/usermsg/${userId}`);
       const data = await response.json();
       setNotifyAll(data);
     } catch (error) {

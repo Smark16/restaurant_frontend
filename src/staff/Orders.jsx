@@ -10,10 +10,10 @@ import useAxios from '../components/useAxios';
 
 import { AuthContext } from '../Context/AuthContext';
 
-const orderUrl = 'http://127.0.0.1:8000/restaurant/orders';
+const orderUrl = 'https://restaurant-backend5.onrender.com/restaurant/orders';
 
 function App() {
-  const { user, setNotifyAll, notifyAll, authTokens } = useContext(AuthContext);
+  const { authTokens } = useContext(AuthContext);
   console.log(authTokens)
   const axiosInstance = useAxios()
   const [orders, setOrders] = useState([]);
@@ -51,7 +51,7 @@ function App() {
 
   const changeStatus = async (id, user_id, username, newStatus) => {
     try {
-      await axiosInstance.patch(`http://127.0.0.1:8000/restaurant/update_status/${id}`, { newStatus });
+      await axiosInstance.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, { newStatus });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === id ? { ...order, status: newStatus } : order
@@ -64,7 +64,7 @@ function App() {
 
   const showOrder = async (id, user_id) => {
     setShowModal(true);
-    const madeOrdersUrl = `http://127.0.0.1:8000/restaurant/user_order/${user_id}`;
+    const madeOrdersUrl = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user_id}`;
 
     try {
       setLoading(true);
