@@ -2,16 +2,13 @@ import React, { useContext, useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import { AuthContext } from '../Context/AuthContext'
-// import { tokenGeneration } from '../components/firebase';
-// import { onMessage } from 'firebase/messaging';
-// import toast, { Toaster } from 'react-hot-toast';
 import useAxios from '../components/useAxios';
 
 const tables = 'https://restaurant-backend5.onrender.com/restaurant/tables'
 const newReservation = 'https://restaurant-backend5.onrender.com/restaurant/new_reservation'
 
 function Reservations() {
-  const { user, showSuccessAlert, showErrorAlert, notifyAll, setNotifyAll } = useContext(AuthContext)
+  const { user, showSuccessAlert, showErrorAlert} = useContext(AuthContext)
   // const {messaging, generateToken} = tokenGeneration()
   const axiosInstance = useAxios();
   const [reservation, setReservation] = useState({ contact: "", Email: "", party_size: "", table: "", reservation_date: "" })
@@ -19,6 +16,7 @@ function Reservations() {
   const [result, setResult] = useState('')
   const [reserve, setReserve] = useState('')
   const [confirmed, setConfirmed] = useState(false)
+  
   
  
   const navigate = useNavigate()
@@ -40,6 +38,7 @@ function Reservations() {
   }
 
   const handleSubmit = async(e) => {
+  setConfirmed(true)
     e.preventDefault()
     const formData = new FormData()
     formData.append("user", user.user_id)
@@ -58,7 +57,7 @@ function Reservations() {
           setResult('')
           setReservation({ contact: "", Email: "", party_size: "", table: "", reservation_date: "" })
           showSuccessAlert("Reservation Made Successfully")
-          setConfirmed(true)
+          setConfirmed(false)
           navigate("/customer/dashboard")
         } else {
           showErrorAlert("Please fill in all Details")
