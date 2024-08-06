@@ -55,7 +55,7 @@ function Customer() {
     try {
       const response = await axios.get(user_order);
       const data = response.data;
-
+      setUserOrder(data)
       // Calculate total expense
       const totalExpense = data.reduce((total, order) => {
         const orderTotal = order.menu.reduce((sum, item) => sum + (item.price * item.quantity), 0);
