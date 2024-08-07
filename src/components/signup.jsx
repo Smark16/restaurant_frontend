@@ -13,20 +13,27 @@ function Signup() {
     username: "",
     email: "",
     password: "",
-    is_staff: false,
-    is_customer: true,
+    role: "",  // Use a single state property for role
   });
   const [passwordError, setPasswordError] = useState([]);
   const [usernameError, setUsernameError] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setPerson({ ...person, [name]: value });
+    const { name, value, type } = e.target;
+    if (type === 'radio') {
+      setPerson({ ...person, role: value });
+    } else {
+      setPerson({ ...person, [name]: value });
+    }
   };
 
-  const RegisterUser = async (email, username, password, is_staff, is_customer) => {
+  const RegisterUser = async (email, username, password, role) => {
     try {
+      // Determine is_staff and is_customer based on role
+      const is_staff = role === "staff";
+      const is_customer = role === "customer";
+
       const response = await axios.post(registerurl, {
         username, password, email, is_staff, is_customer
       });
@@ -56,8 +63,8 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);  // Start loading
-    const { email, username, password, is_staff, is_customer } = person;
-    await RegisterUser(email, username, password, is_staff, is_customer);
+    const { email, username, password, role } = person;
+    await RegisterUser(email, username, password, role);
   };
 
   const showSuccessAlert = (message) => {
@@ -136,6 +143,32 @@ function Signup() {
             {passwordError.map((err, index) => (
               <p key={index} className='text-danger'>{err}</p>
             ))}
+          </div>
+          <div className="mb-3">
+            <div className="form-check">
+              <input
+                type="radio"
+                className="form-check-input"
+                id="is_customer"
+                name="role"
+                value="customer"
+                checked={person.role === 'customer'}
+                onChange={handleChange}
+              />
+              <label className="form-check-label" htmlFor="is_customer">Customer</label>
+            </div>
+            <div className="form-check">
+              <input
+                type="radio"
+                className="form-check-input"
+                id="is_staff"
+                name="role"
+                value="staff"
+                checked={person.role === 'staff'}
+                onChange={handleChange}
+              />
+              <label className="form-check-label" htmlFor="is_staff">Admin/Staff</label>
+            </div>
           </div>
           <div className="mb-3">
             <button className="bg-primary text-white text-center" type="submit" disabled={loading}>

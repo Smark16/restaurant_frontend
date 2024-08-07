@@ -73,6 +73,7 @@ function Cart() {
                         <span>UGX {itemExpense[itemName].toFixed(2)}</span>
                       </li>
                     ))}
+                    
                   </ul>
                   <div className='total bg-primary text-white p-3'>
                     <h4>Total</h4>

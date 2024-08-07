@@ -6,22 +6,7 @@ import './cust.css'
 function AllNotifications() {
  const {showNotificationsAll, orderNotify} = useContext(AuthContext)
  
-//  const orderMsg = async()=>{
-//   try{
-//     const response = await axios(notificationOrderUrl)
-//     const data = response.data
-//     setOrderNotify(data)
-//     console.log(data)
 
-//   }catch(err){
-//     console.log('There was an error')
-//   }
-//  }
-
-
-//  useEffect(()=>{
-//   orderMsg()
-//  }, [])
   return (
     <>
     {showNotificationsAll && (<>
