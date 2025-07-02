@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useContext, useEffect } from 'react';
 import {Route, Routes} from 'react-router-dom';
 import './App.css';
+import Bar from './components/Navbar';
 import Home from './components/Home';
 import Login from './components/login';
 import Logout from './staff/logout';
@@ -25,7 +26,6 @@ import Reservations from './customer/Reservation';
 import Payment from './customer/payment';
 import MenuDisplay from './customer/Menu';
 import UpdateItem from './staff/update';
-import ResetPassword from './staff/resetPassword';
 import ForgotPassword from './components/forgotPassword';
 import ChangePassword from './components/ChangePassword';
 import SingleMenu from './customer/singleItem';
@@ -68,6 +68,7 @@ function Show() {
   return (
     <>
      <Toaster position='top-right'/> 
+          <Bar />
           <Routes>
             {/* Public Routes */}
             <Route path='/' element={<Home />} />
@@ -106,7 +107,6 @@ function Show() {
                         <Route path='profile' element={<StaffProfile/>}/>
                         <Route path='items/:id' element={<SingleItem/>}/>
                         <Route path='update/:id' element={<UpdateItem/>}/>
-                        <Route path='password_reset' element={<ResetPassword/>}/>
                         <Route path='logout' element={<Logout />} />
                       </Routes>
                     </div>

@@ -16,7 +16,8 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Notifications from '../customer/Notifications';
-import AllNotifications from '../customer/allnotifications';
+import NotificationsPanel from './allnotifications';
+
 import '../App.css';
 
 const Search = styled('div')(({ theme }) => ({
@@ -146,7 +147,7 @@ const Bar = () => {
               <NotificationsIcon />
             </Badge>
             <div className="container-notify">
-              {showNotificationsAll && <AllNotifications />}
+              {showNotificationsAll && <NotificationsPanel />}
             </div>
           </IconButton>
           <p>Notifications</p>
@@ -284,7 +285,7 @@ const Bar = () => {
                     <NotificationsIcon />
                   </Badge>
                   <div className="container-notify">
-                    {showNotificationsAll && <AllNotifications />}
+                    {showNotificationsAll && <NotificationsPanel />}
                   </div>
                 </IconButton>
               </Box>
