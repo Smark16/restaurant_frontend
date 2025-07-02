@@ -11,7 +11,7 @@ const OrderItem = 'https://restaurant-backend5.onrender.com/restaurant/post_Orde
 const placedOrder = 'https://restaurant-backend5.onrender.com/restaurant/placed_orders';
 
 function Checkout() {
-  const { data, user, setAddItem, setTotal, setNotifyAll, notifyAll } = useContext(AuthContext);
+  const { data, user, setAddItem, setTotal} = useContext(AuthContext);
   const [info, setInfo] = useState({ location: "", contact: "" });
   const [orderId, setOrderId] = useState('');
   const [loader, setLoader] = useState(false);

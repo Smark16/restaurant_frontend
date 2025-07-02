@@ -3,7 +3,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useContext, useEffect } from 'react';
 import {Route, Routes} from 'react-router-dom';
 import './App.css';
-import Bar from './components/Navbar';
 import Home from './components/Home';
 import Login from './components/login';
 import Logout from './staff/logout';
@@ -15,7 +14,7 @@ import Sidebar from './staff/Sidebar';
 import Menu from './staff/Menu';
 import Orders from './staff/Orders';
 import Reservation from './staff/Reservation';
-import Customers from './staff/Customers';
+import MenuAnalytics from './staff/MenuAnalytics';
 import StaffProfile from './staff/Profile';
 import AddItem from './staff/addItem';
 import SingleItem from './staff/singleItem';
@@ -69,7 +68,6 @@ function Show() {
   return (
     <>
      <Toaster position='top-right'/> 
-          <Bar />
           <Routes>
             {/* Public Routes */}
             <Route path='/' element={<Home />} />
@@ -104,7 +102,7 @@ function Show() {
                         <Route path='reservations' element={<Reservation />} />
                         <Route path='/' element={<Staff />} />
                         <Route path='addItem' element={<AddItem/>}/>
-                        <Route path='customers' element={<Customers />} />
+                        <Route path='analytics' element={<MenuAnalytics />} />
                         <Route path='profile' element={<StaffProfile/>}/>
                         <Route path='items/:id' element={<SingleItem/>}/>
                         <Route path='update/:id' element={<UpdateItem/>}/>

@@ -1,197 +1,502 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
-import $ from 'jquery';
-import 'datatables.net';
-import 'datatables.net-bs4';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import axios from 'axios';
-import { AuthContext } from '../Context/AuthContext';
+import { useContext, useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Container,
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Paper,
+  Avatar,
+  Menu,
+  MenuItem,
+  Alert,
+  TextField,
+  InputAdornment,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import { DataGrid, GridActionsCellItem, GridToolbar } from "@mui/x-data-grid";
+import {
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Schedule as ScheduleIcon,
+  HourglassEmpty as HourglassIcon,
+  TableRestaurant as TableIcon,
+  Person as PersonIcon,
+  Phone as PhoneIcon,
+  CalendarToday as CalendarIcon,
+  Group as GroupIcon,
+  Search as SearchIcon,
+  EventSeat as ReservationIcon,
+} from "@mui/icons-material";
+import axios from "axios";
+import { AuthContext } from "../Context/AuthContext";
 
-const reservationUrl = 'https://restaurant-backend5.onrender.com/restaurant/reservation';
+const reservationUrl = "https://restaurant-backend5.onrender.com/restaurant/reservation";
 
-function Reservation() {
+function ReservationManagement() {
   const { user, notifyAll, setNotifyAll } = useContext(AuthContext);
-  const [orders, setOrders] = useState([]);
-  const [orderStatus, setOrderStatus] = useState(true);
-  
-  const socketRef = useRef(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // useEffect(()=>{
-  //   generateToken()
-  // }), []
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reservationToDelete, setReservationToDelete] = useState(null);
+  const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
+  const [selectedReservationForStatus, setSelectedReservationForStatus] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [error, setError] = useState("");
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await axios.get(reservationUrl);
+      if (!Array.isArray(response.data)) {
+        throw new Error("Invalid response format: Expected an array of reservations");
+      }
+      setReservations(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError(error.message || "Failed to load reservations. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/reservation/${id}`);
-      setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
+      setReservations((prevReservations) => prevReservations.filter((reservation) => reservation.id !== id));
+      setDeleteDialogOpen(false);
+      setReservationToDelete(null);
     } catch (err) {
-      console.log("There was an error:", err);
+      console.error("Error deleting reservation:", err);
+      setError(err.response?.data?.message || "Failed to delete reservation. Please try again.");
     }
   };
 
-  // Handle Notifications
-  // useEffect(() => {
-  //   const url = `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`;
-  //   const socket = new WebSocket(url);
-  //   socketRef.current = socket;
-
-  //   socket.onopen = function(e) {
-  //     console.log('WebSocket connection established');
-  //   };
-
-  //   socket.onclose = function(e) {
-  //     console.log('WebSocket connection closed');
-  //   };
-
-  //   socket.onmessage = function(e) {
-  //     let data = JSON.parse(e.data);
-  //     console.log(data);  // Ensure this logs data when the message event is triggered
-  //     setNotifyAll(prevNotify => [...prevNotify, data]);
-
-  //     if (data.type === 'notification' && data.user.user_id !== user.user_id) {
-  //       Notification.requestPermission().then((perm) => {
-  //         if (perm === 'granted') {
-  //           new Notification('Restaurant management System', {
-  //             body: `${data.message}`,
-  //           });
-  //         }
-  //       });
-  //     }
-  //   };
-
-  //   // Cleanup function to close the WebSocket connection
-  //   return () => {
-  //     socket.close();
-  //   };
-  // }, []);
-
-  const changeStatus = async (id,user_id, username, newStatus) => {
+  const changeStatus = async (id, userId, username, newStatus) => {
+    if (!user) {
+      setError("You must be logged in to update reservation status.");
+      return;
+    }
     const formData = new FormData();
     formData.append("newStatus", newStatus);
-    
+
     try {
-      const response = await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_reservation/${id}`, formData);
-      console.log(response);
-      setOrders((prevOrders) => 
-        prevOrders.map((order) =>
-          order.id === id ? { ...order, status: newStatus } : order
-        )
+      await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_reservation/${id}`, formData);
+      setReservations((prevReservations) =>
+        prevReservations.map((reservation) =>
+          reservation.id === id ? { ...reservation, status: newStatus } : reservation,
+        ),
       );
       localStorage.setItem(`status_${id}`, newStatus);
-    } catch (err) {
-      console.log("There was an error changing the status:", err);
-    }
+      setStatusMenuAnchor(null);
+      setSelectedReservationForStatus(null);
 
-    // socketRef.current.send(JSON.stringify({
-    //   'message': `Dear ${username}, your reservation is ${newStatus}`,
-    //   'user': user_id
-    // }));
+      // WebSocket notification (commented out as in original)
+      // socketRef.current.send(JSON.stringify({
+      //   'message': `Dear ${username}, your reservation is ${newStatus}`,
+      //   'user': userId
+      // }));
+    } catch (err) {
+      console.error("Error changing status:", err);
+      setError(err.response?.data?.message || "Failed to update reservation status. Please try again.");
+    }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios(reservationUrl);
-        if (response.status !== 200) {
-          throw new Error('Network response was not ok');
-        }
-        const result = response.data;
-        setOrders(result);
-        setOrderStatus(result.length === 0);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+  const getStatusChip = (status) => {
+    const statusConfig = {
+      Accepted: { color: "success", icon: <CheckCircleIcon />, label: "Accepted" },
+      Rejected: { color: "error", icon: <CancelIcon />, label: "Rejected" },
+      Pending: { color: "warning", icon: <ScheduleIcon />, label: "Pending" },
+      "": { color: "default", icon: <HourglassIcon />, label: "Waiting" },
     };
 
-    fetchData();
+    const config = statusConfig[status || ""] || statusConfig[""];
 
-    if (orders.length > 0) {
-      $('#myTable').DataTable();
-    }
-  }, [orders]);
+    return (
+      <Chip
+        icon={config.icon}
+        label={config.label}
+        color={config.color}
+        variant="outlined"
+        size="small"
+        sx={{ fontWeight: "bold" }}
+      />
+    );
+  };
+
+  const handleStatusMenuOpen = (event, reservation) => {
+    setStatusMenuAnchor(event.currentTarget);
+    setSelectedReservationForStatus(reservation);
+  };
+
+  const handleStatusMenuClose = () => {
+    setStatusMenuAnchor(null);
+    setSelectedReservationForStatus(null);
+  };
+
+  const filteredReservations = reservations.filter((reservation) => {
+    const username = reservation.user?.username ? reservation.user.username.toLowerCase() : "";
+    const contact = reservation.contact ? reservation.contact.toString() : "";
+    const status = reservation.status ? reservation.status.toLowerCase() : "";
+    const search = searchText.toLowerCase();
+    return username.includes(search) || contact.includes(search) || table.includes(search) || status.includes(search);
+  });
+
+  // Get reservation statistics
+  const getReservationStats = () => {
+    const total = reservations.length;
+    const accepted = reservations.filter((r) => r.status === "Accepted").length;
+    const pending = reservations.filter((r) => r.status === "Pending" || r.status === "").length;
+    const rejected = reservations.filter((r) => r.status === "Rejected").length;
+
+    return { total, accepted, pending, rejected };
+  };
+
+  const stats = getReservationStats();
+
+  const columns = [
+    {
+      field: "username",
+      headerName: "Customer",
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
+            <PersonIcon fontSize="small" />
+          </Avatar>
+          <Typography variant="body2" fontWeight="medium">
+            {params.row.user?.username || "Unknown"}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      field: "contact",
+      headerName: "Contact",
+      flex: 1,
+      minWidth: 130,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <PhoneIcon fontSize="small" color="action" />
+          <Typography variant="body2">{params.value || "N/A"}</Typography>
+        </Box>
+      ),
+    },
+    {
+      field: "table",
+      headerName: "Table",
+      flex: 0.8,
+      minWidth: 100,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <TableIcon fontSize="small" color="action" />
+          <Chip label={params.value || "N/A"} size="small" variant="outlined" color="primary" />
+        </Box>
+      ),
+    },
+    {
+      field: "reservation_date",
+      headerName: "Date & Time",
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <CalendarIcon fontSize="small" color="action" />
+          <Box>
+            <Typography variant="body2">
+              {params.value ? new Date(params.value).toLocaleDateString() : "N/A"}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {params.value
+                ? new Date(params.value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                : "N/A"}
+            </Typography>
+          </Box>
+        </Box>
+      ),
+    },
+    {
+      field: "party_size",
+      headerName: "Party Size",
+      flex: 0.8,
+      minWidth: 100,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <GroupIcon fontSize="small" color="action" />
+          <Chip
+            label={params.value ? `${params.value} guests` : "N/A"}
+            size="small"
+            variant="outlined"
+            color="secondary"
+          />
+        </Box>
+      ),
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      minWidth: 130,
+      renderCell: (params) => getStatusChip(params.value),
+    },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 120,
+      getActions: (params) => [
+        <GridActionsCellItem
+          key="status"
+          icon={<EditIcon />}
+          label="Change Status"
+          onClick={(event) => handleStatusMenuOpen(event, params.row)}
+          color="secondary"
+        />,
+        <GridActionsCellItem
+          key="delete"
+          icon={<DeleteIcon />}
+          label="Delete"
+          onClick={() => {
+            setReservationToDelete(params.row.id);
+            setDeleteDialogOpen(true);
+          }}
+          color="error"
+        />,
+      ],
+    },
+  ];
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (error) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 3 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+        <Button onClick={fetchData} variant="contained">
+          Retry
+        </Button>
+      </Container>
+    );
+  }
 
   return (
-    <div className='res_container'>
-      <table border="2" id="myTable" className="table table-striped table-hover">
-        <thead>
-          <tr>
-            <th scope='col'>Name</th>
-            <th scope='col'>Contact</th>
-            <th scope='col'>Table</th>
-            <th scope='col'>Date</th>
-            <th scope='col'>Party_size</th>
-            <th scope='col'>Status</th>
-            <th scope='col'>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orderStatus && (<h4 className='text-center mt-3'>No Orders Available</h4>)}
-          {orders.map(order => {
-            const { id, contact,party_size, table, reservation_date, status } = order;
-            return (
-              <tr key={id}>
-                <td scope='col'>{order.user.username}</td>
-                <td scope='col'>{contact}</td>
-                <td scope='col'>{table}</td>
-                <td scope='col'>{reservation_date}</td>
-                <td scope='col'>{party_size}</td>
-                <td scope='col'>
-                  {status === 'Accepted' && (<span className='text-success d-flex'><i className="bi bi-check2-circle"></i> Accepted</span>)}
-                  {status === 'Rejected' && (<span className='text-danger'>Rejected</span>)}
-                  {status === 'Pending' && (<span className='text-warning d-flex'><i className="bi bi-arrow-counterclockwise"></i> Pending</span>)}
-                  {status === '' && (<span className='text-secondary'><i className="fa fa-spinner"></i> Waiting</span>)}
-                </td>
-                <td>
-                  <div className="actions d-flex">
-                    <i className="bi bi-trash-fill" onClick={() => handleDelete(id)}></i>
-                    <div className="dropdown">
-                      <button
-                        className="btn btn-primary dropdown-toggle"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                        Change Status
-                      </button>
-                      <ul className="dropdown-menu">
-                        <li>
-                          <a
-                            className="dropdown-item"
-                            href="#"
-                            onClick={() => changeStatus(id,order.user.id,order.user.username, 'Accepted')}
-                          >
-                            Accepted
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            className="dropdown-item"
-                            href="#"
-                            onClick={() => changeStatus(id,order.user.id,order.user.username, 'Rejected')}
-                          >
-                            Rejected
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            className="dropdown-item"
-                            href="#"
-                            onClick={() => changeStatus(id,order.user.id,order.user.username, 'Pending')}
-                          >
-                            Pending
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <Box sx={{ bgcolor: "background.default", minHeight: "100vh", py: 3 }}>
+      <Container maxWidth="xl">
+        {/* Header */}
+        <Paper sx={{ p: 3, mb: 3, bgcolor: "secondary.main", color: "white" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <ReservationIcon sx={{ fontSize: 32 }} />
+            <Box>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: "bold" }}>
+                Reservation Management
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                Manage and track all table reservations
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
+
+        {/* Search and Stats */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              placeholder="Search reservations by customer, contact, table, or status..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ bgcolor: "background.paper" }}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Grid container spacing={2}>
+              <Grid item xs={3}>
+                <Paper sx={{ p: 2, textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Total
+                  </Typography>
+                  <Typography variant="h6" fontWeight="bold" color="primary">
+                    {stats.total}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={3}>
+                <Paper sx={{ p: 2, textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Accepted
+                  </Typography>
+                  <Typography variant="h6" fontWeight="bold" color="success.main">
+                    {stats.accepted}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={3}>
+                <Paper sx={{ p: 2, textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Pending
+                  </Typography>
+                  <Typography variant="h6" fontWeight="bold" color="warning.main">
+                    {stats.pending}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={3}>
+                <Paper sx={{ p: 2, textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Rejected
+                  </Typography>
+                  <Typography variant="h6" fontWeight="bold" color="error.main">
+                    {stats.rejected}
+                  </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
+
+        {/* Reservations Table */}
+        <Card sx={{ boxShadow: 3 }}>
+          <CardContent sx={{ p: 0 }}>
+            <DataGrid
+              rows={filteredReservations}
+              columns={columns}
+              loading={loading}
+              pageSizeOptions={[10, 25, 50, 100]}
+              initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 10 },
+                },
+              }}
+              slots={{
+                toolbar: GridToolbar,
+              }}
+              slotProps={{
+                toolbar: {
+                  showQuickFilter: true,
+                  quickFilterProps: { debounceMs: 500 },
+                },
+              }}
+              sx={{
+                border: "none",
+                "& .MuiDataGrid-cell": {
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                },
+                "& .MuiDataGrid-columnHeaders": {
+                  bgcolor: "grey.50",
+                  borderBottom: "2px solid",
+                  borderColor: "divider",
+                },
+                "& .MuiDataGrid-row:hover": {
+                  bgcolor: "action.hover",
+                },
+                minHeight: 400,
+              }}
+              disableRowSelectionOnClick
+            />
+          </CardContent>
+        </Card>
+
+        {/* Status Change Menu */}
+        <Menu anchorEl={statusMenuAnchor} open={Boolean(statusMenuAnchor)} onClose={handleStatusMenuClose}>
+          <MenuItem
+            onClick={() => {
+              if (selectedReservationForStatus) {
+                changeStatus(
+                  selectedReservationForStatus.id,
+                  selectedReservationForStatus.user?.id || 0,
+                  selectedReservationForStatus.user?.username || "Unknown",
+                  "Accepted",
+                );
+              }
+            }}
+          >
+            <CheckCircleIcon sx={{ mr: 1 }} color="success" />
+            Accept Reservation
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              if (selectedReservationForStatus) {
+                changeStatus(
+                  selectedReservationForStatus.id,
+                  selectedReservationForStatus.user?.id || 0,
+                  selectedReservationForStatus.user?.username || "Unknown",
+                  "Pending",
+                );
+              }
+            }}
+          >
+            <ScheduleIcon sx={{ mr: 1 }} color="warning" />
+            Mark as Pending
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              if (selectedReservationForStatus) {
+                changeStatus(
+                  selectedReservationForStatus.id,
+                  selectedReservationForStatus.user?.id || 0,
+                  selectedReservationForStatus.user?.username || "Unknown",
+                  "Rejected",
+                );
+              }
+            }}
+          >
+            <CancelIcon sx={{ mr: 1 }} color="error" />
+            Reject Reservation
+          </MenuItem>
+        </Menu>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <DeleteIcon color="error" />
+            Confirm Delete
+          </DialogTitle>
+          <DialogContent>
+            <Typography>Are you sure you want to delete this reservation? This action cannot be undone.</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                if (reservationToDelete) handleDelete(reservationToDelete);
+              }}
+              color="error"
+              variant="contained"
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </Box>
   );
 }
 
-export default Reservation;
+export default ReservationManagement;

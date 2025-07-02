@@ -39,30 +39,31 @@ const handleDisplay = ()=> {
   setDisplay(!display)
 }
 
-// useEffect(() => {
-//   if (user) {
+useEffect(() => {
+  if (user) {
 
-//     const socket = new WebSocket(user.is_staff 
-//       ? `wss://restaurant-backend5.onrender.com/ws/admin/${user.user_id}/`
-//       : `wss://restaurant-backend5.onrender.com/ws/customer/${user.user_id}/`)
-//     socket.onopen = function(e) {
-//       console.log('WebSocket connection established');
-//     };
+    const socket = new WebSocket(user.is_staff 
+      ? `ws://127.0.0.1:8000/ws/admin/${user.user_id}/`
+      : `ws://127.0.0.1:8000/ws/customer/${user.user_id}/`)
+    socket.onopen = function(e) {
+      console.log('WebSocket connection established');
+    };
 
-//     socket.onclose = function(e) {
-//       console.log('WebSocket connection closed');
-//     };
+    socket.onclose = function(e) {
+      console.log('WebSocket connection closed');
+    };
 
-//     socket.onmessage = function(e) {
-//       const data = JSON.parse(e.data);
-//       setNotifyAll(prev => [...prev, data]);
-//     };
+    socket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      setNotifyAll(prev => [...prev, data]);
+    };
 
-//     return () => {
-//       socket.close();
-//     }
-//   }
-// }, [user]);
+    return () => {
+      socket.close();
+    }
+  }
+}, [user]);
+console.log(notifyAll)
  
 // this manages notificatios for all the user
  const orderMsg = async()=>{

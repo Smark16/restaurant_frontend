@@ -12,6 +12,8 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { AuthContext } from '../Context/AuthContext';
 
+import Bar from './Navbar';
+
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
@@ -44,6 +46,7 @@ function Login() {
 
   return (
     <>
+    <Bar/>
      <div className='text-center container-fluid loginForm'>
       <div className="grow_img">
       <p>Welcome back! 👋</p>

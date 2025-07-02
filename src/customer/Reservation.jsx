@@ -17,8 +17,6 @@ function Reservations() {
   const [reserve, setReserve] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   
-  
- 
   const navigate = useNavigate()
   const socketRef = useRef(null);
 
@@ -69,6 +67,10 @@ function Reservations() {
         setConfirmed(false)
       })
 
+      socketRef.current.send(JSON.stringify({
+        'message': `Dear Admin a reservation has been made`,
+        'user': user_id
+      }));
   }
 
   console.log(result)
