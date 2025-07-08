@@ -16,6 +16,7 @@ import {
   Alert,
   Stack,
   Avatar,
+  Button
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
@@ -31,10 +32,18 @@ import {
 } from "@mui/icons-material";
 import axios from "axios";
 
-const menuUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items";
+const menuUrl = "http://127.0.0.1:8000/restaurant/food_items";
+
+const menu_stats = "http://127.0.0.1:8000/restaurant/menu_analytics"
+
+const category_count = "http://127.0.0.1:8000/restaurant/category_count"
+
+const top_perfomers = 'http://127.0.0.1:8000/restaurant/top_perfomers'
+
+const needs_attension = 'http://127.0.0.1:8000/restaurant/needs_attention'
 
 function categorizeFoodItem(item) {
-  if (item.category) return item.category.toLowerCase();
+  if (item.category__name) return item.category__name.toLowerCase();
 
   const name = item.name ? item.name.toLowerCase() : "";
   const desc = item.descriptions ? item.descriptions.toLowerCase() : "";
@@ -81,9 +90,14 @@ function MenuAnalytics() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [menuItems, setMenuItems] = useState([]);
+  const [stats, setStats] = useState('')
+  const [cat_stats, setCat_stats] = useState('')
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [error, setError] = useState("");
+
+  const [top, setTop] = useState([])
+  const [attension, setAttention] = useState([])
 
   const fetchData = async () => {
     try {
@@ -114,21 +128,40 @@ function MenuAnalytics() {
     return name.includes(search) || price.includes(search) || category.includes(search);
   });
 
-  const getMenuStats = () => {
-    const total = menuItems.length;
-    const avgPrice = menuItems.length > 0 ? menuItems.reduce((sum, item) => sum + (item.price || 0), 0) / total : 0;
-    const avgRating = menuItems.length > 0 ? menuItems.reduce((sum, item) => sum + (item.avg_rating || 0), 0) / total : 0;
-    const highRated = menuItems.filter((item) => (item.avg_rating || 0) >= 4).length;
-    const categories = {
-      breakfast: menuItems.filter((item) => categorizeFoodItem(item) === "breakfast").length,
-      lunch: menuItems.filter((item) => categorizeFoodItem(item) === "lunch").length,
-      dinner: menuItems.filter((item) => categorizeFoodItem(item) === "dinner").length,
-    };
+  // menu stats
+ const getMenuStats = async()=>{
+  try{
+    const response = await axios.get(menu_stats)
+    const count_response = await axios.get(category_count)
+    const data = response.data
+    setStats(data)
+    setCat_stats(count_response.data)
+  }catch(err){
+    console.log('err', err)
+  }
+ }
 
-    return { total, avgPrice, avgRating, highRated, categories };
-  };
+//  top perfomers
+const topPerfomers = async()=>{
+  try{
+   const response = await axios.get(top_perfomers)
+   const data = response.data
+   setTop(data)
+  }catch(err){
+    console.log('err', err)
+  }
+}
 
-  const stats = getMenuStats();
+// needs attension
+const needsAttention = async()=>{
+  try{
+    const response = await axios.get(needs_attension)
+    const data = response.data
+    setAttention(data)
+  }catch(err){
+    console.log('err', err)
+  }
+}
 
   const categoryConfig = {
     breakfast: { icon: <BreakfastIcon />, label: "Breakfast", color: "#FF9800" },
@@ -198,7 +231,7 @@ function MenuAnalytics() {
       renderCell: (params) => (
         <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
           <Avatar
-            src={params.value || "/placeholder.svg"}
+            src={`http://127.0.0.1:8000/media/${params.value}` || "/placeholder.svg"}
             alt="Product"
             sx={{
               width: 60,
@@ -228,7 +261,11 @@ function MenuAnalytics() {
   ];
 
   useEffect(() => {
-    fetchData();
+     const loadData = async()=>{
+    await Promise.all(getMenuStats(), topPerfomers(), needsAttention(),  fetchData())
+  }
+   loadData()
+   
   }, []);
 
   if (error) {
@@ -268,7 +305,7 @@ function MenuAnalytics() {
             <Card sx={{ textAlign: "center", p: 2, bgcolor: "primary.main", color: "white" }}>
               <RestaurantIcon sx={{ fontSize: 40, mb: 1 }} />
               <Typography variant="h4" fontWeight="bold">
-                {stats.total}
+                {stats.total_items}
               </Typography>
               <Typography variant="body2">Total Items</Typography>
             </Card>
@@ -277,7 +314,7 @@ function MenuAnalytics() {
             <Card sx={{ textAlign: "center", p: 2, bgcolor: "success.main", color: "white" }}>
               <MoneyIcon sx={{ fontSize: 40, mb: 1 }} />
               <Typography variant="h4" fontWeight="bold">
-                UGX {Math.round(stats.avgPrice).toLocaleString()}
+                UGX {stats.avg_price}
               </Typography>
               <Typography variant="body2">Average Price</Typography>
             </Card>
@@ -286,7 +323,7 @@ function MenuAnalytics() {
             <Card sx={{ textAlign: "center", p: 2, bgcolor: "warning.main", color: "white" }}>
               <StarIcon sx={{ fontSize: 40, mb: 1 }} />
               <Typography variant="h4" fontWeight="bold">
-                {stats.avgRating.toFixed(1)}
+                {stats.total_average_rating}
               </Typography>
               <Typography variant="body2">Average Rating</Typography>
             </Card>
@@ -295,7 +332,7 @@ function MenuAnalytics() {
             <Card sx={{ textAlign: "center", p: 2, bgcolor: "secondary.main", color: "white" }}>
               <TrendingUpIcon sx={{ fontSize: 40, mb: 1 }} />
               <Typography variant="h4" fontWeight="bold">
-                {stats.highRated}
+                {stats.highest_rate}
               </Typography>
               <Typography variant="body2">High Rated (4+)</Typography>
             </Card>
@@ -309,10 +346,10 @@ function MenuAnalytics() {
             Category Breakdown
           </Typography>
           <Grid container spacing={2}>
-            {Object.entries(stats.categories).map(([category, count]) => {
-              const config = categoryConfig[category] || { icon: <RestaurantIcon />, label: category, color: "grey.500" };
+            {Object.keys(cat_stats).map((cats) => {
+              const config = { icon: <RestaurantIcon />, label: cats, color: "grey.500" };
               return (
-                <Grid item xs={12} sm={4} key={category}>
+                <Grid item xs={12} sm={4} key={cats}>
                   <Paper
                     sx={{
                       p: 2,
@@ -328,7 +365,7 @@ function MenuAnalytics() {
                     {config.icon}
                     <Box>
                       <Typography variant="h5" fontWeight="bold">
-                        {count}
+                          {cat_stats[cats]}
                       </Typography>
                       <Typography variant="body2">{config.label}</Typography>
                     </Box>
@@ -394,7 +431,7 @@ function MenuAnalytics() {
                     bgcolor: "action.hover",
                   },
                   "& .MuiDataGrid-cell": {
-                    py: 1,
+                    py: 0,
                   },
                 },
                 minHeight: 400,
@@ -417,10 +454,14 @@ function MenuAnalytics() {
                 <Typography variant="subtitle1" fontWeight="bold" color="success.main">
                   Top Performers
                 </Typography>
-                {menuItems
-                  .sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0))
-                  .slice(0, 3)
-                  .map((item, index) => (
+                {top.length === 0 ? ( <Chip
+                                      label="No Ratings Yet"
+                                      color="success"
+                                      size="small"
+                                      sx={{ minWidth: "40px", fontWeight: "bold" }}
+                                    />) : (
+                  <>
+                  {top.map((item, index) => (
                     <Box key={item.id} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Chip
                         label={`#${index + 1}`}
@@ -442,6 +483,9 @@ function MenuAnalytics() {
                       </Typography>
                     </Box>
                   ))}
+                  </>
+                )}
+                
               </Stack>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -449,10 +493,13 @@ function MenuAnalytics() {
                 <Typography variant="subtitle1" fontWeight="bold" color="warning.main">
                   Needs Attention
                 </Typography>
-                {menuItems
-                  .sort((a, b) => (a.avg_rating || 0) - (b.avg_rating || 0))
-                  .slice(0, 3)
-                  .map((item, index) => (
+                {attension.length === 0 ? ( <Chip
+                                          label="No Ratings Yet"
+                                          color="warning"
+                                          size="small"
+                                          sx={{ minWidth: "40px", fontWeight: "bold" }}
+                                        />) : (<>
+                                        {attension.map((item, index) => (
                     <Box key={item.id} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Chip label={`⚠️`} color="warning" size="small" sx={{ minWidth: "40px", fontWeight: "bold" }} />
                       <Avatar
@@ -469,6 +516,8 @@ function MenuAnalytics() {
                       </Typography>
                     </Box>
                   ))}
+                </>)}
+                
               </Stack>
             </Grid>
           </Grid>

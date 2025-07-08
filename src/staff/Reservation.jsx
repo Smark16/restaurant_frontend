@@ -41,7 +41,7 @@ import {
 import axios from "axios";
 import { AuthContext } from "../Context/AuthContext";
 
-const reservationUrl = "https://restaurant-backend5.onrender.com/restaurant/reservation";
+const reservationUrl = "http://127.0.0.1:8000/reservations/all_resrvations";
 
 function ReservationManagement() {
   const { user, notifyAll, setNotifyAll } = useContext(AuthContext);
@@ -76,7 +76,7 @@ function ReservationManagement() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/reservation/${id}`);
+      await axios.delete(`http://127.0.0.1:8000/reservations/delete_reservation/${id}`);
       setReservations((prevReservations) => prevReservations.filter((reservation) => reservation.id !== id));
       setDeleteDialogOpen(false);
       setReservationToDelete(null);
@@ -86,30 +86,22 @@ function ReservationManagement() {
     }
   };
 
-  const changeStatus = async (id, userId, username, newStatus) => {
+  const changeStatus = async (id, newStatus) => {
     if (!user) {
       setError("You must be logged in to update reservation status.");
       return;
     }
-    const formData = new FormData();
-    formData.append("newStatus", newStatus);
 
     try {
-      await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/update_reservation/${id}`, formData);
+      await axios.patch(`http://127.0.0.1:8000/reservations/update_reservation/${id}`, {"status" : newStatus});
       setReservations((prevReservations) =>
         prevReservations.map((reservation) =>
           reservation.id === id ? { ...reservation, status: newStatus } : reservation,
         ),
       );
-      localStorage.setItem(`status_${id}`, newStatus);
       setStatusMenuAnchor(null);
       setSelectedReservationForStatus(null);
 
-      // WebSocket notification (commented out as in original)
-      // socketRef.current.send(JSON.stringify({
-      //   'message': `Dear ${username}, your reservation is ${newStatus}`,
-      //   'user': userId
-      // }));
     } catch (err) {
       console.error("Error changing status:", err);
       setError(err.response?.data?.message || "Failed to update reservation status. Please try again.");
@@ -151,12 +143,10 @@ function ReservationManagement() {
   const filteredReservations = reservations.filter((reservation) => {
     const username = reservation.user?.username ? reservation.user.username.toLowerCase() : "";
     const contact = reservation.contact ? reservation.contact.toString() : "";
-    const status = reservation.status ? reservation.status.toLowerCase() : "";
     const search = searchText.toLowerCase();
-    return username.includes(search) || contact.includes(search) || table.includes(search) || status.includes(search);
+    return username.includes(search) || contact.includes(search) || table.includes(search);
   });
 
-  // Get reservation statistics
   const getReservationStats = () => {
     const total = reservations.length;
     const accepted = reservations.filter((r) => r.status === "Accepted").length;
@@ -430,8 +420,6 @@ function ReservationManagement() {
               if (selectedReservationForStatus) {
                 changeStatus(
                   selectedReservationForStatus.id,
-                  selectedReservationForStatus.user?.id || 0,
-                  selectedReservationForStatus.user?.username || "Unknown",
                   "Accepted",
                 );
               }
@@ -445,8 +433,6 @@ function ReservationManagement() {
               if (selectedReservationForStatus) {
                 changeStatus(
                   selectedReservationForStatus.id,
-                  selectedReservationForStatus.user?.id || 0,
-                  selectedReservationForStatus.user?.username || "Unknown",
                   "Pending",
                 );
               }
@@ -460,8 +446,6 @@ function ReservationManagement() {
               if (selectedReservationForStatus) {
                 changeStatus(
                   selectedReservationForStatus.id,
-                  selectedReservationForStatus.user?.id || 0,
-                  selectedReservationForStatus.user?.username || "Unknown",
                   "Rejected",
                 );
               }

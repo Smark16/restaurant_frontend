@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-import '../staff/staff.css';
 import { AuthContext } from '../Context/AuthContext';
 import useAxios from '../components/useAxios';
 import Swal from 'sweetalert2';

@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+"use client"
+
+import { useState, useEffect } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import {
   Box,
   Card,
@@ -23,7 +25,7 @@ import {
   Stack,
   Breadcrumbs,
   Skeleton,
-} from "@mui/material";
+} from "@mui/material"
 import {
   Restaurant as RestaurantIcon,
   Save as SaveIcon,
@@ -36,17 +38,18 @@ import {
   AttachMoney as MoneyIcon,
   NavigateNext as NavigateNextIcon,
   Edit as EditIcon,
-} from "@mui/icons-material";
-import { Link } from "react-router-dom";
-import axios from "axios";
-import Swal from "sweetalert2";
+  Add as AddIcon,
+  LocalDining as IngredientsIcon,
+} from "@mui/icons-material"
+import { Link } from "react-router-dom"
+import axios from "axios"
+import Swal from "sweetalert2"
 
 // Function to categorize food items (same as other components)
 const categorizeFoodItem = (item) => {
-  const name = item.name.toLowerCase();
-  const desc = item.descriptions.toLowerCase();
-  const text = `${name} ${desc}`;
-
+  const name = item.name.toLowerCase()
+  const desc = item.descriptions.toLowerCase()
+  const text = `${name} ${desc}`
   if (
     text.includes("breakfast") ||
     text.includes("cereal") ||
@@ -61,9 +64,8 @@ const categorizeFoodItem = (item) => {
     text.includes("oatmeal") ||
     text.includes("yogurt")
   ) {
-    return "breakfast";
+    return "breakfast"
   }
-
   if (
     text.includes("dinner") ||
     text.includes("steak") ||
@@ -77,199 +79,234 @@ const categorizeFoodItem = (item) => {
     text.includes("seafood") ||
     text.includes("risotto")
   ) {
-    return "dinner";
+    return "dinner"
   }
-
-  return "lunch";
-};
+  return "lunch"
+}
 
 function UpdateItem() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-
+  const { id } = useParams()
+  const navigate = useNavigate()
   const [item, setItem] = useState({
     name: "",
     price: "",
     descriptions: "",
     image: null,
     category: "",
-  });
-  const [originalImage, setOriginalImage] = useState("");
-  const [imagePreview, setImagePreview] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
+    ingredients: [], // Added ingredients field
+  })
+  const [originalImage, setOriginalImage] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [currentIngredient, setCurrentIngredient] = useState("") // For ingredient input
 
-  const singleUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`;
-  const updateUrl = `https://restaurant-backend5.onrender.com/restaurant/update_order/${id}`;
+  const singleUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`
+  const updateUrl = `http://127.0.0.1:8000/restaurant/update_menu/${id}`
 
   const categories = [
-    { value: "breakfast", label: "Breakfast", icon: <BreakfastIcon />, color: "#FF9800" },
-    { value: "lunch", label: "Lunch", icon: <LunchIcon />, color: "#4CAF50" },
-    { value: "dinner", label: "Dinner", icon: <DinnerIcon />, color: "#9C27B0" },
-  ];
+    { id: 1, value: "breakfast", label: "Breakfast", icon: <BreakfastIcon />, color: "#FF9800" },
+    { id: 2, value: "lunch", label: "Lunch", icon: <LunchIcon />, color: "#4CAF50" },
+    { id: 3, value: "dinner", label: "Dinner", icon: <DinnerIcon />, color: "#9C27B0" },
+  ]
 
   const fetchData = async () => {
     try {
-      setLoading(true);
-      const response = await axios.get(singleUrl);
-      const data = response.data;
+      setLoading(true)
+      const response = await axios.get(singleUrl)
+      const data = response.data
 
+      setOriginalImage(data.image)
       // Auto-categorize if no category exists
-      const category = data.category || categorizeFoodItem(data);
+      const category = data.category || categorizeFoodItem(data)
+
+      // Parse ingredients if they exist, otherwise use empty array
+      let ingredients = []
+      if (data.ingredients) {
+        try {
+          ingredients =
+            typeof data.ingredients === "string"
+              ? JSON.parse(data.ingredients)
+              : Array.isArray(data.ingredients)
+                ? data.ingredients
+                : []
+        } catch (e) {
+          console.warn("Failed to parse ingredients:", e)
+          ingredients = []
+        }
+      }
 
       setItem({
         name: data.name || "",
         price: data.price?.toString() || "",
         descriptions: data.descriptions || "",
-        image: data.image || null,
+        image: data.image,
         category: category,
-      });
-
-      setOriginalImage(data.image || "");
-      setImagePreview(data.image || "");
+        ingredients: ingredients,
+      })
     } catch (err) {
-      console.error(err);
+      console.error(err)
       Swal.fire({
         title: "Error loading item",
         text: "Failed to load item details. Please try again.",
         icon: "error",
-      });
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchData();
-  }, [id]);
+    fetchData()
+  }, [id])
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setItem({ ...item, [name]: value });
-
+    const { name, value } = e.target
+    setItem({ ...item, [name]: value })
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
+      setErrors({ ...errors, [name]: "" })
     }
-  };
+  }
 
   const handleCategoryChange = (e) => {
-    setItem({ ...item, category: e.target.value });
+    setItem({ ...item, category: e.target.value })
     if (errors.category) {
-      setErrors({ ...errors, category: "" });
+      setErrors({ ...errors, category: "" })
     }
-  };
+  }
+
+  // Handle adding ingredients
+  const handleAddIngredient = () => {
+    if (currentIngredient.trim() && !item.ingredients.includes(currentIngredient.trim())) {
+      setItem({
+        ...item,
+        ingredients: [...item.ingredients, currentIngredient.trim()],
+      })
+      setCurrentIngredient("")
+      // Clear ingredients error
+      if (errors.ingredients) {
+        setErrors({ ...errors, ingredients: "" })
+      }
+    }
+  }
+
+  // Handle removing ingredients
+  const handleRemoveIngredient = (ingredientToRemove) => {
+    setItem({
+      ...item,
+      ingredients: item.ingredients.filter((ingredient) => ingredient !== ingredientToRemove),
+    })
+  }
+
+  // Handle Enter key press for adding ingredients
+  const handleIngredientKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleAddIngredient()
+    }
+  }
 
   const handleImageChange = (e) => {
-    const selectedFile = e.target.files?.[0];
+    const selectedFile = e.target.files?.[0]
+
     if (selectedFile) {
       // Validate file type
       if (!selectedFile.type.startsWith("image/")) {
-        setErrors({ ...errors, image: "Please select a valid image file" });
-        return;
+        setErrors({ ...errors, image: "Please select a valid image file" })
+        return
       }
-
       // Validate file size (5MB limit)
       if (selectedFile.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, image: "Image size should be less than 5MB" });
-        return;
+        setErrors({ ...errors, image: "Image size should be less than 5MB" })
+        return
       }
-
-      setItem({ ...item, image: selectedFile });
-      setImagePreview(URL.createObjectURL(selectedFile));
-
+      setItem({ ...item, image: selectedFile })
+      setImagePreview(URL.createObjectURL(selectedFile))
       // Clear image error
       if (errors.image) {
-        setErrors({ ...errors, image: "" });
+        setErrors({ ...errors, image: "" })
       }
     }
-  };
+  }
 
   const removeImage = () => {
-    setItem({ ...item, image: originalImage });
-    setImagePreview(originalImage);
+    setItem({ ...item, image: originalImage })
+    setImagePreview(originalImage)
     // Reset file input
-    const fileInput = document.getElementById("image-upload");
-    if (fileInput) fileInput.value = "";
-  };
+    const fileInput = document.getElementById("image-upload")
+    if (fileInput) fileInput.value = ""
+  }
 
   const validateForm = () => {
-    const newErrors = {};
-
+    const newErrors = {}
     if (!item.name.trim()) {
-      newErrors.name = "Product name is required";
+      newErrors.name = "Product name is required"
     }
-
     if (!item.price.trim()) {
-      newErrors.price = "Price is required";
+      newErrors.price = "Price is required"
     } else if (isNaN(Number(item.price)) || Number(item.price) <= 0) {
-      newErrors.price = "Please enter a valid price";
+      newErrors.price = "Please enter a valid price"
     }
-
     if (!item.descriptions.trim()) {
-      newErrors.descriptions = "Description is required";
+      newErrors.descriptions = "Description is required"
     } else if (item.descriptions.trim().length < 10) {
-      newErrors.descriptions = "Description should be at least 10 characters";
+      newErrors.descriptions = "Description should be at least 10 characters"
     }
-
     if (!item.category) {
-      newErrors.category = "Please select a category";
+      newErrors.category = "Please select a category"
+    }
+    if (item.ingredients.length === 0) {
+      newErrors.ingredients = "Please add at least one ingredient"
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
+    e.preventDefault()
     if (!validateForm()) {
-      return;
+      return
     }
 
-    setSubmitting(true);
-
+    setSubmitting(true)
     try {
-      const formData = new FormData();
-      formData.append("name", item.name);
-      formData.append("price", item.price);
-      formData.append("descriptions", item.descriptions);
-      formData.append("category", item.category);
+      const formData = new FormData()
+      formData.append("name", item.name)
+      formData.append("price", item.price)
+      formData.append("descriptions", item.descriptions)
+      formData.append("category", item.category)
+      formData.append("ingredients", JSON.stringify(item.ingredients)) // Send ingredients as JSON string
 
       // Handle image
       if (item.image instanceof File) {
         // New image uploaded
-        formData.append("image", item.image);
-      } else if (typeof item.image === "string" && item.image !== originalImage) {
-        // Image URL changed (shouldn't happen in normal flow)
-        formData.append("image", item.image);
-      } else {
-        // Keep original image
-        formData.append("image", originalImage);
+        formData.append("image", item.image)
       }
 
       const response = await axios.put(updateUrl, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      });
+      })
 
       if (response.status === 200 || response.status === 201) {
-        setSuccessAlert("Item Updated Successfully");
+        setSuccessAlert("Item Updated Successfully")
         setTimeout(() => {
-          navigate(`/staff/dashboard/items/${id}`);
-        }, 1500);
+          navigate(`/staff/dashboard/items/${id}`)
+        }, 1500)
       } else {
-        setErrorAlert("An Error Occurred");
+        setErrorAlert("An Error Occurred")
       }
     } catch (err) {
-      console.error(err);
-      setErrorAlert("Failed to update item. Please try again.");
+      console.error(err)
+      setErrorAlert("Failed to update item. Please try again.")
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   const setSuccessAlert = (message) => {
     Swal.fire({
@@ -280,8 +317,8 @@ function UpdateItem() {
       position: "top",
       timerProgressBar: true,
       showConfirmButton: false,
-    });
-  };
+    })
+  }
 
   const setErrorAlert = (message) => {
     Swal.fire({
@@ -292,10 +329,10 @@ function UpdateItem() {
       position: "top-right",
       timerProgressBar: true,
       showConfirmButton: false,
-    });
-  };
+    })
+  }
 
-  const selectedCategory = categories.find((cat) => cat.value === item.category);
+  const selectedCategory = categories.find((cat) => cat.value === item.category)
 
   if (loading) {
     return (
@@ -325,7 +362,7 @@ function UpdateItem() {
           </Card>
         </Container>
       </Box>
-    );
+    )
   }
 
   return (
@@ -422,7 +459,7 @@ function UpdateItem() {
                     <InputLabel>Category</InputLabel>
                     <Select value={item.category} label="Category" onChange={handleCategoryChange}>
                       {categories.map((category) => (
-                        <MenuItem key={category.value} value={category.value}>
+                        <MenuItem key={category.value} value={category.id}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                             {category.icon}
                             <Typography>{category.label}</Typography>
@@ -445,6 +482,73 @@ function UpdateItem() {
                       />
                     </Box>
                   )}
+                </Grid>
+
+                {/* Ingredients */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <IngredientsIcon />
+                    Ingredients
+                  </Typography>
+
+                  <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                    <TextField
+                      fullWidth
+                      label="Add Ingredient"
+                      value={currentIngredient}
+                      onChange={(e) => setCurrentIngredient(e.target.value)}
+                      onKeyPress={handleIngredientKeyPress}
+                      placeholder="e.g., salt, tomatoes, onions"
+                      error={!!errors.ingredients}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <IngredientsIcon color="action" />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <Button
+                      variant="contained"
+                      onClick={handleAddIngredient}
+                      disabled={!currentIngredient.trim()}
+                      sx={{ minWidth: 100 }}
+                      startIcon={<AddIcon />}
+                    >
+                      Add
+                    </Button>
+                  </Box>
+
+                  {/* Display current ingredients */}
+                  {item.ingredients.length > 0 && (
+                    <Paper sx={{ p: 2, bgcolor: "grey.50" }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Current Ingredients ({item.ingredients.length}):
+                      </Typography>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                        {item.ingredients.map((ingredient, index) => (
+                          <Chip
+                            key={index}
+                            label={ingredient}
+                            onDelete={() => handleRemoveIngredient(ingredient)}
+                            color="primary"
+                            variant="outlined"
+                            deleteIcon={<DeleteIcon />}
+                          />
+                        ))}
+                      </Box>
+                    </Paper>
+                  )}
+
+                  {errors.ingredients && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {errors.ingredients}
+                    </Alert>
+                  )}
+
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                    Add ingredients one by one. Press Enter or click Add button to add each ingredient.
+                  </Typography>
                 </Grid>
 
                 {/* Description */}
@@ -470,7 +574,6 @@ function UpdateItem() {
                     <PhotoCameraIcon />
                     Update Image
                   </Typography>
-
                   <Paper
                     sx={{
                       p: 3,
@@ -485,16 +588,32 @@ function UpdateItem() {
                     }}
                   >
                     <Box sx={{ position: "relative", display: "inline-block" }}>
-                      <img
-                        src={imagePreview || "/placeholder.svg"}
-                        alt="Preview"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "300px",
-                          borderRadius: "8px",
-                          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                        }}
-                      />
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview || "/placeholder.svg"}
+                          alt="Preview"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "300px",
+                            borderRadius: "8px",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                          }}
+                        />
+                      ) : originalImage ? (
+                        <img
+                          src={`http://127.0.0.1:8000${originalImage}`}
+                          alt="Preview"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "300px",
+                            borderRadius: "8px",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                          }}
+                        />
+                      ) : (
+                        <p>No Image selected</p>
+                      )}
+
                       <input
                         accept="image/*"
                         style={{ display: "none" }}
@@ -582,7 +701,7 @@ function UpdateItem() {
         </Card>
       </Container>
     </Box>
-  );
+  )
 }
 
-export default UpdateItem;
+export default UpdateItem

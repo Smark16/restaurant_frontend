@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 //import { tokenGeneration } from '../components/firebase';
 import Swal from 'sweetalert2'
 
-const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
+const loginurl = 'http://127.0.0.1:8000/restaurant/'
 const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
 const notificationOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/messages'
 
@@ -12,15 +12,17 @@ import axios from 'axios'
 
 export const AuthContext = createContext()
 
-export const AuthProvider = ({children}) =>{
-  const data = JSON.parse(localStorage.getItem("clickedItem")) || []
-  
+export const AuthProvider = ({children}) =>{  
  const [authTokens, setAuthTokens] = useState(() => JSON.parse(localStorage.getItem('authtokens')) || null);
  const [user, setUser] = useState(() => (authTokens ? jwtDecode(authTokens.access) : null));
  const [loading, setLoading] = useState(true)
  const [staff, setStaff] = useState(user ? user.is_staff : false)
  const [customer, setCustomer] = useState(user ? user.is_customer : false)
- const [addItem, setAddItem] = useState([])
+//  const [takenItem, setTakenItem] = useState({menu:"", quantity:0})
+ const [addItem, setAddItem] = useState(()=> {
+    const storedItems = JSON.parse(localStorage.getItem('cartItem')) || [];
+    return storedItems;
+})
  const [food, setFood] = useState([])
  const [clicked, setClicked] = useState(false)
  const [total, setTotal] = useState('')
@@ -38,32 +40,6 @@ export const AuthProvider = ({children}) =>{
 const handleDisplay = ()=> {
   setDisplay(!display)
 }
-
-useEffect(() => {
-  if (user) {
-
-    const socket = new WebSocket(user.is_staff 
-      ? `ws://127.0.0.1:8000/ws/admin/${user.user_id}/`
-      : `ws://127.0.0.1:8000/ws/customer/${user.user_id}/`)
-    socket.onopen = function(e) {
-      console.log('WebSocket connection established');
-    };
-
-    socket.onclose = function(e) {
-      console.log('WebSocket connection closed');
-    };
-
-    socket.onmessage = function(e) {
-      const data = JSON.parse(e.data);
-      setNotifyAll(prev => [...prev, data]);
-    };
-
-    return () => {
-      socket.close();
-    }
-  }
-}, [user]);
-console.log(notifyAll)
  
 // this manages notificatios for all the user
  const orderMsg = async()=>{
@@ -89,102 +65,94 @@ console.log(notifyAll)
   }
 }
 
-// define setNotify (the issue is here notifyall is not defined and its i dont know how to manage this notifyAll array so that it can be passed to reservation and cart.jsx component instead of distructuring ordernotify which is then not used in navbar for single user notitifications hope you get what i mean)
-const handleMessage = ()=>{
-  setShowNotifications(!showNotifications)
-  if(showNotifications){
-    setNotifyAll([])
-  }
-}
-
-// this function dispalys the notifications when clicked
-const handleAllMessages = ()=>{
-  setShowNotificationsAll(!showNotificationsAll)
-  if(showNotificationsAll){
-    setOrderNotify([])
-  }
-  }
-
-
+   // Add item to cart
   const handleCart = (product) => {
     setAddItem((prevAddItem) => {
-      const selectedItem = prevAddItem.find((item) => item.id === product.id);
-  
-      let newAddItem;
+      const newItem = {
+        menu: product?.id,
+        quantity: 1,
+        product: product,
+      }
+      const selectedItem = prevAddItem.find((item) => item.menu === newItem.menu)
+
+      let newAddItem
       if (selectedItem) {
         newAddItem = prevAddItem.map((item) =>
-          item.id === product.id ? { ...selectedItem, quantity: selectedItem.quantity + 1 } : item
-        );
+          item.menu === newItem.menu ? { ...item, quantity: item.quantity + 1 } : item
+        )
       } else {
-        newAddItem = [...prevAddItem, { ...product, quantity: 1 }];
+        newAddItem = [...prevAddItem, newItem]
       }
-  
-      const totalItems = newAddItem.reduce((sum, item) => sum + item.quantity, 0);
-      setTotal(totalItems);
-  
-      // Update localStorage after the state update
-      localStorage.setItem('clickedItem', JSON.stringify(newAddItem));
-      
-      return newAddItem;
-    });
-  };
-  
 
-console.log(total)
-// Increse product
-const Increase = (product) => {
-  setAddItem((prevAddItem) => {
-    const updatedAddItem = prevAddItem.map(item => 
-      item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    
-    localStorage.setItem('clickedItem', JSON.stringify(updatedAddItem));
-    return updatedAddItem;
-  });
+      // Update total quantity
+      const totalItems = newAddItem.reduce((sum, item) => sum + item.quantity, 0)
+      setTotal(totalItems)
 
-  // Update the total quantity in the cart
-  const totalItems = addItem.reduce((sum, item) => sum + item.quantity, 0);
-  setTotal(totalItems);
-};
+      // Update localStorage
+      localStorage.setItem('clickedItem', JSON.stringify(newAddItem))
 
-// reduce products
-const Reduce = (product) => {
-  setAddItem((prevAddItem) => {
-    const selectedItem = prevAddItem.find(item => item.id === product.id);
+      return newAddItem
+    })
+  }
 
-    let updatedAddItem;
-    if (selectedItem && selectedItem.quantity > 1) {
-      updatedAddItem = prevAddItem.map(item => 
-        item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item
-      );
-    } else {
-      updatedAddItem = prevAddItem.filter(item => item.id !== product.id);
-    }
+  // Increase product quantity
+  const Increase = (product) => {
+    setAddItem((prevAddItem) => {
+      const selectedItem = prevAddItem.find((item) => item.menu === product.id)
 
-    localStorage.setItem('clickedItem', JSON.stringify(updatedAddItem));
-    return updatedAddItem;
-  });
+      // Increment quantity of existing item
+      const updatedItems = prevAddItem.map((item) =>
+        item.menu === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      )
 
-  // Update the total quantity in the cart
-  const totalItems = addItem.reduce((sum, item) => sum + item.quantity, 0);
-  setTotal(totalItems);
-};
+      // Update localStorage and total
+      localStorage.setItem('clickedItem', JSON.stringify(updatedItems))
+      setTotal(updatedItems.reduce((sum, item) => sum + item.quantity, 0))
 
+      return updatedItems
+    })
+  }
 
-// delete items 
-const handleDelete = (id) => {
-  const updatedData = data.filter(item => item.id !== id);
-  localStorage.setItem('clickedItem', JSON.stringify(updatedData));
-  setAddItem(updatedData);
+  // Reduce product quantity
+  const Reduce = (product) => {
+    setAddItem((prevAddItem) => {
+      const selectedItem = prevAddItem.find((item) => item.menu === product.id)
 
-  // Calculate the total amount again based on updated data
-  const totalAmount = updatedData.map(prices => {
-    const { quantity } = prices;
-    return quantity;
-  }).reduce((sum, amount) => sum + amount, 0);
+      if (!selectedItem) {
+        return prevAddItem // Do nothing if item doesn't exist
+      }
 
-  setTotal(totalAmount); // Update the state with the new total amount
-};
+      let updatedItems
+      if (selectedItem.quantity > 1) {
+        // Decrease quantity if greater than 1
+        updatedItems = prevAddItem.map((item) =>
+          item.menu === product.id ? { ...item, quantity: item.quantity - 1 } : item
+        )
+      } else {
+        // Remove item if quantity is 1
+        updatedItems = prevAddItem.filter((item) => item.menu !== product.id)
+      }
+
+      // Update localStorage and total
+      localStorage.setItem('clickedItem', JSON.stringify(updatedItems))
+      setTotal(updatedItems.reduce((sum, item) => sum + item.quantity, 0))
+
+      return updatedItems
+    })
+  }
+
+  // Delete item from cart
+  const handleDelete = (menuId) => {
+    setAddItem((prevAddItem) => {
+      const updatedItems = prevAddItem.filter((item) => item.menu !== menuId)
+
+      // Update localStorage and total
+      localStorage.setItem('clickedItem', JSON.stringify(updatedItems))
+      setTotal(updatedItems.reduce((sum, item) => sum + item.quantity, 0))
+
+      return updatedItems
+    })
+  }
 
  const loginUser = async (username, password) =>{
   axios.post(loginurl, {
@@ -270,9 +238,9 @@ const contextData = {
     loginUser,
     showSuccessAlert, handleCart,
     setAddItem, addItem, fetchFood,
-    food, setFood, data, clicked, setClicked, total,handleAllMessages,
+    food, setFood, clicked, setClicked, total,
     showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete,
-    handleDisplay, display, setDisplay,Increase, Reduce, handleMessage, notifyAll,
+    handleDisplay, display, setDisplay,Increase, Reduce, notifyAll,
     setNotifyAll,noAccount,setTotal,setOrderNotify
 }
 return (

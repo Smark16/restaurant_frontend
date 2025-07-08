@@ -1,182 +1,562 @@
-import React, { useState, useEffect, useContext } from 'react';
-import SearchIcon from '@mui/icons-material/Search';
-import { styled, alpha } from '@mui/material/styles';
-import InputBase from '@mui/material/InputBase';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './cust.css';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { AuthContext } from '../Context/AuthContext';
-import Swal from 'sweetalert2';
+"use client"
 
-const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items';
+import React, { useState, useEffect, useContext } from "react"
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  Chip,
+  Rating,
+  Skeleton,
+  Container,
+  Paper,
+  IconButton,
+  Fade,
+  Alert,
+  Snackbar,
+  useTheme,
+  alpha,
+  CardActions,
+  Badge,
+  Tabs,
+  Tab,
+  Pagination,
+  Stack,
+  Tooltip,
+} from "@mui/material"
+import {
+  Search as SearchIcon,
+  ShoppingCart,
+  Visibility,
+  Check,
+  Restaurant,
+  LocalOffer,
+  WbSunny,
+  LunchDining,
+  DinnerDining,
+  Fastfood,
+  FilterList,
+} from "@mui/icons-material"
+import { Link } from "react-router-dom"
+import axios from "axios"
+import { AuthContext } from "../Context/AuthContext"
 
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
-}));
+// Tab Panel Component
+function TabPanel(props) {
+  const { children, value, index, ...other } = props
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`meal-tabpanel-${index}`}
+      aria-labelledby={`meal-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    </div>
+  )
+}
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-  },
-}));
+// Food Item Card Component
+const FoodItemCard = ({ item, isAdded, onAddToCart }) => {
+  const theme = useTheme()
+  const [imageLoaded, setImageLoaded] = useState(false)
 
-function MenuDisplay() {
-  const [food, setFood] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
-  const [filteredFood, setFilteredFood] = useState([]);
-  const [addedItems, setAddedItems] = useState([]);
-  const { handleCart } = useContext(AuthContext);
+  return (
+    <Fade in timeout={300}>
+      <Card
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          transition: "all 0.3s ease",
+          "&:hover": {
+            transform: "translateY(-8px)",
+            boxShadow: `0 12px 24px ${alpha(theme.palette.common.black, 0.15)}`,
+          },
+          position: "relative",
+          overflow: "visible",
+          opacity: item.is_available === false ? 0.6 : 1,
+        }}
+      >
+        {/* Badges */}
+        <Box
+          sx={{ position: "absolute", top: 12, right: 12, zIndex: 2, display: "flex", flexDirection: "column", gap: 1 }}
+        >
+          {item.discount && (
+            <Chip
+              label={`${item.discount}% OFF`}
+              color="error"
+              size="small"
+              icon={<LocalOffer />}
+              sx={{ fontWeight: "bold" }}
+            />
+          )}
+          {item.is_available === false && (
+            <Chip label="Out of Stock" color="default" size="small" sx={{ bgcolor: "grey.500", color: "white" }} />
+          )}
+        </Box>
+
+        {/* Food Image */}
+        <Box sx={{ position: "relative", overflow: "hidden" }}>
+          {!imageLoaded && (
+            <Skeleton
+              variant="rectangular"
+              height={200}
+              sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+            />
+          )}
+          <CardMedia
+            component="img"
+            height="200"
+            image={`http://127.0.0.1:8000/media/${item.image}` || "/placeholder.svg?height=200&width=300"}
+            alt={item.name}
+            Loading='lazy'
+            onLoad={() => setImageLoaded(true)}
+            sx={{
+              transition: "transform 0.3s ease",
+              "&:hover": { transform: "scale(1.05)" },
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7))",
+              opacity: 0,
+              transition: "opacity 0.3s ease",
+              "&:hover": { opacity: 1 },
+              display: "flex",
+              alignItems: "flex-end",
+              p: 2,
+            }}
+          >
+            <Button
+              component={Link}
+              to={`/customer/dashboard/item/${item.id}`}
+              variant="contained"
+              size="small"
+              startIcon={<Visibility />}
+              sx={{
+                bgcolor: "rgba(255,255,255,0.9)",
+                color: "text.primary",
+                "&:hover": { bgcolor: "white" },
+              }}
+            >
+              View Details
+            </Button>
+          </Box>
+        </Box>
+
+        <CardContent sx={{ flexGrow: 1, p: 2 }}>
+          {/* Food Name and Price */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
+            <Typography variant="h6" fontWeight="bold" sx={{ flexGrow: 1, mr: 1 }}>
+              {item.name}
+            </Typography>
+            <Box sx={{ textAlign: "right" }}>
+              {item.discount && (
+                <Typography
+                  variant="body2"
+                  sx={{ textDecoration: "line-through", color: "text.secondary", fontSize: "0.75rem" }}
+                >
+                  UGX {(item.price / (1 - item.discount / 100)).toLocaleString()}
+                </Typography>
+              )}
+              <Typography variant="h6" color="primary" fontWeight="bold">
+                UGX {item.price.toLocaleString()}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Description */}
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mb: 2,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              lineHeight: 1.4,
+            }}
+          >
+            {item.descriptions || "No description available"}
+          </Typography>
+
+          {/* Rating */}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <Rating value={item.avg_rating || 0} precision={0.1} readOnly size="small" />
+            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+              {(item.avg_rating || 0).toFixed(1)}/5
+            </Typography>
+          </Box>
+        </CardContent>
+
+        <CardActions sx={{ p: 2, pt: 0 }}>
+          <Button
+            fullWidth
+            variant={isAdded ? "outlined" : "contained"}
+            color={isAdded ? "success" : "primary"}
+            startIcon={isAdded ? <Check /> : <ShoppingCart />}
+            onClick={() => onAddToCart(item)}
+            disabled={isAdded || item.is_available === false}
+            sx={{ py: 1, fontWeight: "bold", transition: "all 0.3s ease" }}
+          >
+            {item.is_available === false ? "Out of Stock" : isAdded ? "Added to Cart" : "Add to Cart"}
+          </Button>
+        </CardActions>
+      </Card>
+    </Fade>
+  )
+}
+
+// Loading Skeleton Component
+const FoodItemSkeleton = () => (
+  <Card sx={{ height: "100%" }}>
+    <Skeleton variant="rectangular" height={200} />
+    <CardContent>
+      <Skeleton variant="text" height={32} width="80%" />
+      <Skeleton variant="text" height={24} width="60%" />
+      <Skeleton variant="text" height={20} width="100%" />
+      <Skeleton variant="text" height={20} width="100%" />
+      <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+        <Skeleton variant="rectangular" width={100} height={20} />
+        <Skeleton variant="text" width={40} sx={{ ml: 1 }} />
+      </Box>
+    </CardContent>
+    <CardActions sx={{ p: 2 }}>
+      <Skeleton variant="rectangular" width="100%" height={36} />
+    </CardActions>
+  </Card>
+)
+
+function EnhancedMenuDisplay() {
+  const theme = useTheme()
+  const [food, setFood] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [search, setSearch] = useState("")
+  const [addedItems, setAddedItems] = useState([])
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [snackbarMessage, setSnackbarMessage] = useState("")
+  const [currentTab, setCurrentTab] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 8
+
+  const { handleCart } = useContext(AuthContext)
+
+  const foodUrl = "http://127.0.0.1:8000/restaurant/food_items"
+
+  const categories = [
+    { label: "All Items", value: "all", icon: <Restaurant /> },
+    { label: "Breakfast", value: "breakfast", icon: <WbSunny /> },
+    { label: "Lunch", value: "lunch", icon: <LunchDining /> },
+    { label: "Dinner", value: "dinner", icon: <DinnerDining /> },
+  ]
 
   const fetchFood = async () => {
     try {
-      setLoading(true);
-      const response = await axios(foodUrl);
-      const data = response.data;
-      setFood(data);
-      setFilteredFood(data); // Initialize filteredFood with the full food list
-      setLoading(false);
+      setLoading(true)
+      const response = await axios.get(foodUrl)
+        setFood(response.data)
+        // setFood(mockFoodData)
+        setLoading(false)
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching food items:", error)
+      setSnackbarMessage("Failed to load menu items")
+      setSnackbarOpen(true)
+      setLoading(false)
     }
-  };
+  }
 
   const handleSearch = (e) => {
-    setSearch(e.target.value);
-    const filteredItems = food.filter((item) =>
-      item.name.toLowerCase().includes(e.target.value.toLowerCase())
-    );
-    setFilteredFood(filteredItems); // Update filteredFood instead of food
-  };
+    setSearch(e.target.value)
+    setCurrentPage(1) // Reset to first page when searching
+  }
 
-  useEffect(() => {
-    fetchFood();
-  }, []);
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue)
+    setCurrentPage(1) // Reset to first page when changing tabs
+  }
 
-  const renderStars = (avg_rating) => {
-    const stars = [];
-    const roundedRating = Math.round(avg_rating);
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <i
-          key={i}
-          className={`bi bi-star-fill ${i <= roundedRating ? 'rankedstar' : ''}`}
-        ></i>
-      );
-    }
-    return stars;
-  };
+  const handlePageChange = (event, page) => {
+    setCurrentPage(page)
+    // Smooth scroll to top of menu section
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
 
   const handleAddToCart = (item) => {
-    handleCart(item);
-    setAddedItems([...addedItems, item.id]); // Track the added item by its ID
-    showSuccessAlert("item added to cart")
-  };
-  const showSuccessAlert =(message)=>{
-    Swal.fire({
-        title:message,
-        icon:"success",
-        timer:6000,
-        toast:true,
-        position:'top',
-        timerProgressBar:true,
-        showConfirmButton:true,
-    })
-}
+    handleCart(item)
+    setAddedItems([...addedItems, item.id])
+    setSnackbarMessage(`${item.name} added to cart!`)
+    setSnackbarOpen(true)
+  }
+
+  // Filter items based on current tab and search
+  const getFilteredItems = () => {
+    let filtered = food
+
+    // Filter by category
+    if (currentTab > 0) {
+      const selectedCategory = categories[currentTab].value
+      filtered = filtered.filter((item) => item.category__name === selectedCategory)
+    }
+
+    // Filter by search
+    if (search) {
+      filtered = filtered.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
+    }
+
+    return filtered
+  }
+
+  // Get paginated items
+  const getPaginatedItems = () => {
+    const filteredItems = getFilteredItems()
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return filteredItems.slice(startIndex, endIndex)
+  }
+
+  const filteredFood = getFilteredItems()
+  const paginatedFood = getPaginatedItems()
+  const totalPages = Math.ceil(filteredFood.length / itemsPerPage)
+
+  useEffect(() => {
+    fetchFood()
+    
+  }, [])
 
   return (
-    <>
-      {loading ? (
-        <span className="menuloader"></span>
-      ) : (
-        <>
-          <div className="menubar bg-success mt-0 p-3 d-flex text-white">
-            <h2>Menu</h2>
-            <Search className="ms-auto">
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ 'aria-label': 'search' }}
-                onChange={handleSearch}
+    <Box sx={{ bgcolor: "background.default", minHeight: "100vh", py: 4 }}>
+      <Container maxWidth="xl">
+        {/* Header Section */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            mb: 4,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            borderRadius: 3,
+          }}
+        >
+          <Box sx={{ textAlign: "center", mb: 3 }}>
+            <Typography variant="h3" fontWeight="bold" gutterBottom>
+              Our Delicious Menu
+            </Typography>
+            <Typography variant="h6" sx={{ opacity: 0.9 }}>
+              Discover amazing flavors crafted with love and the finest ingredients
+            </Typography>
+          </Box>
+
+          {/* Search Bar */}
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <TextField
+              placeholder="Search for your favorite dish..."
+              value={search}
+              onChange={handleSearch}
+              sx={{
+                maxWidth: 500,
+                width: "100%",
+                "& .MuiOutlinedInput-root": {
+                  bgcolor: "rgba(255,255,255,0.1)",
+                  borderRadius: 3,
+                  "& fieldset": { borderColor: "rgba(255,255,255,0.3)" },
+                  "&:hover fieldset": { borderColor: "rgba(255,255,255,0.5)" },
+                  "&.Mui-focused fieldset": { borderColor: "white" },
+                },
+                "& .MuiInputBase-input": {
+                  color: "white",
+                  "&::placeholder": { color: "rgba(255,255,255,0.7)" },
+                },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: "rgba(255,255,255,0.7)" }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+        </Paper>
+
+        {/* Category Tabs */}
+        <Paper sx={{ mb: 4 }}>
+          <Tabs
+            value={currentTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            aria-label="menu categories"
+            sx={{
+              "& .MuiTab-root": {
+                minHeight: 72,
+                textTransform: "none",
+                fontSize: "1rem",
+                fontWeight: 500,
+              },
+            }}
+          >
+            {categories.map((category, index) => (
+              <Tab
+                key={category.value}
+                icon={category.icon}
+                label={category.label}
+                iconPosition="start"
+                aria-label={`${category.label} category`}
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: 1,
+                }}
               />
-            </Search>
-          </div>
+            ))}
+          </Tabs>
+        </Paper>
 
-          <h4 className="mt-3">Total Items ({filteredFood.length})</h4>
-          <div className="row menu_row">
-            {filteredFood.map((items) => {
-              const { id, descriptions, price, image, name, avg_rating } = items;
-              const isAdded = addedItems.includes(id);
+        {/* Stats and Cart */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <FilterList color="primary" />
+            <Typography variant="h6" fontWeight="bold">
+              {search
+                ? `Search Results (${filteredFood.length})`
+                : `${categories[currentTab].label} (${filteredFood.length})`}
+            </Typography>
+            {search && (
+              <Chip
+                label={`"${search}"`}
+                onDelete={() => {
+                  setSearch("")
+                  setCurrentPage(1)
+                }}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+          </Box>
 
-              return (
-                <div className="col-md-3 col-sm-12 mt-3 menu" key={id}>
-                  <div className="card" style={{ height: '25rem' }}>
-                    <img src={image} className="img" alt={name} />
-                    <div className="card-body">
-                      <div className="price d-flex">
-                        <h4>{name}</h4>
-                        <span className="ms-auto">UGX.{price}</span>
-                      </div>
-                      <p className="card-text">{descriptions}</p>
+          <Badge badgeContent={addedItems.length} color="primary">
+            <Tooltip title="View Cart">
+              <IconButton
+                component={Link}
+                to="/customer/dashboard/cart"
+                aria-label="View shopping cart"
+                sx={{
+                  bgcolor: "primary.main",
+                  color: "white",
+                  "&:hover": { bgcolor: "primary.dark" },
+                }}
+              >
+                <ShoppingCart />
+              </IconButton>
+            </Tooltip>
+          </Badge>
+        </Box>
 
-                      <div className="star d-flex">
-                        <div className="i">{renderStars(avg_rating)}</div>
-                        <span>{avg_rating.toFixed(1)}/5</span>
-                      </div>
-                      <div className="btns d-flex">
-                        <Link to={`/customer/dashboard/item/${id}`}>
-                          <button className="text-center text-primary">View More</button>
-                        </Link>
-                        <button
-                          className={`text-center text-white ${isAdded ? 'bg-success' : 'bg-danger'}`}
-                          onClick={() => handleAddToCart(items)}
-                        >
-                          {isAdded ? 'Added' : 'Cart'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-    </>
-  );
+        {/* Tab Panels */}
+        {categories.map((category, index) => (
+          <TabPanel key={category.value} value={currentTab} index={index}>
+            {loading ? (
+              <Grid container spacing={3}>
+                {Array.from({ length: itemsPerPage }).map((_, skeletonIndex) => (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={skeletonIndex}>
+                    <FoodItemSkeleton />
+                  </Grid>
+                ))}
+              </Grid>
+            ) : paginatedFood.length === 0 ? (
+              <Paper sx={{ p: 6, textAlign: "center" }}>
+                <Restaurant sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
+                <Typography variant="h5" gutterBottom>
+                  No items found
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {search
+                    ? `No results for "${search}" in ${category.label.toLowerCase()}`
+                    : `No ${category.label.toLowerCase()} items available at the moment`}
+                </Typography>
+                {search && (
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      setSearch("")
+                      setCurrentPage(1)
+                    }}
+                    sx={{ mt: 2 }}
+                  >
+                    Clear Search
+                  </Button>
+                )}
+              </Paper>
+            ) : (
+              <>
+                <Grid container spacing={3}>
+                  {paginatedFood.map((item) => (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
+                      <FoodItemCard item={item} isAdded={addedItems.includes(item.id)} onAddToCart={handleAddToCart} />
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
+                    <Stack spacing={2} alignItems="center">
+                      <Pagination
+                        count={totalPages}
+                        page={currentPage}
+                        onChange={handlePageChange}
+                        color="primary"
+                        size="large"
+                        showFirstButton
+                        showLastButton
+                        sx={{
+                          "& .MuiPaginationItem-root": {
+                            fontSize: "1rem",
+                            fontWeight: 500,
+                          },
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Showing {(currentPage - 1) * itemsPerPage + 1}-
+                        {Math.min(currentPage * itemsPerPage, filteredFood.length)} of {filteredFood.length} items
+                      </Typography>
+                    </Stack>
+                  </Box>
+                )}
+              </>
+            )}
+          </TabPanel>
+        ))}
+      </Container>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success" variant="filled" sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </Box>
+  )
 }
 
-export default MenuDisplay;
+export default EnhancedMenuDisplay

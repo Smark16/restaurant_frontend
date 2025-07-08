@@ -1,270 +1,490 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../Context/AuthContext';
-import order from '../Images/order.png';
-import reserve from '../Images/reser.png';
-// import Chart from "react-apexcharts";
-import Calendar from './calendar';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
-import './cust.css';
+"use client"
+
+import React, { useContext, useEffect, useState } from "react"
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
+  Alert,
+  Button,
+  LinearProgress,
+  Divider,
+  IconButton,
+  Tooltip,
+  useTheme,
+  alpha,
+} from "@mui/material"
+import {
+  TrendingUp,
+  Restaurant,
+  EventSeat,
+  AccountBalanceWallet,
+  CheckCircle,
+  Cancel,
+  Schedule,
+  Visibility,
+  ArrowForward,
+  CalendarToday,
+  Phone,
+  LocationOn,
+  People,
+} from "@mui/icons-material"
+import { Link } from "react-router-dom"
+import axios from "axios"
+// import { AuthContext } from '../Context/AuthContext'
+import Calendar from "./calendar"
+
+// Mock AuthContext for demonstration
+const AuthContext = React.createContext({
+  user: { user_id: 1, username: "John Doe" },
+  Loginloading: false,
+})
+
+// Stats Card Component
+const StatsCard = ({ title, value, icon, color, trend, subtitle }) => {
+  const theme = useTheme()
+
+  return (
+    <Card
+      sx={{
+        height: "100%",
+        background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
+        border: `1px solid ${alpha(color, 0.2)}`,
+        transition: "all 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: `0 8px 25px ${alpha(color, 0.15)}`,
+        },
+      }}
+    >
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {title}
+            </Typography>
+            <Typography variant="h4" fontWeight="bold" color={color}>
+              {value}
+            </Typography>
+            {subtitle && (
+              <Typography variant="caption" color="text.secondary">
+                {subtitle}
+              </Typography>
+            )}
+          </Box>
+          <Avatar sx={{ bgcolor: color, width: 56, height: 56 }}>{icon}</Avatar>
+        </Box>
+        {trend && (
+          <Box sx={{ mt: 2, display: "flex", alignItems: "center" }}>
+            <TrendingUp sx={{ fontSize: 16, color: "success.main", mr: 0.5 }} />
+            <Typography variant="caption" color="success.main">
+              {trend}
+            </Typography>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// Status Chip Component
+const StatusChip = ({ status }) => {
+  const getStatusProps = (status) => {
+    switch (status) {
+      case "Completed":
+      case "Accepted":
+        return { color: "success", icon: <CheckCircle sx={{ fontSize: 16 }} /> }
+      case "Canceled":
+      case "Rejected":
+        return { color: "error", icon: <Cancel sx={{ fontSize: 16 }} /> }
+      case "In Progress":
+      case "Pending":
+        return { color: "warning", icon: <Schedule sx={{ fontSize: 16 }} /> }
+      default:
+        return { color: "default", icon: null }
+    }
+  }
+
+  const { color, icon } = getStatusProps(status)
+
+  return (
+    <Chip
+      label={status === "Accepted" ? "Confirmed" : status}
+      color={color}
+      size="small"
+      icon={icon}
+      sx={{ fontWeight: 500 }}
+    />
+  )
+}
 
 function Customer() {
-  const { user, Loginloading } = useContext(AuthContext);
-  const [expense, setExpense] = useState(0);
-  const user_order = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user.user_id}`;
-  const [Userorder, setUserOrder] = useState([]);
-  const userOrder = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
-  const [loading, setLoading] = useState(false);
-  const [orders, setOrders] = useState([]);
-  const [reservations, setReservations] = useState([]);
-  const orderPlaced = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`;
-  const userReservation = `https://restaurant-backend5.onrender.com/restaurant/user-reservation/${user.user_id}`;
+  const { user, Loginloading } = useContext(AuthContext)
+  const theme = useTheme()
+
+  const [expense, setExpense] = useState(0)
+  const [userOrder, setUserOrder] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [orders, setOrders] = useState([])
+  const [reservations, setReservations] = useState([])
+
+  // API endpoints
+  const user_order = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user.user_id}`
+  const orderPlaced = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`
+  const userReservation = `https://restaurant-backend5.onrender.com/restaurant/user-reservation/${user.user_id}`
 
   const fetchData = async () => {
     try {
-      setLoading(true);
-      const response = await axios.get(orderPlaced);
-      const data = response.data;
-      setOrders(data);
-      setLoading(false);
+      setLoading(true)
+      const response = await axios.get(orderPlaced)
+      setOrders(response.data)
     } catch (err) {
-      console.log("Error occurred");
-      setLoading(false);
+      console.log("Error occurred", err)
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   const fetchReservations = async () => {
     try {
-      setLoading(true);
-      const response = await axios.get(userReservation);
-      const data = response.data;
-      setReservations(data);
-      setLoading(false);
+      setLoading(true)
+      const response = await axios.get(userReservation)
+      setReservations(response.data)
     } catch (err) {
-      console.log("Error occurred");
-      setLoading(false);
+      console.log("Error occurred", err)
+    } finally {
+      setLoading(false)
     }
-  };
-
-  useEffect(() => {
-    fetchData();
-    fetchReservations();
-  }, []);
+  }
 
   const fetchOrder = async () => {
     try {
-      const response = await axios.get(user_order);
-      const data = response.data;
+      const response = await axios.get(user_order)
+      const data = response.data
       setUserOrder(data)
-      // Calculate total expense
-      const totalExpense = data.reduce((total, order) => {
-        const orderTotal = order.menu.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        return total + orderTotal;
-      }, 0);
 
-      setExpense(totalExpense);
+      const totalExpense = data.reduce((total, order) => {
+        const orderTotal = order.menu.reduce((sum, item) => sum + item.price * item.quantity, 0)
+        return total + orderTotal
+      }, 0)
+      setExpense(totalExpense)
     } catch (err) {
-      console.log(err);
+      console.log(err)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchOrder();
-  }, []);
+    fetchData()
+    fetchReservations()
+    fetchOrder()
+  }, [])
+
+  if (Loginloading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <CircularProgress size={60} />
+        <Typography variant="h6" color="text.secondary">
+          Loading your dashboard...
+        </Typography>
+      </Box>
+    )
+  }
 
   return (
-    <>
-      {Loginloading ? (
-        <>
-          <div className="shape-loader"></div>
-          <div className='shape-overlay'></div>
-        </>
-      ) : (
-        <>
-          <div className="mainsection">
-            <h4 className='text-center bg-success text-white p-3 menubar'>Welcome, {user.username}</h4>
+    <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "100vh" }}>
+      {/* Welcome Header */}
+      <Card sx={{ mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", color: "white" }}>
+            <Avatar sx={{ width: 60, height: 60, bgcolor: "rgba(255,255,255,0.2)", mr: 2 }}>
+              {user.username.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box>
+              <Typography variant="h4" fontWeight="bold">
+                Welcome back, {user.username}!
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                Here's what's happening with your account today.
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
-            <div className="result mt-2">
-              <div className="order">
-                <div className="icon">
-                  <img src={reserve} alt="" className='cons' />
-                </div>
+      {/* Stats Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatsCard
+            title="Total Reservations"
+            value={reservations.length}
+            icon={<EventSeat />}
+            color={theme.palette.primary.main}
+            trend="+12% from last month"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatsCard
+            title="Total Expense"
+            value={`UGX ${expense.toFixed(2)}`}
+            icon={<TrendingUp />}
+            color={theme.palette.success.main}
+            subtitle="This month"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatsCard
+            title="Total Orders"
+            value={userOrder.length}
+            icon={<Restaurant />}
+            color={theme.palette.warning.main}
+            trend="+8% from last week"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatsCard
+            title="Wallet Balance"
+            value="UGX 0.00"
+            icon={<AccountBalanceWallet />}
+            color={theme.palette.info.main}
+            subtitle="Available balance"
+          />
+        </Grid>
+      </Grid>
 
-                <div className="word">
-                  <p className='text-black'>Total Reservations</p>
-                  <h4 className='text-black'>{reservations.length}</h4>
-                </div>
-              </div>
+      <Grid container spacing={3}>
+        {/* Recent Orders */}
+        <Grid item xs={12} lg={8}>
+          <Card sx={{ height: "fit-content" }}>
+            <CardContent>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+                <Typography variant="h6" fontWeight="bold" color="primary">
+                  Recent Orders
+                </Typography>
+                <Button component={Link} to="/customer/dashboard/customerOrder" endIcon={<ArrowForward />} size="small">
+                  View All
+                </Button>
+              </Box>
 
-              <div className="order">
-                <div className="icon">
-                  <i className="bi bi-bar-chart-line-fill cons"></i>
-                </div>
+              {loading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : orders.length === 0 ? (
+                <Alert severity="info" sx={{ textAlign: "center" }}>
+                  No orders found. Start by placing your first order!
+                </Alert>
+              ) : (
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Order ID</TableCell>
+                        <TableCell>Customer</TableCell>
+                        <TableCell>Location</TableCell>
+                        <TableCell>Contact</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Date</TableCell>
+                        <TableCell>Action</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {orders.slice(0, 5).map((order) => (
+                        <TableRow key={order.id} hover>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight="bold">
+                              #{order.id}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>{order.user.username}</TableCell>
+                          <TableCell>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <LocationOn sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+                              {order.location}
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <Phone sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+                              {order.contact}
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <StatusChip status={order.status} />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" color="text.secondary">
+                              {new Date(order.order_date).toLocaleDateString()}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title="View Details">
+                              <IconButton size="small">
+                                <Visibility />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </CardContent>
+          </Card>
 
-                <div className="word">
-                  <p>Total Expense</p>
-                  <h4>UGX {expense.toFixed(2)}</h4>
-                </div>
-              </div>
+          {/* Recent Reservations */}
+          <Card sx={{ mt: 3 }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight="bold" color="primary" gutterBottom>
+                Recent Reservations
+              </Typography>
 
-              <div className="order">
-                <div className="icon">
-                  <img src={order} alt="" className='cons' />
-                </div>
+              {loading ? (
+                <LinearProgress sx={{ my: 2 }} />
+              ) : reservations.length === 0 ? (
+                <Alert severity="info">No reservations found. Make your first reservation today!</Alert>
+              ) : (
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ID</TableCell>
+                        <TableCell>Customer</TableCell>
+                        <TableCell>Table</TableCell>
+                        <TableCell>Contact</TableCell>
+                        <TableCell>Party Size</TableCell>
+                        <TableCell>Status</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {reservations.slice(0, 5).map((reservation) => (
+                        <TableRow key={reservation.id} hover>
+                          <TableCell>
+                            <Typography variant="body2" fontWeight="bold">
+                              #{reservation.id}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>{reservation.user.username}</TableCell>
+                          <TableCell>
+                            <Chip label={`Table ${reservation.table}`} size="small" variant="outlined" />
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <Phone sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+                              {reservation.contact}
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <People sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+                              {reservation.party_size} people
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <StatusChip status={reservation.status} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
 
-                <div className="word">
-                  <p>Total Order</p>
-                  <h4>{Userorder.length}</h4>
-                </div>
-              </div>
+        {/* Sidebar */}
+        <Grid item xs={12} lg={4}>
+          {/* Calendar */}
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <CalendarToday sx={{ mr: 1, color: "primary.main" }} />
+                <Typography variant="h6" fontWeight="bold">
+                  Calendar
+                </Typography>
+              </Box>
+              <Calendar />
+            </CardContent>
+          </Card>
 
-              <div className="order">
-                <div className="icon">
-                  <i className="bi bi-wallet cons"></i>
-                </div>
+          {/* Quick Stats */}
+          <Card>
+            <CardContent>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                Quick Overview
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
 
-                <div className="word">
-                  <p>Wallet</p>
-                  <h4>UGX 0.00</h4>
-                </div>
-              </div>
-            </div>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Completed Orders
+                </Typography>
+                <Chip
+                  label={orders.filter((order) => order.status === "Completed").length}
+                  color="success"
+                  size="small"
+                />
+              </Box>
 
-            <div className="more">
-              <div className="graph bg-white p-2 mt-2">
-                {/* <Chart options={options} series={series} type="line" width="300" /> */}
-                <div className="orders">
-                  <p className='text-center text-primary'>Made Orders</p>
-                  {loading ? (
-                    <span className='loader'></span>
-                  ) : orders.length === 0 ? (
-                    <p className='alert alert-info text-center'>No Activities!!!</p>
-                  ) : (
-                    <table className='table table-striped table-hover'>
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Username</th>
-                          <th>Location</th>
-                          <th>Contact</th>
-                          <th>Status</th>
-                          <th>Order Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {orders.slice(0, 3).map(order => {
-                          const { id, location, contact, status, order_date } = order;
-                          return (
-                            <tr key={id}>
-                              <td>{id}</td>
-                              <td>{order.user.username}</td>
-                              <td>{location}</td>
-                              <td>{contact}</td>
-                              <td>
-                                {status === 'Completed' && (
-                                  <span className='text-success d-flex'>
-                                    <i className="bi bi-check2-circle"></i> Completed
-                                  </span>
-                                )}
-                                {status === 'Canceled' && (
-                                  <span className='text-danger'>
-                                    Canceled
-                                  </span>
-                                )}
-                                {status === 'In Progress' && (
-                                  <span className='text-warning d-flex'>
-                                    <i className="bi bi-arrow-counterclockwise"></i> In Progress
-                                  </span>
-                                )}
-                              </td>
-                              <td>{order_date}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                  <p className='text-primary seeAll'><Link to='/customer/dashboard/customerOrder'>See All <i className="bi bi-arrow-right-circle-fill"></i></Link></p>
-                </div>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Pending Orders
+                </Typography>
+                <Chip
+                  label={orders.filter((order) => order.status === "In Progress").length}
+                  color="warning"
+                  size="small"
+                />
+              </Box>
 
-                <div className="reservation mt-3">
-                  <p className='text-primary text-center'>Made Reservations</p>
-                  {loading ? (
-                    <span className='loader'></span>
-                  ) : reservations.length === 0 ? (
-                    <p className='alert alert-info text-center'>No Reservations!!!</p>
-                  ) : (
-                    <table className='table table-striped table-hover'>
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Username</th>
-                          <th>Table</th>
-                          <th>contact</th>
-                          <th>party size</th>
-                          <th>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {reservations.slice(0, 3).map(reservation => {
-                          const { id, table, contact, party_size, status } = reservation;
-                          return (
-                            <tr key={id}>
-                              <td>{id}</td>
-                              <td>{reservation.user.username}</td>
-                              <td>{table}</td>
-                              <td>{contact}</td>
-                              <td>{party_size}</td>
-                              <td>
-                                {status === 'Accepted' && (
-                                  <span className='text-success'>
-                                    Confirmed
-                                  </span>
-                                )}
-                                {status === 'Rejected' && (
-                                  <span className='text-danger'>
-                                    Canceled
-                                  </span>
-                                )}
-                                {status === 'Pending' && (
-                                  <span className='text-warning'>
-                                    Pending
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                
-                </div>
-              </div>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Confirmed Reservations
+                </Typography>
+                <Chip
+                  label={reservations.filter((res) => res.status === "Accepted").length}
+                  color="primary"
+                  size="small"
+                />
+              </Box>
 
-              <div className="detail bg-white">
-                <div className="calendar">
-                  <Calendar />
-                </div>
-                <h4 className='text-center'>Product Details</h4>
-                <ul className='list'>
-                  <li className='d-flex'>
-                    <span>Completed Orders</span>
-                    <h6 className='text-white bg-success p-2'>23</h6>
-                  </li>
+              <Divider sx={{ my: 2 }} />
 
-                  <li className='d-flex'>
-                    <span>Reservation Status</span>
-                    <h6 className='text-white bg-primary p-2'>Pending</h6>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </>
-  );
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Member since
+                </Typography>
+                <Typography variant="h6" color="primary" fontWeight="bold">
+                  January 2024
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  )
 }
 
-export default Customer;
+export default Customer

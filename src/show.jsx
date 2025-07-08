@@ -24,7 +24,7 @@ import Order from './customer/Order';
 import Profile from './customer/Profile';
 import Reservations from './customer/Reservation';
 import Payment from './customer/payment';
-import MenuDisplay from './customer/Menu';
+import EnhancedMenuDisplay from './customer/Menu';
 import UpdateItem from './staff/update';
 import ForgotPassword from './components/forgotPassword';
 import ChangePassword from './components/ChangePassword';
@@ -68,7 +68,7 @@ function Show() {
   return (
     <>
      <Toaster position='top-right'/> 
-          <Bar />
+          {/* <Bar /> */}
           <Routes>
             {/* Public Routes */}
             <Route path='/' element={<Home />} />
@@ -128,7 +128,7 @@ function Show() {
               
                     <div className="props p-3">
                       <Routes>
-                        <Route path='customermenuDisplay' element={<MenuDisplay />} />
+                        <Route path='customermenuDisplay' element={<EnhancedMenuDisplay />} />
                         <Route path='item/:id' element={<SingleMenu/>}/>
                         <Route path='customerOrder' element={<Order />} />
                         <Route path='CustomerProfile' element={<Profile />} />

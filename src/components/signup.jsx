@@ -78,7 +78,7 @@ const theme = createTheme({
   },
 });
 
-const registerurl = "https://restaurant-backend5.onrender.com/restaurant/register";
+const registerurl = "http://127.0.0.1:8000/restaurant/register";
 
 function SignupPage() {
   const navigate = useNavigate();

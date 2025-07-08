@@ -44,7 +44,7 @@ import axios from "axios";
 import useAxios from "../components/useAxios";
 import { AuthContext } from "../Context/AuthContext";
 
-const orderUrl = "https://restaurant-backend5.onrender.com/restaurant/orders";
+const orderUrl = "http://127.0.0.1:8000/orders/user_orders";
 
 function OrdersManagement() {
   const { authTokens } = useContext(AuthContext);
@@ -85,7 +85,7 @@ function OrdersManagement() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_order/${id}`);
+      await axios.delete(`http://127.0.0.1:8000/orders/delete_order/${id}`);
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
       setDeleteDialogOpen(false);
       setOrderToDelete(null);
@@ -101,7 +101,7 @@ function OrdersManagement() {
       return;
     }
     try {
-      await axiosInstance.patch(`https://restaurant-backend5.onrender.com/restaurant/update_status/${id}`, {
+      await axiosInstance.patch(`http://127.0.0.1:8000/orders/update_status/${id}`, {
         newStatus,
       });
       setOrders((prevOrders) => prevOrders.map((order) => (order.id === id ? { ...order, status: newStatus } : order)));
@@ -114,7 +114,7 @@ function OrdersManagement() {
   };
 
   const showOrderDetails = async (order) => {
-    if (!order?.user?.id) {
+    if (!order?.id) {
       setError("Invalid order data: Missing user information.");
       return;
     }
@@ -122,16 +122,13 @@ function OrdersManagement() {
     setShowModal(true);
     setItemsLoading(true);
 
-    const madeOrdersUrl = `https://restaurant-backend5.onrender.com/restaurant/user_order/${order.user.id}`;
+    const SingleOrderItemUrl = `http://127.0.0.1:8000/orders/single_order_item/${order?.id}`;
 
     try {
-      const response = await axios.get(madeOrdersUrl);
+      const response = await axios.get(SingleOrderItemUrl);
       const data = response.data;
-      if (!Array.isArray(data)) {
-        throw new Error("Invalid response format: Expected an array of user orders");
-      }
-      const userOrder = data.find((orderData) => orderData.order?.id === order.id);
-      setOrderItems(userOrder?.menu || []);
+      
+      setOrderItems(data?.menu);
     } catch (err) {
       console.error("Error fetching order details:", err);
       setError(err.message || "Failed to load order details.");
@@ -456,7 +453,7 @@ function OrdersManagement() {
                   <Grid item xs={12} key={item.id}>
                     <Paper sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
-                        src={item.image ? `https://restaurant-backend5.onrender.com${item.image}` : "/placeholder.svg"}
+                        src={item.image ? `http://127.0.0.1:8000${item.image}` : "/placeholder.svg"}
                         alt={item.name || "Item"}
                         sx={{ width: 60, height: 60 }}
                         variant="rounded"

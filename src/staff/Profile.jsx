@@ -41,26 +41,27 @@ import {
 import { AuthContext } from "../Context/AuthContext";
 import axios from "axios";
 import Swal from "sweetalert2";
+import useAxios from "../components/useAxios";
 
-const ProfileUrl = "https://restaurant-backend5.onrender.com/restaurant/profiles";
-const changePasswordUrl = "https://restaurant-backend5.onrender.com/restaurant/change-password/";
+const changePasswordUrl = "http://127.0.0.1:8000/restaurant/change-password/";
 
 function ProfileManagement() {
   const { user } = useContext(AuthContext);
+  const axiosInstance = useAxios()
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const updateUser = user?.user_id
-    ? `https://restaurant-backend5.onrender.com/restaurant/update_user/${user.user_id}`
+    ? `http://127.0.0.1:8000/restaurant/update_user/${user.user_id}`
     : "";
   const getUser = user?.user_id
-    ? `https://restaurant-backend5.onrender.com/restaurant/get_user/${user.user_id}`
+    ? `http://127.0.0.1:8000/restaurant/get_user/${user.user_id}`
     : "";
   const updateProfileUrl = user?.user_id
-    ? `https://restaurant-backend5.onrender.com/restaurant/update_profile/${user.user_id}`
+    ? `http://127.0.0.1:8000/restaurant/update_profile/${user.user_id}`
     : "";
   const profileUrl = user?.user_id
-    ? `https://restaurant-backend5.onrender.com/restaurant/profile/${user.user_id}`
+    ? `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`
     : "";
 
   const [profileImage, setProfileImage] = useState([]);
@@ -91,29 +92,8 @@ function ProfileManagement() {
   // Image preview
   const [imagePreview, setImagePreview] = useState("");
 
-  const fetchProfiles = async () => {
-    if (!user?.user_id) {
-      setError("User not authenticated");
-      setLoading(false);
-      return;
-    }
-    try {
-      const response = await axios.get(ProfileUrl);
-      const data = response.data;
-      if (!Array.isArray(data)) {
-        throw new Error("Invalid response format: Expected an array of profiles");
-      }
-      const images = data.filter((image) => image.id === user.user_id);
-      setProfileImage(images);
-      if (images.length > 0 && images[0].image) {
-        setImagePreview(images[0].image);
-      }
-    } catch (error) {
-      console.error("Error fetching profiles:", error);
-      setError(error.message || "Failed to load profile images");
-    }
-  };
 
+  // fetch user profile
   const profileData = async () => {
     if (!user?.user_id) {
       setError("User not authenticated");
@@ -123,6 +103,7 @@ function ProfileManagement() {
     try {
       const response = await axios.get(profileUrl);
       const data = response.data;
+      setProfileImage(data.image)
       setProfile({
         email: data.email || "",
         location: data.location || "",
@@ -135,6 +116,7 @@ function ProfileManagement() {
     }
   };
 
+  // fetch users
   const fetchUser = async () => {
     if (!user?.user_id) {
       setError("User not authenticated");
@@ -159,16 +141,19 @@ function ProfileManagement() {
     }
   };
 
+  // handle change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfile({ ...profile, [name]: value });
   };
 
+  // handle user
   const handleUserChange = (e) => {
     const { name, value } = e.target;
     setMyUser({ ...myUser, [name]: value });
   };
 
+  // hande image
   const changeImage = (e) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -190,6 +175,7 @@ function ProfileManagement() {
     }
   };
 
+  // handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user?.user_id) {
@@ -231,7 +217,7 @@ function ProfileManagement() {
       if (profileRes.status === 201 && userRes.status === 200) {
         setSuccess("Profile updated successfully!");
         showSuccessAlert("Profile Updated");
-        await Promise.all([fetchProfiles(), profileData(), fetchUser()]);
+        await Promise.all([profileData(), fetchUser()]);
       }
     } catch (err) {
       console.error("Error updating profile:", err);
@@ -250,6 +236,7 @@ function ProfileManagement() {
     });
   };
 
+  // handle password
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (!user?.user_id) {
@@ -277,7 +264,7 @@ function ProfileManagement() {
     formData.append("password2", confirmPassword);
 
     try {
-      const response = await axios.put(changePasswordUrl, formData, {
+      const response = await axiosInstance.put(changePasswordUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setPasswordMessage("Password updated successfully!");
@@ -308,7 +295,7 @@ function ProfileManagement() {
       return;
     }
     const loadData = async () => {
-      await Promise.all([fetchProfiles(), profileData(), fetchUser()]);
+      await Promise.all([profileData(), fetchUser()]);
     };
     loadData();
   }, [user]);
@@ -366,7 +353,8 @@ function ProfileManagement() {
               <CardContent sx={{ textAlign: "center", p: 3 }}>
                 {/* Profile Image */}
                 <Box sx={{ position: "relative", display: "inline-block", mb: 3 }}>
-                  <Avatar
+                  {imagePreview ? (
+                     <Avatar
                     src={imagePreview || "/placeholder.svg"}
                     alt="Profile"
                     sx={{
@@ -376,6 +364,18 @@ function ProfileManagement() {
                       borderColor: "primary.main",
                     }}
                   />
+                  ) : profileImage ? (
+                     <Avatar
+                    src={profileImage}
+                    alt="Profile"
+                    sx={{
+                      width: 120,
+                      height: 120,
+                      border: "4px solid",
+                      borderColor: "primary.main",
+                    }}
+                  />
+                  ) : (<p>No image</p>)}
                   <input
                     type="file"
                     accept="image/*"

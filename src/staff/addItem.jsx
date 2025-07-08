@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+"use client"
+
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Box,
   Card,
@@ -22,7 +24,7 @@ import {
   InputAdornment,
   Divider,
   Stack,
-} from "@mui/material";
+} from "@mui/material"
 import {
   CloudUpload as CloudUploadIcon,
   Restaurant as RestaurantIcon,
@@ -33,130 +35,157 @@ import {
   FreeBreakfast as BreakfastIcon,
   LunchDining as LunchIcon,
   DinnerDining as DinnerIcon,
-  AttachMoney as MoneyIcon,
-} from "@mui/icons-material";
-import { Link } from "react-router-dom";
-import axios from "axios";
-import Swal from "sweetalert2";
+  Add as AddIcon,
+  LocalDining as IngredientsIcon,
+} from "@mui/icons-material"
+import { Link } from "react-router-dom"
+import axios from "axios"
+import Swal from "sweetalert2"
 
-const url = "https://restaurant-backend5.onrender.com/restaurant/items";
+const url = "http://127.0.0.1:8000/restaurant/items"
 
 function AddItem() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [product, setProduct] = useState({
     pname: "",
     price: "",
     desc: "",
     image: null,
     category: "",
-  });
-  const [imagePreview, setImagePreview] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+    ingredients: [], // Added ingredients field
+  })
+  const [imagePreview, setImagePreview] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [currentIngredient, setCurrentIngredient] = useState("") // For ingredient input
 
   const categories = [
-    { value: "breakfast", label: "Breakfast", icon: <BreakfastIcon />, color: "#FF9800" },
-    { value: "lunch", label: "Lunch", icon: <LunchIcon />, color: "#4CAF50" },
-    { value: "dinner", label: "Dinner", icon: <DinnerIcon />, color: "#9C27B0" },
-  ];
+    { id: 1, value: "breakfast", label: "Breakfast", icon: <BreakfastIcon />, color: "#FF9800" },
+    { id: 2, value: "lunch", label: "Lunch", icon: <LunchIcon />, color: "#4CAF50" },
+    { id: 3, value: "dinner", label: "Dinner", icon: <DinnerIcon />, color: "#9C27B0" },
+  ]
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct({ ...product, [name]: value });
-
+    const { name, value } = e.target
+    setProduct({ ...product, [name]: value })
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
+      setErrors({ ...errors, [name]: "" })
     }
-  };
+  }
 
   const handleCategoryChange = (e) => {
-    setProduct({ ...product, category: e.target.value });
+    setProduct({ ...product, category: e.target.value })
     if (errors.category) {
-      setErrors({ ...errors, category: "" });
+      setErrors({ ...errors, category: "" })
     }
-  };
+  }
+
+  // Handle adding ingredients
+  const handleAddIngredient = () => {
+    if (currentIngredient.trim() && !product.ingredients.includes(currentIngredient.trim())) {
+      setProduct({
+        ...product,
+        ingredients: [...product.ingredients, currentIngredient.trim()],
+      })
+      setCurrentIngredient("")
+      // Clear ingredients error
+      if (errors.ingredients) {
+        setErrors({ ...errors, ingredients: "" })
+      }
+    }
+  }
+
+  // Handle removing ingredients
+  const handleRemoveIngredient = (ingredientToRemove) => {
+    setProduct({
+      ...product,
+      ingredients: product.ingredients.filter((ingredient) => ingredient !== ingredientToRemove),
+    })
+  }
+
+  // Handle Enter key press for adding ingredients
+  const handleIngredientKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleAddIngredient()
+    }
+  }
 
   const handleImageChange = (e) => {
-    const selectedFile = e.target.files?.[0];
+    const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       // Validate file type
       if (!selectedFile.type.startsWith("image/")) {
-        setErrors({ ...errors, image: "Please select a valid image file" });
-        return;
+        setErrors({ ...errors, image: "Please select a valid image file" })
+        return
       }
-
       // Validate file size (5MB limit)
       if (selectedFile.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, image: "Image size should be less than 5MB" });
-        return;
+        setErrors({ ...errors, image: "Image size should be less than 5MB" })
+        return
       }
-
-      setProduct({ ...product, image: selectedFile });
-      setImagePreview(URL.createObjectURL(selectedFile));
-
+      setProduct({ ...product, image: selectedFile })
+      setImagePreview(URL.createObjectURL(selectedFile))
       // Clear image error
       if (errors.image) {
-        setErrors({ ...errors, image: "" });
+        setErrors({ ...errors, image: "" })
       }
     }
-  };
+  }
 
   const removeImage = () => {
-    setProduct({ ...product, image: null });
-    setImagePreview("");
+    setProduct({ ...product, image: null })
+    setImagePreview("")
     // Reset file input
-    const fileInput = document.getElementById("image-upload");
-    if (fileInput) fileInput.value = "";
-  };
+    const fileInput = document.getElementById("image-upload")
+    if (fileInput) fileInput.value = ""
+  }
 
   const validateForm = () => {
-    const newErrors = {};
-
+    const newErrors = {}
     if (!product.pname.trim()) {
-      newErrors.pname = "Product name is required";
+      newErrors.pname = "Product name is required"
     }
-
     if (!product.price.trim()) {
-      newErrors.price = "Price is required";
+      newErrors.price = "Price is required"
     } else if (isNaN(Number(product.price)) || Number(product.price) <= 0) {
-      newErrors.price = "Please enter a valid price";
+      newErrors.price = "Please enter a valid price"
     }
-
     if (!product.desc.trim()) {
-      newErrors.desc = "Description is required";
+      newErrors.desc = "Description is required"
     } else if (product.desc.trim().length < 10) {
-      newErrors.desc = "Description should be at least 10 characters";
+      newErrors.desc = "Description should be at least 10 characters"
     }
-
     if (!product.category) {
-      newErrors.category = "Please select a category";
+      newErrors.category = "Please select a category"
     }
-
     if (!product.image) {
-      newErrors.image = "Please upload an image";
+      newErrors.image = "Please upload an image"
+    }
+    if (product.ingredients.length === 0) {
+      newErrors.ingredients = "Please add at least one ingredient"
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
+    e.preventDefault()
     if (!validateForm()) {
-      return;
+      return
     }
 
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append("name", product.pname);
-    formData.append("price", product.price);
-    formData.append("descriptions", product.desc);
-    formData.append("category", product.category);
+    setLoading(true)
+    const formData = new FormData()
+    formData.append("name", product.pname)
+    formData.append("price", product.price)
+    formData.append("descriptions", product.desc)
+    formData.append("category", product.category)
+    formData.append("ingredients", JSON.stringify(product.ingredients)) // Send ingredients as JSON string
     if (product.image) {
-      formData.append("image", product.image);
+      formData.append("image", product.image)
     }
 
     try {
@@ -164,26 +193,26 @@ function AddItem() {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      });
-
+      })
       if (response.status === 201) {
-        setSuccessAlert("Item Added Successfully");
+        setSuccessAlert("Item Added Successfully")
         // Reset form
-        setProduct({ pname: "", price: "", desc: "", image: null, category: "" });
-        setImagePreview("");
+        setProduct({ pname: "", price: "", desc: "", image: null, category: "", ingredients: [] })
+        setImagePreview("")
+        setCurrentIngredient("")
         setTimeout(() => {
-          navigate("/staff/dashboard/menu");
-        }, 1500);
+          navigate("/staff/dashboard/menu")
+        }, 1500)
       } else {
-        setErrorAlert("An Error Occurred");
+        setErrorAlert("An Error Occurred")
       }
     } catch (err) {
-      console.error(err);
-      setErrorAlert("Failed to add item. Please try again.");
+      console.error(err)
+      setErrorAlert("Failed to add item. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const setSuccessAlert = (message) => {
     Swal.fire({
@@ -194,8 +223,8 @@ function AddItem() {
       position: "top",
       timerProgressBar: true,
       showConfirmButton: true,
-    });
-  };
+    })
+  }
 
   const setErrorAlert = (message) => {
     Swal.fire({
@@ -206,10 +235,10 @@ function AddItem() {
       position: "top-right",
       timerProgressBar: true,
       showConfirmButton: true,
-    });
-  };
+    })
+  }
 
-  const selectedCategory = categories.find((cat) => cat.value === product.category);
+  const selectedCategory = categories.find((cat) => cat.value === product.category)
 
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "100vh", py: 3 }}>
@@ -269,11 +298,7 @@ function AddItem() {
                     helperText={errors.price}
                     placeholder="Enter price"
                     InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MoneyIcon color="action" />
-                        </InputAdornment>
-                      ),
+                      startAdornment: <InputAdornment position="start">UGX</InputAdornment>,
                     }}
                   />
                 </Grid>
@@ -284,7 +309,7 @@ function AddItem() {
                     <InputLabel>Category</InputLabel>
                     <Select value={product.category} label="Category" onChange={handleCategoryChange}>
                       {categories.map((category) => (
-                        <MenuItem key={category.value} value={category.value}>
+                        <MenuItem key={category.value} value={category.id}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                             {category.icon}
                             <Typography>{category.label}</Typography>
@@ -307,6 +332,73 @@ function AddItem() {
                       />
                     </Box>
                   )}
+                </Grid>
+
+                {/* Ingredients */}
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <IngredientsIcon />
+                    Ingredients
+                  </Typography>
+
+                  <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                    <TextField
+                      fullWidth
+                      label="Add Ingredient"
+                      value={currentIngredient}
+                      onChange={(e) => setCurrentIngredient(e.target.value)}
+                      onKeyPress={handleIngredientKeyPress}
+                      placeholder="e.g., salt, tomatoes, onions"
+                      error={!!errors.ingredients}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <IngredientsIcon color="action" />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <Button
+                      variant="contained"
+                      onClick={handleAddIngredient}
+                      disabled={!currentIngredient.trim()}
+                      sx={{ minWidth: 100 }}
+                      startIcon={<AddIcon />}
+                    >
+                      Add
+                    </Button>
+                  </Box>
+
+                  {/* Display current ingredients */}
+                  {product.ingredients.length > 0 && (
+                    <Paper sx={{ p: 2, bgcolor: "grey.50" }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Current Ingredients ({product.ingredients.length}):
+                      </Typography>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                        {product.ingredients.map((ingredient, index) => (
+                          <Chip
+                            key={index}
+                            label={ingredient}
+                            onDelete={() => handleRemoveIngredient(ingredient)}
+                            color="primary"
+                            variant="outlined"
+                            deleteIcon={<DeleteIcon />}
+                          />
+                        ))}
+                      </Box>
+                    </Paper>
+                  )}
+
+                  {errors.ingredients && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {errors.ingredients}
+                    </Alert>
+                  )}
+
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                    Add ingredients one by one. Press Enter or click Add button to add each ingredient.
+                  </Typography>
                 </Grid>
 
                 {/* Description */}
@@ -332,7 +424,6 @@ function AddItem() {
                     <PhotoCameraIcon />
                     Upload Image
                   </Typography>
-
                   <Paper
                     sx={{
                       p: 3,
@@ -445,7 +536,7 @@ function AddItem() {
         </Card>
       </Container>
     </Box>
-  );
+  )
 }
 
-export default AddItem;
+export default AddItem

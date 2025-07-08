@@ -22,6 +22,9 @@ import {
   Alert,
   useTheme,
   useMediaQuery,
+  Switch,
+  ListItemSecondaryAction,
+  ListItem
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -35,16 +38,19 @@ import {
   LunchDining as LunchIcon,
   DinnerDining as DinnerIcon,
   NavigateNext as NavigateNextIcon,
+  CheckCircle,
+  Cancel,
 } from "@mui/icons-material";
+
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import useHook from "./customHook";
 
-const foodUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items";
+const foodUrl = "http://127.0.0.1:8000/restaurant/food_items";
 
 // Function to categorize food items (same as in menu component)
 const categorizeFoodItem = (item) => {
-  if (item.category) return item.category.toLowerCase();
+  if (item.category.name) return item.category.name.toLowerCase();
 
   const name = item.name.toLowerCase();
   const desc = item.descriptions.toLowerCase();
@@ -92,7 +98,7 @@ function SingleItem() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const singleUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`;
+  const singleUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`;
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -121,7 +127,7 @@ function SingleItem() {
 
     try {
       setDeleting(true);
-      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/single_item/${id}`);
+      await axios.delete(`http://127.0.0.1:8000/restaurant/delete_items/${id}`);
       navigate("/staff/dashboard/menu");
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -131,6 +137,21 @@ function SingleItem() {
       setDeleteDialogOpen(false);
     }
   };
+
+  // change availability status
+  const changeStatus = async(id, available)=>{
+    try{
+       const change_status = `http://127.0.0.1:8000/restaurant/update_availability/${id}`
+       const newStatus = !available
+       await axios.patch(change_status, {is_available : newStatus})
+
+       setItem((prev) => prev.id === id ? {...prev, is_available:newStatus} : prev)
+    }catch(err){
+      console.log('err', err)
+    }finally{
+
+    }
+  }
 
   useEffect(() => {
     fetchData();
@@ -232,7 +253,7 @@ function SingleItem() {
             <Card sx={{ boxShadow: 3 }}>
               <CardMedia
                 component="img"
-                image={item.image}
+                image={`http://127.0.0.1:8000${item.image}`}
                 alt={item.name}
                 sx={{
                   height: { xs: 300, md: 400 },
@@ -279,6 +300,38 @@ function SingleItem() {
                   {item.descriptions}
                 </Typography>
               </Paper>
+
+              {/* ingredients */}
+              {item.ingredients && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Ingredients:
+                  </Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {item.ingredients.map((ingredient, index) => (
+                      <Chip key={index} label={ingredient} size="small" variant="outlined" />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {/* item status */}
+              <ListItem>
+              <Chip
+                label={item.is_available ? "Available" : "Out of Stock"}
+                color={item.is_available ? "success" : "error"}
+                size="small"
+                icon={item.is_available ? <Cancel /> : <CheckCircle />}
+              />
+              <ListItemSecondaryAction>
+                <Switch
+                  checked={item.is_available}
+                  onChange={() => changeStatus(item.id, item.is_available)}
+                  color="primary"
+                />
+              </ListItemSecondaryAction>
+                
+              </ListItem>
 
               {/* Action Buttons */}
               <Paper sx={{ p: 3 }}>

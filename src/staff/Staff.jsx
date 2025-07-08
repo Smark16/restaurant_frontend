@@ -71,6 +71,7 @@ import {
 } from "recharts";
 import { AuthContext } from "../Context/AuthContext";
 import useHook from "./customHook";
+import axios from 'axios'
 
 const theme = createTheme({
   palette: {
@@ -131,12 +132,88 @@ const theme = createTheme({
   },
 });
 
-const orderItemsUrl = "https://restaurant-backend5.onrender.com/restaurant/order_items";
-const tablesUrl = "https://restaurant-backend5.onrender.com/restaurant/tables";
-const postTableUrl = "https://restaurant-backend5.onrender.com/restaurant/post_table";
-const patchTableStatusUrl = "https://restaurant-backend5.onrender.com/restaurant/table_status/";
+const tablesUrl = "http://127.0.0.1:8000/tables/tables";
+const postTableUrl = "http://127.0.0.1:8000/tables/post_table";
+const patchTableStatusUrl = "http://127.0.0.1:8000/tables/table_status/";
 
-// Sample data for different time periods
+// stats urls
+const yesterday_orders = 'http://127.0.0.1:8000/dashboard/yesterday_orders'
+const this_month_orders = 'http://127.0.0.1:8000/dashboard/this_month_orders'
+const last_month_orders = 'http://127.0.0.1:8000/dashboard/last_month_orders'
+const cat_perfomance = 'http://127.0.0.1:8000/dashboard/cat_perfomance'
+const order_status_perfomance = 'http://127.0.0.1:8000/dashboard/order_status_stats'
+
+function StaffDashboard() {
+  const { orders, reservations} = useHook();
+  const { user } = useContext(AuthContext);
+
+  const [tables, setTables] = useState([]);
+  const [message, setMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newTable, setNewTable] = useState({ table_no: "", capacity:"", location:"", is_booked: false });
+  const [selectedPeriod, setSelectedPeriod] = useState(0); // 0: Today, 1: Yesterday, 2: This Month, 3: Last Month
+
+  const [yesterday, setYesterday] = useState('')
+  const [thisMonth, setThisMonth] = useState('')
+  const [lastMonth, setLastMonth] = useState('')
+  const [catPerfomance, setCatPerfomnace] = useState('')
+  const [orderPerfomance, setOrderPerfomance] = useState('')
+
+  // order stats
+const YesterdayOrders = async()=>{
+  try{
+  const response = await axios.get(yesterday_orders)
+  const data = response.data
+  setYesterday(data)
+  }catch(err){
+    console.log('err', err)
+  }
+}
+
+const ThisMonthOrders = async()=>{
+  try{
+  const response = await axios.get(this_month_orders)
+  const data = response.data
+  setThisMonth(data)
+  }catch(err){
+    console.log('err', err)
+  }
+}
+
+const LastMonthOrders = async()=>{
+  try{
+  const response = await axios.get(last_month_orders)
+  const data = response.data
+  setLastMonth(data)
+  }catch(err){
+    console.log('err', err)
+  }
+}
+
+// category perfomance
+const CatPerfomance = async()=>{
+  try{
+   const response = await axios.get(cat_perfomance)
+   setCatPerfomnace(response.data)
+  }catch(err){
+    console.log('err', err)
+  }
+}
+
+// order perfomance
+const OrderStatusPerfomance = async()=>{
+  try{
+    const response = await axios.get(order_status_perfomance)
+    setOrderPerfomance(response.data)
+  }catch(err){
+    console.log('err', err)
+  }
+}
+
+
+//data for different time periods
 const generateSampleData = (period) => {
   const baseData = {
     today: {
@@ -154,76 +231,32 @@ const generateSampleData = (period) => {
       ],
     },
     yesterday: {
-      revenue: 12800,
-      orders: 38,
-      customers: 32,
-      avgRevenue: 336.84,
-      chartData: [
-        { time: "9AM", orders: 4, revenue: 980 },
-        { time: "11AM", orders: 6, revenue: 1650 },
-        { time: "1PM", orders: 10, revenue: 2800 },
-        { time: "3PM", orders: 5, revenue: 1400 },
-        { time: "6PM", orders: 13, revenue: 3700 },
-        { time: "8PM", orders: 8, revenue: 2270 },
-      ],
+      revenue: yesterday.yesterday_revenue,
+      orders: yesterday.yesterday_orders,
+      customers: yesterday.yesterday_customers,
+      avgRevenue: yesterday.yesterday_avg_revenue,
+      chartData: yesterday.Data,
     },
     thisMonth: {
-      revenue: 425600,
-      orders: 1240,
-      customers: 980,
-      avgRevenue: 343.23,
-      chartData: [
-        { time: "Week 1", orders: 280, revenue: 95200 },
-        { time: "Week 2", orders: 320, revenue: 108400 },
-        { time: "Week 3", orders: 310, revenue: 105800 },
-        { time: "Week 4", orders: 330, revenue: 116200 },
-      ],
+      revenue: thisMonth.monthly_revenue,
+      orders: thisMonth.monthly_orders,
+      customers: thisMonth.monthly_customers,
+      avgRevenue: thisMonth.monthly_avg_revenue,
+      chartData: thisMonth.Data,
     },
     lastMonth: {
-      revenue: 398200,
-      orders: 1180,
-      customers: 920,
-      avgRevenue: 337.46,
-      chartData: [
-        { time: "Week 1", orders: 290, revenue: 98600 },
-        { time: "Week 2", orders: 295, revenue: 99800 },
-        { time: "Week 3", orders: 285, revenue: 96200 },
-        { time: "Week 4", orders: 310, revenue: 103600 },
-      ],
+      revenue: lastMonth.last_month_revenue,
+      orders: lastMonth.last_month_orders,
+      customers: lastMonth.last_month_customers,
+      avgRevenue: lastMonth.last_month_avg_revenue,
+      chartData: lastMonth.Data,
     },
   };
   return baseData[period] || baseData.today;
 };
 
-// Pie chart data for menu categories
-const menuCategoryData = [
-  { name: "Main Dishes", value: 45, color: "#1976d2" },
-  { name: "Appetizers", value: 25, color: "#2e7d32" },
-  { name: "Desserts", value: 15, color: "#ed6c02" },
-  { name: "Beverages", value: 15, color: "#9c27b0" },
-];
-
-// Order status data
-const orderStatusData = [
-  { name: "Completed", value: 78, color: "#2e7d32" },
-  { name: "Pending", value: 15, color: "#ed6c02" },
-  { name: "Cancelled", value: 7, color: "#d32f2f" },
-];
-
-function StaffDashboard() {
-  const { orders, loading, reservations, customer, latest, Revenue, avg } = useHook();
-  const { user } = useContext(AuthContext);
-
-  const [tables, setTables] = useState([]);
-  const [message, setMessage] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [showSnackbar, setShowSnackbar] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newTable, setNewTable] = useState({ table_no: "", is_booked: false });
-  const [selectedPeriod, setSelectedPeriod] = useState(0); // 0: Today, 1: Yesterday, 2: This Month, 3: Last Month
-
-  const periods = ["today", "yesterday", "thisMonth", "lastMonth"];
-  const currentData = generateSampleData(periods[selectedPeriod]);
+const periods = ["today", "yesterday", "thisMonth", "lastMonth"];
+const currentData = generateSampleData(periods[selectedPeriod]);
 
   const handleTabChange = (event, newValue) => {
     setSelectedPeriod(newValue);
@@ -240,6 +273,8 @@ function StaffDashboard() {
 
     const formData = new FormData();
     formData.append("table_no", newTable.table_no);
+    formData.append("capacity", newTable.capacity);
+    formData.append("location", newTable.location);
     formData.append("is_booked", newTable.is_booked.toString());
 
     try {
@@ -298,9 +333,14 @@ function StaffDashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchTables();
-  }, []);
+  useEffect(()=>{
+  const loadData = async()=>{
+    await Promise.all(YesterdayOrders(), ThisMonthOrders(), LastMonthOrders(), fetchTables())
+  }
+  CatPerfomance()
+  OrderStatusPerfomance()
+  loadData()
+}, [])
 
   const statsCards = [
     {
@@ -343,7 +383,7 @@ function StaffDashboard() {
         <Card
           sx={{
             mb: 4,
-            background: " the colors in the gradient are #667eea and #764ba2",
+            background: "#667eea",
             color: "white",
             position: "relative",
             overflow: "hidden",
@@ -398,7 +438,7 @@ function StaffDashboard() {
                 iconPosition="start"
                 sx={{
                   "&.Mui-selected": {
-                    background: " the colors in the gradient are #667eea and #764ba2",
+                    background: "#667eea",
                     color: "white",
                   },
                 }}
@@ -466,7 +506,7 @@ function StaffDashboard() {
                     <Tooltip
                       formatter={(value, name) => [
                         name === "revenue" ? `UGX.${value}` : value,
-                        name === "revenue" ? "Revenue" : "Orders",
+                        name
                       ]}
                     />
                     <Legend />
@@ -502,12 +542,16 @@ function StaffDashboard() {
                 <Card>
                   <CardContent>
                     <Typography variant="h6" fontWeight="bold" mb={2}>
-                      Menu Categories
+                      Menu Category Perfomance
                     </Typography>
-                    <ResponsiveContainer width="100%" height={200}>
+                    <ResponsiveContainer width="100%" height={200} >
                       <PieChart>
                         <Pie
-                          data={menuCategoryData}
+                          data={Object.entries(catPerfomance).map(([name, value]) =>({
+                            name: name.charAt(0).toUpperCase() + name.slice(1),
+                            value
+                          }))}
+
                           cx="50%"
                           cy="50%"
                           innerRadius={40}
@@ -515,9 +559,16 @@ function StaffDashboard() {
                           paddingAngle={5}
                           dataKey="value"
                         >
-                          {menuCategoryData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          {Object.entries(catPerfomance).map(([name], index) => (
+                            <Cell 
+                            key={`cell-${index}`} 
+                            fill={
+                               name === "breakfast" ? "#FF9800" :
+                                name === "lunch" ? "#4CAF50" :
+                                name === "dinner" ? "#9C27B0" : "#888888"
+                            } />
                           ))}
+
                         </Pie>
                         <Tooltip formatter={(value) => [`${value}%`, "Percentage"]} />
                         <Legend />
@@ -537,7 +588,11 @@ function StaffDashboard() {
                     <ResponsiveContainer width="100%" height={200}>
                       <PieChart>
                         <Pie
-                          data={orderStatusData}
+                          data={Object.entries(orderPerfomance).map(([name, value]) => ({
+                            name, 
+                            value
+                          }))}
+
                           cx="50%"
                           cy="50%"
                           innerRadius={40}
@@ -545,8 +600,15 @@ function StaffDashboard() {
                           paddingAngle={5}
                           dataKey="value"
                         >
-                          {orderStatusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+
+                          {Object.entries(orderPerfomance).map(([name], index) => (
+                            <Cell 
+                            key={`cell-${index}`} 
+                            fill={
+                              name === 'Completed' ? '#2e7d32' :
+                              name === 'Pending' ? '#ed6c02' :
+                              name === 'Canceled' ? '#d32f2f' : '#888888'
+                            } />
                           ))}
                         </Pie>
                         <Tooltip formatter={(value) => [`${value}%`, "Percentage"]} />
@@ -732,6 +794,28 @@ function StaffDashboard() {
                 name="table_no"
                 type="number"
                 value={newTable.table_no}
+                onChange={handleChange}
+                required
+                sx={{ mb: 2 }}
+              />
+
+              <TextField
+                fullWidth
+                label="Table capacity"
+                name="capacity"
+                type="number"
+                value={newTable.capacity}
+                onChange={handleChange}
+                required
+                sx={{ mb: 2 }}
+              />
+
+              <TextField
+                fullWidth
+                label="Table location"
+                name="location"
+                type="text"
+                value={newTable.location}
                 onChange={handleChange}
                 required
                 sx={{ mb: 2 }}

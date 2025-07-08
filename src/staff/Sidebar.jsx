@@ -271,22 +271,12 @@ function Sidebar({ children }) {
       {/* Footer */}
       <Box sx={{ p: 2 }}>
         <Divider sx={{ mb: 2 }} />
-        <Paper
-          elevation={2}
-          sx={{
-            p: 2,
-            background: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
-            color: "white",
-            borderRadius: 2,
-          }}
-        >
+
           <ListItemButton
             onClick={handleLogout}
             sx={{
               borderRadius: 1,
-              "&:hover": {
-                backgroundColor: "rgba(255,255,255,0.1)",
-              },
+              background: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
             }}
           >
             <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
@@ -300,7 +290,6 @@ function Sidebar({ children }) {
               }}
             />
           </ListItemButton>
-        </Paper>
 
         {/* Version Info */}
         <Box mt={2} textAlign="center">

@@ -37,11 +37,11 @@ import {
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-const foodUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items";
+const foodUrl = "http://127.0.0.1:8000/restaurant/food_items";
 
 // Function to categorize food items based on name/description if category is not provided
 const categorizeFoodItem = (item) => {
-  if (item.category) return item.category.toLowerCase();
+  if (item.category__name) return item.category__name.toLowerCase();
 
   const name = item.name.toLowerCase();
   const desc = item.descriptions.toLowerCase();
@@ -114,6 +114,8 @@ function Menu() {
       setLoading(false);
     }
   };
+
+  console.log(food)
 
   const handleSearch = (e) => {
     const searchValue = e.target.value;
@@ -380,7 +382,7 @@ function Menu() {
                     <CardMedia
                       component="img"
                       height="200"
-                      image={item.image}
+                      image={`http://127.0.0.1:8000/media/${item.image}`}
                       alt={item.name}
                       sx={{ objectFit: "cover" }}
                     />
