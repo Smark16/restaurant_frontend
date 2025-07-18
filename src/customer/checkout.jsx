@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState, useRef } from "react"
 import {
   Box,
   Grid,
@@ -49,50 +49,24 @@ import {
   ShoppingBag,
 } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
-// import { FlutterWaveButton, closePaymentModal } from 'flutterwave-react-v3'
-
-// Mock AuthContext for demonstration
-const AuthContext = React.createContext({
-  data: [
-    {
-      id: 1,
-      name: "Grilled Salmon",
-      price: 38000,
-      image: "/placeholder.svg?height=60&width=60",
-      quantity: 2,
-    },
-    {
-      id: 2,
-      name: "Caesar Salad",
-      price: 18000,
-      image: "/placeholder.svg?height=60&width=60",
-      quantity: 1,
-    },
-  ],
-  user: {
-    user_id: 1,
-    username: "John Doe",
-    email: "john@example.com",
-  },
-  setAddItem: (items) => console.log("Set items:", items),
-  setTotal: (total) => console.log("Set total:", total),
-})
+import axios from 'axios'
+import { AuthContext } from "../Context/AuthContext"
+import useAxios from '../components/useAxios'
 
 // Order Summary Component
 const OrderSummaryCard = ({ items, totalAmount }) => {
   const theme = useTheme()
   const deliveryFee = 5000
-  const tax = totalAmount * 0.1
-  const finalTotal = totalAmount + deliveryFee + tax
+  const finalTotal = totalAmount + deliveryFee
 
   const itemExpense = items.reduce((accumulator, item) => {
-    const { name, quantity, price } = item
-    const totalExpense = price * quantity
+    const { quantity} = item
+    const totalExpense = item.product.price * quantity
 
-    if (!accumulator[name]) {
-      accumulator[name] = 0
+    if (!accumulator[item.product.name]) {
+      accumulator[item.product.name] = 0
     }
-    accumulator[name] += totalExpense
+    accumulator[item.product.name] += totalExpense
     return accumulator
   }, {})
 
@@ -137,16 +111,16 @@ const OrderSummaryCard = ({ items, totalAmount }) => {
           <AccordionDetails>
             <List>
               {items.map((item) => (
-                <ListItem key={item.id} sx={{ px: 0 }}>
+                <ListItem key={item.menu} sx={{ px: 0 }}>
                   <ListItemAvatar>
-                    <Avatar src={item.image} alt={item.name} sx={{ width: 50, height: 50 }} />
+                    <Avatar src={`http://127.0.0.1:8000/${item.product.image}`} alt={item.product.name} sx={{ width: 50, height: 50 }} />
                   </ListItemAvatar>
                   <ListItemText
-                    primary={item.name}
-                    secondary={`Qty: ${item.quantity} × UGX ${item.price.toLocaleString()}`}
+                    primary={item.product.name}
+                    secondary={`Qty: ${item.quantity} × UGX ${item.product.price.toLocaleString()}`}
                   />
                   <Typography variant="body2" fontWeight="bold">
-                    UGX {(item.price * item.quantity).toLocaleString()}
+                    UGX {(item.product.price * item.quantity).toLocaleString()}
                   </Typography>
                 </ListItem>
               ))}
@@ -184,12 +158,6 @@ const OrderSummaryCard = ({ items, totalAmount }) => {
               UGX {deliveryFee.toLocaleString()}
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-            <Typography variant="body2">Tax (10%)</Typography>
-            <Typography variant="body2" fontWeight="medium">
-              UGX {tax.toLocaleString()}
-            </Typography>
-          </Box>
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -219,7 +187,7 @@ const OrderSummaryCard = ({ items, totalAmount }) => {
 }
 
 // Payment Method Component
-const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onFlutterwavePayment }) => {
+const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPayment, contact, location, loading }) => {
   return (
     <Card elevation={2} sx={{ mb: 3 }}>
       <CardContent sx={{ p: 3 }}>
@@ -294,7 +262,7 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onFlutterwave
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Security sx={{ mr: 1, color: "primary.main" }} />
               <Typography variant="body2" color="primary.main" fontWeight="medium">
-                Secure Payment with Flutterwave
+                Secure Payment with Pesapal
               </Typography>
             </Box>
             <Button
@@ -302,15 +270,16 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onFlutterwave
               fullWidth
               size="large"
               startIcon={<AccountBalanceWallet />}
-              onClick={onFlutterwavePayment}
+              onClick={onPesaPalPayment}
               sx={{
                 background: "linear-gradient(45deg, #f39c12 30%, #e67e22 90%)",
                 "&:hover": {
                   background: "linear-gradient(45deg, #e67e22 30%, #d35400 90%)",
                 },
               }}
+              disabled={contact === '' && location === ''}
             >
-              Pay with Flutterwave
+              {loading ? 'processing...' : 'Make Payment'}
             </Button>
           </Box>
         )}
@@ -320,11 +289,18 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onFlutterwave
 }
 
 function EnhancedCheckout() {
-  const { data, user, setAddItem, setTotal } = useContext(AuthContext)
+  const { addItem, user, setAddItem, setTotal, websocket  } = useContext(AuthContext)
+ const axiosInstance = useAxios()
   const navigate = useNavigate()
   const theme = useTheme()
+  const post_orderInfo = 'http://127.0.0.1:8000/orders/placed_orders'
+  const make_payment = 'http://127.0.0.1:8000/payments/make_payment'
+  const post_picked_items = 'http://127.0.0.1:8000/orders/post_picked_items'
 
-  const [info, setInfo] = useState({ location: "", contact: "" })
+  const [info, setInfo] = useState(() => {
+    const savedInfo = localStorage.getItem('info')
+    return savedInfo ? JSON.parse(savedInfo) : { location: '', contact: '' }
+  })
   const [orderId, setOrderId] = useState("")
   const [loader, setLoader] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -332,83 +308,112 @@ function EnhancedCheckout() {
   const [orderError, setOrderError] = useState("")
   const [activeStep, setActiveStep] = useState(0)
   const [infoSaved, setInfoSaved] = useState(false)
+  const [trackId, setTrackId] = useState('')
 
   const steps = ["Delivery Info", "Payment Method", "Confirm Order"]
 
-  const totalAmount = data
+  const totalAmount = addItem
     .map((item) => {
-      const { price, quantity } = item
-      return price * quantity
+      const { quantity } = item
+      return item.product.price * quantity
     })
     .reduce((sum, total) => sum + total, 0)
 
-  // Flutterwave config (commented out for demo)
-  /*
-  const config = {
-    public_key: 'FLWPUBK_TEST-64ed21a038fb9488488027e6c5ef2e70-X',
-    tx_ref: Date.now(),
-    amount: totalAmount,
-    currency: 'UGX',
-    payment_options: 'card, mobilemoneyuganda, banktransfer',
-    customer: {
-      email: user.email,
-      phone_number: info.contact,
-      name: user.username,
-    },
-    customizations: {
-      title: 'Restaurant Management System',
-      description: 'Payment for items in cart',
-      logo: 'https://st2.depositphotos.com/4403291/7418/v/450/depositphotos_74189661-stock-illustration-online-shop-log.jpg',
-    },
-  }
-  */
+    // store user info in local storage
+    useEffect(()=>{
+      localStorage.setItem('info', JSON.stringify(info))
+    }, [info])
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setInfo({ ...info, [name]: value })
+    setInfo((prevInfo) =>({
+      ...prevInfo, [name]:value
+    }))
+    
   }
 
-  const handleInfoSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-
-    try {
-      // Mock API call
-      setTimeout(() => {
-        setLoading(false)
-        setInfoSaved(true)
-        setActiveStep(1)
-        console.log("Info saved:", info)
-      }, 1000)
-    } catch (error) {
+   // make payment post
+   const handlePesaPalPayment = async() => {
+     try{
+        setLoading(true)
+        const response = await axiosInstance.post(make_payment, {
+         amount:totalAmount,
+         email_address:user?.email,
+         phone_number:info.contact,
+         first_name:user?.username
+    })
+    
+    if (response.data.status === 'success' && response.data.data.redirect_url) {
+      setTrackId(response.data.data.order_tracking_id)
       setLoading(false)
-      setOrderError("Failed to save delivery information")
+      window.location.href = response.data.data.redirect_url
     }
-  }
+      
+    }catch(err){
+      console.log('err', err)
+    }
+ }
 
   const handleFinalSubmit = async (e) => {
-    e.preventDefault()
-    setLoader(true)
+  e.preventDefault();
+  setLoader(true);
 
-    try {
-      // Mock API call
-      setTimeout(() => {
-        setAddItem([])
-        setTotal("")
-        localStorage.removeItem("clickedItem")
-        navigate("/customer/dashboard/receipt")
-      }, 2000)
-    } catch (err) {
-      console.log("There was an error", err)
-      setOrderError("Please fill in all the required credentials")
-      setLoader(false)
+  try {
+    // Post order info
+    const orderResponse = await axiosInstance.post(post_orderInfo, {
+      user: user?.user_id,
+      location: info.location,
+      contact: info.contact,
+      payment_method: paymentMethod,
+      Tracking_Id: trackId
+    });
+
+    if (orderResponse.status !== 201) {
+      throw new Error('Failed to create order');
     }
+
+    const orderId = orderResponse.data.id;
+    setOrderId(orderId);
+    setInfoSaved(true);
+    setActiveStep(1);
+
+    // Post each addItem to create OrderTaken instances
+    const orderTakenIds = await Promise.all(
+      addItem.map(async (item) => {
+        const picketItemResponse = await axiosInstance.post(post_picked_items, {
+          menu: Number(item.menu), // Use item.menu instead of item.product.id
+          quantity: Number(item.quantity)
+        });
+
+        if (picketItemResponse.status !== 201) {
+          throw new Error(`Failed to create OrderTaken for menu ${item.menu}`);
+        }
+
+        return picketItemResponse.data.id; 
+      })
+    );
+
+    // Post order items with takenItems as a list of OrderTaken IDs
+    if (websocket.current && websocket.current.readyState === WebSocket.OPEN) {
+      websocket.current.send(JSON.stringify({
+          user: user?.user_id,
+          order:orderId,
+          takenItems:orderTakenIds
+      }));
   }
 
-  const handleFlutterwavePayment = () => {
-    console.log("Flutterwave payment initiated")
-    // FlutterWave integration would go here
+    setAddItem([]);
+    setTotal('');
+    localStorage.removeItem('clickedItem');
+    localStorage.removeItem('info');
+    navigate('/customer/dashboard/receipt');
+
+  } catch (err) {
+    console.error('Error response:', err);
+    setOrderError('Please fill in all the required credentials');
+    setLoader(false);
   }
+};
 
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "100vh", py: 4 }}>
@@ -475,7 +480,7 @@ function EnhancedCheckout() {
                   {infoSaved && <CheckCircle sx={{ ml: 2, color: "success.main" }} />}
                 </Box>
 
-                <form onSubmit={handleInfoSubmit}>
+                <form onSubmit={handleFinalSubmit}>
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
                       <TextField
@@ -518,46 +523,25 @@ function EnhancedCheckout() {
                     </Grid>
                   </Grid>
 
-                  {!infoSaved && (
-                    <Box sx={{ mt: 3 }}>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        size="large"
-                        disabled={loading}
-                        startIcon={loading ? <CircularProgress size={20} /> : <CheckCircle />}
-                        sx={{ minWidth: 150 }}
-                      >
-                        {loading ? "Saving..." : "Save Info"}
-                      </Button>
-                    </Box>
-                  )}
-
-                  {infoSaved && (
-                    <Box sx={{ mt: 2, p: 2, bgcolor: "success.light", borderRadius: 1 }}>
-                      <Typography variant="body2" color="success.dark">
-                        ✓ Delivery information saved successfully
-                      </Typography>
-                    </Box>
-                  )}
                 </form>
               </CardContent>
             </Card>
 
             {/* Payment Method */}
-            {infoSaved && (
               <PaymentMethodCard
                 paymentMethod={paymentMethod}
                 onPaymentMethodChange={(method) => {
                   setPaymentMethod(method)
                   setActiveStep(2)
                 }}
-                onFlutterwavePayment={handleFlutterwavePayment}
+                onPesaPalPayment={handlePesaPalPayment}
+                contact={info.contact}
+                location={info.location}
+                loading={loading}
               />
-            )}
-
+          
             {/* Final Confirmation */}
-            {infoSaved && paymentMethod && (
+            {paymentMethod && (
               <Card elevation={2}>
                 <CardContent sx={{ p: 3 }}>
                   <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
@@ -606,7 +590,7 @@ function EnhancedCheckout() {
           {/* Right Column - Order Summary */}
           <Grid item xs={12} lg={4}>
             <Box sx={{ position: "sticky", top: 24 }}>
-              <OrderSummaryCard items={data} totalAmount={totalAmount} />
+              <OrderSummaryCard items={addItem} totalAmount={totalAmount} />
             </Box>
           </Grid>
         </Grid>

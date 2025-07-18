@@ -1,12 +1,11 @@
-import {createContext, useState, useEffect} from 'react'
+import {createContext, useState, useEffect, useRef} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 //import { tokenGeneration } from '../components/firebase';
 import Swal from 'sweetalert2'
 
 const loginurl = 'http://127.0.0.1:8000/restaurant/'
-const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
-const notificationOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/messages'
+const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
 
 import axios from 'axios'
 
@@ -18,52 +17,85 @@ export const AuthProvider = ({children}) =>{
  const [loading, setLoading] = useState(true)
  const [staff, setStaff] = useState(user ? user.is_staff : false)
  const [customer, setCustomer] = useState(user ? user.is_customer : false)
-//  const [takenItem, setTakenItem] = useState({menu:"", quantity:0})
  const [addItem, setAddItem] = useState(()=> {
-    const storedItems = JSON.parse(localStorage.getItem('cartItem')) || [];
+    const storedItems = JSON.parse(localStorage.getItem('clickedItem')) || [];
     return storedItems;
 })
  const [food, setFood] = useState([])
  const [clicked, setClicked] = useState(false)
  const [total, setTotal] = useState('')
- const [showNotifications, setShowNotifications] = useState(false)
- const [showNotificationsAll, setShowNotificationsAll] = useState(false)
- const [orderNotify, setOrderNotify] = useState([])
  const [display, setDisplay] = useState(true)
- const [notifyAll, setNotifyAll] = useState([]);  // Centralized notifications state
  const [noAccount, setNoAccount] = useState('')
- //const {messaging, generateToken} = tokenGeneration()
+ 
+
+ const [showUserNotifications, setShowUserNotifications] = useState(false)
+ const [showAdminNotifications, setShowAdminNotifications] = useState(false)
+ const [unreadUserNotifications, setUnreadUserNotifications] = useState([])
+
+//  live updates
+const [CurrentOrders, setCurrentOrders] = useState('')
+const [catPerfomance, setCatPerfomnace] = useState('')
  
  const navigate = useNavigate()
+
+//  websocket Intergration
+const websocket = useRef(null)
+
+useEffect(()=>{
+  if(user){
+
+    const tokenString = localStorage.getItem('authtokens');
+    const token = tokenString ? JSON.parse(tokenString) : null;
+
+    websocket.current  = new WebSocket(`ws://127.0.0.1:8000/ws/user_updates/?token=${token.access}`)
+  
+    websocket.current.onopen = ()=>{
+      console.log('connection established')
+    }
+  
+    websocket.current.onmessage = (event)=>{
+      console.log('received', JSON.parse(event.data))
+      const data = JSON.parse(event.data)
+
+      if(data.type === 'live_updates'){
+        setCatPerfomnace(data.category_perfomance)
+        setCurrentOrders(data.today_orders)
+      }
+    }
+  
+    
+    websocket.current.onclose = () => {
+      console.log('WebSocket connection disconnected');
+    };
+  
+    websocket.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  
+    return () => {
+      if (websocket.current) {
+        websocket.current.close();
+      }
+    };
+  }
+}, [user])
 
 //  this is the code for removing the custbar component
 const handleDisplay = ()=> {
   setDisplay(!display)
 }
  
-// this manages notificatios for all the user
- const orderMsg = async()=>{
-  try{
-    const response = await axios(notificationOrderUrl)
-    const data = response.data
-    setOrderNotify(data)
-    // console.log(data)
+//  const fetchFood = async ()=>{
+//   try {
+//     const response = await axios(foodUrl)
+//     const data = response.data
+//     setFood(data)
+//   }catch (err){
+//    console.log("there was an error")
+//   }
+// }
 
-  }catch(err){
-    console.log('There was an error')
-  }
- }
 
- 
- const fetchFood = async ()=>{
-  try {
-    const response = await axios(foodUrl)
-    const data = response.data
-    setFood(data)
-  }catch (err){
-   console.log("there was an error")
-  }
-}
 
    // Add item to cart
   const handleCart = (product) => {
@@ -212,8 +244,7 @@ const showErrorAlert =(message)=>{
 }
 
 useEffect(()=>{
-  orderMsg()
-  fetchFood()
+  // fetchFood()
   if(authTokens){
     const decodedUser =  jwtDecode(authTokens.access)
     setUser(decodedUser);
@@ -236,12 +267,16 @@ const contextData = {
     staff, setStaff,
     customer, setCustomer,
     loginUser,
-    showSuccessAlert, handleCart,
-    setAddItem, addItem, fetchFood,
-    food, setFood, clicked, setClicked, total,
-    showNotifications,showNotificationsAll,setShowNotifications,setShowNotificationsAll,orderMsg, orderNotify,handleDelete,
-    handleDisplay, display, setDisplay,Increase, Reduce, notifyAll,
-    setNotifyAll,noAccount,setTotal,setOrderNotify
+    showSuccessAlert, showErrorAlert ,handleCart,
+    setAddItem, addItem,
+    food, setFood, clicked, setClicked, total,handleDelete,
+    handleDisplay, display, setDisplay,Increase, Reduce, noAccount,setTotal,
+    showUserNotifications, setShowUserNotifications,
+    unreadUserNotifications, setUnreadUserNotifications,
+    websocket,
+    CurrentOrders, setCurrentOrders,
+    catPerfomance, setCatPerfomnace
+
 }
 return (
     <AuthContext.Provider value={contextData}>

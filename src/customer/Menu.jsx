@@ -46,6 +46,7 @@ import {
 import { Link } from "react-router-dom"
 import axios from "axios"
 import { AuthContext } from "../Context/AuthContext"
+import useAxios from "../components/useAxios"
 
 // Tab Panel Component
 function TabPanel(props) {
@@ -244,6 +245,7 @@ const FoodItemSkeleton = () => (
 
 function EnhancedMenuDisplay() {
   const theme = useTheme()
+  const axiosInstance = useAxios()
   const [food, setFood] = useState([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState("")
@@ -254,7 +256,7 @@ function EnhancedMenuDisplay() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 8
 
-  const { handleCart } = useContext(AuthContext)
+  const { handleCart, addItem } = useContext(AuthContext)
 
   const foodUrl = "http://127.0.0.1:8000/restaurant/food_items"
 
@@ -268,7 +270,7 @@ function EnhancedMenuDisplay() {
   const fetchFood = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(foodUrl)
+      const response = await axiosInstance.get(foodUrl)
         setFood(response.data)
         // setFood(mockFoodData)
         setLoading(false)
@@ -449,7 +451,7 @@ function EnhancedMenuDisplay() {
             )}
           </Box>
 
-          <Badge badgeContent={addedItems.length} color="primary">
+          <Badge badgeContent={addItem.length} color="primary">
             <Tooltip title="View Cart">
               <IconButton
                 component={Link}

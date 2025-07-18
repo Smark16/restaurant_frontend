@@ -1,91 +1,105 @@
 // App.jsx
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, lazy, Suspense } from 'react';
 import {Route, Routes} from 'react-router-dom';
+import { CircularProgress } from '@mui/material'
 import './App.css';
-import Bar from './components/Navbar';
-import Home from './components/Home';
-import Login from './components/login';
-import Logout from './staff/logout';
-import Signup from './components/signup';
+import NavigationBar from './components/Navbar';
 import PrivateRoute from './components/privateRoute';
-import Staff from './staff/Staff';
-import Customer from './customer/Customer';
 import Sidebar from './staff/Sidebar';
-import Menu from './staff/Menu';
-import Orders from './staff/Orders';
-import Reservation from './staff/Reservation';
-import MenuAnalytics from './staff/MenuAnalytics';
-import StaffProfile from './staff/Profile';
-import AddItem from './staff/addItem';
-import SingleItem from './staff/singleItem';
-import Custbar from './customer/Custbar';
-import Order from './customer/Order';
-import Profile from './customer/Profile';
-import Reservations from './customer/Reservation';
-import Payment from './customer/payment';
-import EnhancedMenuDisplay from './customer/Menu';
-import UpdateItem from './staff/update';
-import ForgotPassword from './components/forgotPassword';
-import ChangePassword from './components/ChangePassword';
-import SingleMenu from './customer/singleItem';
-import Cart from './customer/cart';
-import About from './LandingPage/about';
-import Booking from './LandingPage/booking';
-import Contact from './LandingPage/contact';
-import Testimonial from './LandingPage/testimonial';
-import Service from './LandingPage/service';
-import Team from './LandingPage/team';
-import Menus from './LandingPage/menu';
-import Index from './LandingPage';
-import Receipt from './customer/receipt';
 import { AuthContext } from './Context/AuthContext';
-import Notify from './customer/Notify';
-import Checkout from './customer/checkout';
 import { tokenGeneration } from './components/firebase';
 import { onMessage } from 'firebase/messaging';
 import toast, { Toaster } from 'react-hot-toast';
+import paymentSucesss from './customer/paymentSucesss';
+import NetworkStatus from './components/NetworkCheck';
 
+const Home = lazy(()=>import('./components/Home'));
+const Login = lazy(()=>import('./components/login'));
+const Logout = lazy(()=>import('./staff/logout'));
+const Signup = lazy(()=>import('./components/signup'));
+const Staff  = lazy(()=>import('./staff/Staff'));
+const Customer = lazy(()=>import('./customer/Customer'));
+const Menu = lazy(()=>import('./staff/Menu'));
+const OrdersManagement = lazy(()=>import('./staff/Orders'));
+const Reservation = lazy(()=>import('./staff/Reservation'));
+const MenuAnalytics = lazy(()=>import('./staff/MenuAnalytics'));
+const AddItem = lazy(()=>import('./staff/addItem'));
+const SingleItem = lazy(()=>import('./staff/singleItem'));
+const Custbar = lazy(()=>import('./customer/Custbar'));
+const Order = lazy(()=>import('./customer/Order'));
+const Reservations = lazy(()=>import('./customer/Reservation'));
+const EnhancedMenuDisplay = lazy(()=>import('./customer/Menu'));
+const UpdateItem = lazy(()=>import('./staff/update'));
+const ForgotPassword = lazy(()=>import('./components/forgotPassword'));
+const SingleMenu = lazy(()=>import('./customer/singleItem'));
+const Cart = lazy(()=>import('./customer/cart'));
+const About = lazy(()=>import('./LandingPage/about'));
+const Booking = lazy(()=>import('./LandingPage/booking'));
+const Contact = lazy(()=>import('./LandingPage/contact'));
+const Testimonial = lazy(()=>import('./LandingPage/testimonial'));
+const Service = lazy(()=>import('./LandingPage/service'));
+const Team = lazy(()=>import('./LandingPage/team'));
+const Menus = lazy(()=>import('./LandingPage/menu'));
+const Index = lazy(()=>import('./LandingPage'));
+const Receipt = lazy(()=>import('./customer/receipt'));
+const CustomerProfileManagement = lazy(()=>import('./customer/Profile'));
+const ProfileManagement = lazy(()=>import('./staff/Profile'));
+const Checkout = lazy(()=>import('./customer/checkout'));
 
 function Show() {
-  const {display, setNotifyAll, setOrderNotify} = useContext(AuthContext)
+  const {display} = useContext(AuthContext)
   const {messaging, generateToken} = tokenGeneration()
+
+  const LoadingSpinner = () => (
+    <div className="center-content">
+      <CircularProgress size={40} sx={{color:'#600018'}}/>
+    </div>
+  );
+
   useEffect(() => {
     generateToken();
-
-    onMessage(messaging, (payload) => {
-      console.log('Received payload:', payload);
-
+  
+    const unsubscribe = onMessage(messaging, (payload) => {
       if (payload.notification && payload.notification.body) {
+        // const newNotification = {
+        //   user: user?.user_id,
+        //   message: payload.notification.body,
+        // };
+  
         toast(payload.notification.body);
-        setNotifyAll((prev) => [...prev, payload.notification.body]);
-        setOrderNotify((prev) => [...prev, payload.notification.body])
+        // setNotifications((prev) => [...prev, newNotification]);
+  
+        // Ensure `notifications` is used to calculate unread count
+        // setNotificationCount((prevCount) => prevCount + 1);
       } else {
-        console.error('Notification payload is incorrect or missing');
+        console.error("Notification payload is incorrect or missing");
       }
     });
+  
+    return () => unsubscribe(); // Cleanup function to avoid memory leaks
   }, [messaging, generateToken]);
+
   return (
     <>
      <Toaster position='top-right'/> 
-          {/* <Bar /> */}
+     <NetworkStatus/>
+          {/* <NavigationBar/> */}
           <Routes>
             {/* Public Routes */}
-            <Route path='/' element={<Home />} />
-            <Route path='/login' element={<Login />} />
-            <Route path='/signup' element={<Signup />} />
-            <Route path='/forgot-password' element={<ForgotPassword/>}/>
-            <Route path='/changePassword' element={<ChangePassword/>}/>
-            <Route path='/index' element={<Index/>}></Route>
-            <Route path='/about' element={<About/>}></Route>
-            <Route path='/booking' element={<Booking/>}></Route>
-            <Route path='/contact' element={<Contact/>}></Route>
-            <Route path='/menus' element={<Menus/>}></Route>
-            <Route path='/team' element={<Team/>}></Route>
-            <Route path='/testimonial' element={<Testimonial/>}></Route>
-            <Route path='/service' element={<Service/>}></Route>
-
-
+            <Route path='/' element={<Suspense fallback={<LoadingSpinner/>}><Home /></Suspense>} />
+            <Route path='/login' element={<Suspense fallback={<LoadingSpinner/>}><Login /></Suspense>} />
+            <Route path='/signup' element={<Suspense fallback={<LoadingSpinner/>}><Signup /></Suspense>} />
+            <Route path='/forgot-password' element={<Suspense fallback={<LoadingSpinner/>}><ForgotPassword/></Suspense>}/>
+            <Route path='/index' element={<Suspense fallback={<LoadingSpinner/>}><Index/></Suspense>}></Route>
+            <Route path='/about' element={<Suspense fallback={<LoadingSpinner/>}><About/></Suspense>}></Route>
+            <Route path='/booking' element={<Suspense fallback={<LoadingSpinner/>}><Booking/></Suspense>}></Route>
+            <Route path='/contact' element={<Suspense fallback={<LoadingSpinner/>}><Contact/></Suspense>}></Route>
+            <Route path='/menus' element={<Suspense fallback={<LoadingSpinner/>}><Menus/></Suspense>}></Route>
+            <Route path='/team' element={<Suspense fallback={<LoadingSpinner/>}><Team/></Suspense>}></Route>
+            <Route path='/testimonial' element={<Suspense fallback={<LoadingSpinner/>}><Testimonial/></Suspense>}></Route>
+            <Route path='/service' element={<Suspense fallback={<LoadingSpinner/>}><Service/></Suspense>}></Route>
+            <Route path='/payment/callback?order_id&merchant_id' element={<paymentSucesss/>}/>
 
             {/* Staff Routes */}
             <Route
@@ -98,16 +112,16 @@ function Show() {
                     </div>
                     <div className="props p-3">
                       <Routes>
-                        <Route path='menu' element={<Menu />} />
-                        <Route path='orders' element={<Orders />} />
-                        <Route path='reservations' element={<Reservation />} />
-                        <Route path='/' element={<Staff />} />
-                        <Route path='addItem' element={<AddItem/>}/>
-                        <Route path='analytics' element={<MenuAnalytics />} />
-                        <Route path='profile' element={<StaffProfile/>}/>
-                        <Route path='items/:id' element={<SingleItem/>}/>
-                        <Route path='update/:id' element={<UpdateItem/>}/>
-                        <Route path='logout' element={<Logout />} />
+                        <Route path='menu' element={<Suspense fallback={<LoadingSpinner/>}><Menu /></Suspense>} />
+                        <Route path='orders' element={<Suspense fallback={<LoadingSpinner/>}><OrdersManagement /></Suspense>} />
+                        <Route path='reservations' element={<Suspense fallback={<LoadingSpinner/>}><Reservation /></Suspense>} />
+                        <Route path='/' element={<Suspense fallback={<LoadingSpinner/>}><Staff /></Suspense>} />
+                        <Route path='addItem' element={<Suspense fallback={<LoadingSpinner/>}><AddItem/></Suspense>}/>
+                        <Route path='analytics' element={<Suspense fallback={<LoadingSpinner/>}><MenuAnalytics /></Suspense>} />
+                        <Route path='profile' element={<Suspense fallback={<LoadingSpinner/>}><ProfileManagement/></Suspense>}/>
+                        <Route path='items/:id' element={<Suspense fallback={<LoadingSpinner/>}><SingleItem/></Suspense>}/>
+                        <Route path='update/:id' element={<Suspense fallback={<LoadingSpinner/>}><UpdateItem/></Suspense>}/>
+                        <Route path='logout' element={<Suspense fallback={<LoadingSpinner/>}><Logout /></Suspense>} />
                       </Routes>
                     </div>
                   </div>
@@ -115,7 +129,6 @@ function Show() {
               }
             />
               
-
             {/* Customer Routes */}
             <Route
               path='/customer/dashboard/*'
@@ -128,18 +141,16 @@ function Show() {
               
                     <div className="props p-3">
                       <Routes>
-                        <Route path='customermenuDisplay' element={<EnhancedMenuDisplay />} />
-                        <Route path='item/:id' element={<SingleMenu/>}/>
-                        <Route path='customerOrder' element={<Order />} />
-                        <Route path='CustomerProfile' element={<Profile />} />
-                        <Route path='CustomerReservation' element={<Reservations />} />
-                        <Route path='CustomerPayment' element={<Payment />} />
-                        <Route path='/' element={<Customer />} />
-                        <Route path='cart' element={<Cart/>}/>
-                        <Route path='receipt' element={<Receipt/>}/>
-                        <Route path='notify' element={<Notify/>}/>
-                        <Route path='Checkout' element={<Checkout/>}/>
-                        <Route path='/logout' element={<Logout/>}></Route>
+                        <Route path='customermenuDisplay' element={<Suspense fallback={<LoadingSpinner/>}><EnhancedMenuDisplay /></Suspense>} />
+                        <Route path='item/:id' element={<Suspense fallback={<LoadingSpinner/>}><SingleMenu/></Suspense>}/>
+                        <Route path='customerOrder' element={<Suspense fallback={<LoadingSpinner/>}><Order /></Suspense>} />
+                        <Route path='CustomerProfile' element={<Suspense fallback={<LoadingSpinner/>}><CustomerProfileManagement /></Suspense>} />
+                        <Route path='CustomerReservation' element={<Suspense fallback={<LoadingSpinner/>}><Reservations /></Suspense>} />
+                        <Route path='/' element={<Suspense fallback={<LoadingSpinner/>}><Customer /></Suspense>} />
+                        <Route path='cart' element={<Suspense fallback={<LoadingSpinner/>}><Cart/></Suspense>}/>
+                        <Route path='receipt' element={<Suspense fallback={<LoadingSpinner/>}><Receipt/></Suspense>}/>
+                        <Route path='Checkout' element={<Suspense fallback={<LoadingSpinner/>}><Checkout/></Suspense>}/>
+                        <Route path='/logout' element={<Suspense fallback={<LoadingSpinner/>}><Logout/></Suspense>}></Route>
                       </Routes>
                     </div>
                   </div>

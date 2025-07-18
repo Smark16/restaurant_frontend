@@ -45,13 +45,11 @@ import {
   Refresh,
 } from "@mui/icons-material"
 
-// Mock AuthContext for demonstration
-const AuthContext = React.createContext({
-  user: {
-    user_id: 1,
-    username: "John Doe",
-  },
-})
+import axios from 'axios'
+import { AuthContext } from "../Context/AuthContext"
+import useAxios from "../components/useAxios"
+
+import { IndexedData } from "../components/IndexedDB"
 
 // Order Card Component for Mobile
 const OrderCard = ({ order, onDelete }) => {
@@ -84,7 +82,7 @@ const OrderCard = ({ order, onDelete }) => {
   }
 
   return (
-    <Fade in timeout={300}>
+    <Fade in timeout={100}>
       <Card
         sx={{
           mb: 2,
@@ -135,18 +133,8 @@ const OrderCard = ({ order, onDelete }) => {
             </Box>
           </Box>
 
-          {order.total_amount && (
-            <Box sx={{ mb: 2, p: 1, bgcolor: alpha(theme.palette.primary.main, 0.1), borderRadius: 1 }}>
-              <Typography variant="body2" color="primary" fontWeight="bold">
-                Total: UGX {order.total_amount.toLocaleString()}
-              </Typography>
-            </Box>
-          )}
-
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Button variant="outlined" size="small" startIcon={<Visibility />}>
-              View Details
-            </Button>
+           
             <Tooltip title="Delete Order">
               <IconButton
                 onClick={() => onDelete(order.id)}
@@ -217,8 +205,12 @@ const OrderSkeleton = () => (
 
 function EnhancedOrder() {
   const { user } = useContext(AuthContext)
+  const {getUserOrders } = IndexedData()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
+  const axiosInstance = useAxios()
+
+  const user_orders = `http://127.0.0.1:8000/orders/userOrder/${user?.user_id}`
 
   const [loading, setLoading] = useState(false)
   const [orders, setOrders] = useState([])
@@ -228,48 +220,21 @@ function EnhancedOrder() {
   const [snackbarMessage, setSnackbarMessage] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
 
-  // Mock data for demonstration
-  const mockOrders = [
-    {
-      id: 1,
-      location: "123 Main Street, Kampala",
-      contact: "+256 700 123 456",
-      status: "Completed",
-      order_date: "2024-01-15T10:30:00Z",
-      user: { username: "John Doe" },
-      total_amount: 75000,
-      items_count: 3,
-    },
-    {
-      id: 2,
-      location: "456 Oak Avenue, Entebbe",
-      contact: "+256 701 234 567",
-      status: "In Progress",
-      order_date: "2024-01-16T14:20:00Z",
-      user: { username: "John Doe" },
-      total_amount: 45000,
-      items_count: 2,
-    },
-    {
-      id: 3,
-      location: "789 Pine Road, Jinja",
-      contact: "+256 702 345 678",
-      status: "Canceled",
-      order_date: "2024-01-14T09:15:00Z",
-      user: { username: "John Doe" },
-      total_amount: 32000,
-      items_count: 1,
-    },
-  ]
+  // get offline user orders
+  useEffect(()=>{
+    getUserOrders(user?.user_id)
+    .then(data => setOrders(data))
+    .catch(err => console.log('err', err))
+  }, [user?.user_id])
 
+  // get user orders
   const fetchData = async () => {
     try {
       setLoading(true)
-      // Mock API call
-      setTimeout(() => {
-        setOrders(mockOrders)
-        setLoading(false)
-      }, 1000)
+      const response = await axios.get(user_orders)
+      
+      setOrders(response.data)
+      setLoading(false)
     } catch (err) {
       console.log("Error occurred", err)
       setLoading(false)
@@ -278,10 +243,15 @@ function EnhancedOrder() {
 
   const handleDelete = async (id) => {
     try {
+      const delete_order = `http://127.0.0.1:8000/orders/delete_order/${id}`
+      const deleteResponse = await axiosInstance.delete(delete_order)
       // Mock API call
       const deleted = orders.filter((order) => order.id !== id)
       setOrders(deleted)
-      setSnackbarMessage("Order deleted successfully")
+
+      if(deleteResponse.status === 204){
+        setSnackbarMessage("Order deleted successfully")
+      }
       setSnackbarOpen(true)
       setDeleteDialogOpen(false)
       setOrderToDelete(null)
@@ -324,7 +294,7 @@ function EnhancedOrder() {
   }
 
   const filteredOrders = filterStatus === "all" ? orders : orders.filter((order) => order.status === filterStatus)
-
+  
   useEffect(() => {
     fetchData()
   }, [])
@@ -461,7 +431,6 @@ function EnhancedOrder() {
                   <TableCell>Contact</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Order Date</TableCell>
-                  <TableCell>Total</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -501,19 +470,7 @@ function EnhancedOrder() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      {order.total_amount && (
-                        <Typography variant="body2" fontWeight="bold" color="primary">
-                          UGX {order.total_amount.toLocaleString()}
-                        </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
                       <Box sx={{ display: "flex", gap: 1 }}>
-                        <Tooltip title="View Details">
-                          <IconButton size="small">
-                            <Visibility />
-                          </IconButton>
-                        </Tooltip>
                         <Tooltip title="Delete Order">
                           <IconButton size="small" color="error" onClick={() => openDeleteDialog(order.id)}>
                             <Delete />

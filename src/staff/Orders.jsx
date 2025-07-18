@@ -128,7 +128,7 @@ function OrdersManagement() {
       const response = await axios.get(SingleOrderItemUrl);
       const data = response.data;
       
-      setOrderItems(data?.menu);
+      setOrderItems(data?.takenItems);
     } catch (err) {
       console.error("Error fetching order details:", err);
       setError(err.message || "Failed to load order details.");
@@ -137,6 +137,7 @@ function OrdersManagement() {
     }
   };
 
+  console.log('order_items', orderItems)
   const getStatusChip = (status) => {
     const statusConfig = {
       Completed: { color: "success", icon: <CheckCircleIcon />, label: "Completed" },
@@ -453,21 +454,21 @@ function OrdersManagement() {
                   <Grid item xs={12} key={item.id}>
                     <Paper sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
-                        src={item.image ? `http://127.0.0.1:8000${item.image}` : "/placeholder.svg"}
+                        src={item.menu.image ? `http://127.0.0.1:8000${item.menu.image}` : "/placeholder.svg"}
                         alt={item.name || "Item"}
                         sx={{ width: 60, height: 60 }}
                         variant="rounded"
                       />
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="h6" fontWeight="bold">
-                          {item.name || "Unknown"}
+                          {item.menu.name || "Unknown"}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Quantity: {item.quantity || 0}
                         </Typography>
                       </Box>
                       <Chip
-                        label={`UGX ${item.price ? item.price.toLocaleString() : "0"}`}
+                        label={`UGX ${item.menu.price ? item.menu.price.toLocaleString() : "0"}`}
                         color="success"
                         variant="outlined"
                       />

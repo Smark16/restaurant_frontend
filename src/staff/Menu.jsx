@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -35,7 +35,8 @@ import {
   RestaurantMenu as AllIcon,
 } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { AuthContext } from "../Context/AuthContext";
+import useAxios from "../components/useAxios";
 
 const foodUrl = "http://127.0.0.1:8000/restaurant/food_items";
 
@@ -87,7 +88,8 @@ const categorizeFoodItem = (item) => {
 };
 
 function Menu() {
-  const [food, setFood] = useState([]);
+  const axiosInstance = useAxios()
+  const {food, setFood} = useContext(AuthContext)
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [filteredFood, setFilteredFood] = useState([]);
@@ -101,7 +103,7 @@ function Menu() {
   const fetchFood = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(foodUrl);
+      const response = await axiosInstance.get(foodUrl);
       const data = response.data.map((item) => ({
         ...item,
         category: categorizeFoodItem(item),
@@ -114,6 +116,7 @@ function Menu() {
       setLoading(false);
     }
   };
+  console.log('food', food)
 
   console.log(food)
 

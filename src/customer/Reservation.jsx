@@ -40,17 +40,9 @@ import {
   Celebration,
 } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
-
-// Mock AuthContext for demonstration
-const AuthContext = React.createContext({
-  user: {
-    user_id: 1,
-    username: "John Doe",
-    email: "john@example.com",
-  },
-  showSuccessAlert: (message) => console.log("Success:", message),
-  showErrorAlert: (message) => console.log("Error:", message),
-})
+import axios from "axios"
+import { AuthContext } from "../Context/AuthContext"
+import useAxios from "../components/useAxios"
 
 // Table Card Component
 const TableCard = ({ table, isSelected, onSelect }) => {
@@ -66,16 +58,16 @@ const TableCard = ({ table, isSelected, onSelect }) => {
           transform: "translateY(-4px)",
           boxShadow: `0 8px 25px ${alpha(theme.palette.common.black, 0.15)}`,
         },
-        opacity: table.is_available ? 1 : 0.6,
+        opacity: !table.is_booked ? 1 : 0.6,
       }}
-      onClick={() => table.is_available && onSelect(table.id.toString())}
+      onClick={() => !table.is_booked && onSelect(table.id.toString())}
     >
       <CardContent sx={{ textAlign: "center", p: 3 }}>
         <Avatar
           sx={{
             width: 60,
             height: 60,
-            bgcolor: isSelected ? "primary.main" : table.is_available ? "success.main" : "grey.400",
+            bgcolor: isSelected ? "primary.main" : !table.is_booked ? "success.main" : "grey.400",
             mx: "auto",
             mb: 2,
           }}
@@ -92,8 +84,8 @@ const TableCard = ({ table, isSelected, onSelect }) => {
           Location: {table.location}
         </Typography>
         <Chip
-          label={table.is_available ? "Available" : "Occupied"}
-          color={table.is_available ? "success" : "error"}
+          label={!table.is_booked ? "Available" : "Occupied"}
+          color={!table.is_booked ? "success" : "error"}
           size="small"
           sx={{ mt: 1 }}
         />
@@ -158,12 +150,17 @@ function EnhancedReservations() {
   const { user, showSuccessAlert, showErrorAlert } = useContext(AuthContext)
   const navigate = useNavigate()
   const theme = useTheme()
+  const axiosInstance = useAxios()
+
+  const post_reservations = 'http://127.0.0.1:8000/reservations/new_reservation'
+  const table_list = 'http://127.0.0.1:8000/tables/tables'
 
   const [reservation, setReservation] = useState({
+    user:user?.user_id,
     contact: "",
-    Email: user.email || "",
+    email: "",
     party_size: "",
-    table: "",
+    table: null,
     reservation_date: "",
   })
 
@@ -175,25 +172,15 @@ function EnhancedReservations() {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const steps = ["Reservation Details", "Select Table", "Confirm Booking"]
-
-  // Mock table data
-  const mockTables = [
-    { id: 1, table_no: "1", capacity: 2, location: "Window Side", is_available: true },
-    { id: 2, table_no: "2", capacity: 4, location: "Center", is_available: true },
-    { id: 3, table_no: "3", capacity: 6, location: "Private Corner", is_available: false },
-    { id: 4, table_no: "4", capacity: 8, location: "VIP Section", is_available: true },
-    { id: 5, table_no: "5", capacity: 2, location: "Balcony", is_available: true },
-    { id: 6, table_no: "6", capacity: 4, location: "Garden View", is_available: true },
-  ]
-
+  
+//get tables
   const fetchTables = async () => {
     try {
       setLoading(true)
+      const tableList = await axiosInstance.get(table_list)
+      setTables(tableList.data)
       // Mock API call
-      setTimeout(() => {
-        setTables(mockTables)
-        setLoading(false)
-      }, 1000)
+      setLoading(false)
     } catch (err) {
       console.log("No table", err)
       setLoading(false)
@@ -206,13 +193,13 @@ function EnhancedReservations() {
   }
 
   const handleTableSelect = (tableId) => {
-    setReservation({ ...reservation, table: tableId })
+    setReservation({ ...reservation, table: Number(tableId) })
   }
 
   const handleNext = () => {
     if (activeStep === 0) {
       // Validate step 1
-      if (!reservation.contact || !reservation.Email || !reservation.party_size || !reservation.reservation_date) {
+      if (!reservation.contact || !reservation.email || !reservation.party_size || !reservation.reservation_date) {
         setErrorMessage("Please fill in all required fields")
         setSnackbarOpen(true)
         return
@@ -231,18 +218,28 @@ function EnhancedReservations() {
   const handleBack = () => {
     setActiveStep((prev) => prev - 1)
   }
+  console.log('reservation', reservation)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setConfirmed(true)
 
     try {
-      // Mock API call
-      setTimeout(() => {
-        showSuccessAlert("Reservation Made Successfully")
-        setConfirmed(false)
-        navigate("/customer/dashboard")
-      }, 2000)
+      await axiosInstance.post(post_reservations, {
+        user:user?.user_id,
+        contact:reservation.contact,
+        email:reservation.email,
+        party_size:reservation.party_size,
+        reservation_date:reservation.reservation_date,
+        table:reservation.table
+      }).then(res =>{
+        if(res.status === 201){
+          showSuccessAlert("Reservation Made Successfully")
+          setConfirmed(false)
+          navigate("/customer/dashboard")
+        }
+      })
+  
     } catch (err) {
       console.log("An error occurred", err)
       showErrorAlert("Failed to make reservation. Please try again.")
@@ -255,7 +252,7 @@ function EnhancedReservations() {
   }, [])
 
   const selectedTable = tables.find((table) => table.id.toString() === reservation.table)
-  const availableTables = tables.filter((table) => table.is_available)
+  const availableTables = tables.filter((table) => !table.is_booked)
 
   // Get minimum date (today)
   const today = new Date().toISOString().split("T")[0]
@@ -354,9 +351,9 @@ function EnhancedReservations() {
                       <TextField
                         fullWidth
                         label="Email Address"
-                        name="Email"
+                        name="email"
                         type="email"
-                        value={reservation.Email}
+                        value={reservation.email}
                         onChange={handleChange}
                         required
                         InputProps={{
@@ -444,7 +441,7 @@ function EnhancedReservations() {
                         <Grid item xs={12} sm={6} md={4} key={table.id}>
                           <TableCard
                             table={table}
-                            isSelected={reservation.table === table.id.toString()}
+                            isSelected={reservation.table === table.id}
                             onSelect={handleTableSelect}
                           />
                         </Grid>

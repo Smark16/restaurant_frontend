@@ -45,12 +45,13 @@ import {
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import useHook from "./customHook";
+import { IndexedData } from "../components/IndexedDB";
 
 const foodUrl = "http://127.0.0.1:8000/restaurant/food_items";
 
 // Function to categorize food items (same as in menu component)
 const categorizeFoodItem = (item) => {
-  if (item.category.name) return item.category.name.toLowerCase();
+  if (item.category__name) return item.category__name.toLowerCase();
 
   const name = item.name.toLowerCase();
   const desc = item.descriptions.toLowerCase();
@@ -93,6 +94,7 @@ const categorizeFoodItem = (item) => {
 };
 
 function SingleItem() {
+  const { getSingleItem } = IndexedData()
   const { id } = useParams();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -105,7 +107,13 @@ function SingleItem() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
-  const { food } = useHook(foodUrl);
+  const { foodItems } = useHook(foodUrl);
+
+  useEffect(()=>{
+    getSingleItem(id)
+    .then(data => setItem(data))
+    .catch(err => console.log('indexed bd err', err))
+  }, [id])
 
   const fetchData = async () => {
     try {
@@ -164,9 +172,9 @@ function SingleItem() {
   };
 
   const getRelatedItems = () => {
-    if (!item || !food.length) return [];
+    if (!item || !foodItems?.length) return [];
     const currentCategory = categorizeFoodItem(item);
-    return food
+    return foodItems
       .filter((foodItem) => foodItem.id !== item.id && categorizeFoodItem(foodItem) === currentCategory)
       .slice(0, 4);
   };
@@ -403,7 +411,7 @@ function SingleItem() {
                     <CardMedia
                       component="img"
                       height="150"
-                      image={relatedItem.image}
+                      image={`http://127.0.0.1:8000/media/${relatedItem.image}`}
                       alt={relatedItem.name}
                       sx={{ objectFit: "cover" }}
                     />

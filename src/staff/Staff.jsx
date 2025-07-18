@@ -53,8 +53,6 @@ import {
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -64,14 +62,14 @@ import {
   PieChart,
   Pie,
   Cell,
-  BarChart,
-  Bar,
   Area,
   AreaChart,
 } from "recharts";
 import { AuthContext } from "../Context/AuthContext";
 import useHook from "./customHook";
 import axios from 'axios'
+import useAxios from "../components/useAxios";
+import NavigationBar from "../components/Navbar";
 
 const theme = createTheme({
   palette: {
@@ -145,7 +143,8 @@ const order_status_perfomance = 'http://127.0.0.1:8000/dashboard/order_status_st
 
 function StaffDashboard() {
   const { orders, reservations} = useHook();
-  const { user } = useContext(AuthContext);
+  const { user,  CurrentOrders, setCurrentOrders,catPerfomance, setCatPerfomnace } = useContext(AuthContext);
+  const axiosInstance = useAxios()
 
   const [tables, setTables] = useState([]);
   const [message, setMessage] = useState("");
@@ -158,8 +157,18 @@ function StaffDashboard() {
   const [yesterday, setYesterday] = useState('')
   const [thisMonth, setThisMonth] = useState('')
   const [lastMonth, setLastMonth] = useState('')
-  const [catPerfomance, setCatPerfomnace] = useState('')
   const [orderPerfomance, setOrderPerfomance] = useState('')
+
+  // current orders
+  const TodayOrders = async()=>{
+    try{
+    const response = await axiosInstance.get('http://127.0.0.1:8000/dashboard/today_stats')
+    const data = response.data
+    setCurrentOrders(data)
+    }catch(err){
+      console.log('err', err)
+    }
+  }
 
   // order stats
 const YesterdayOrders = async()=>{
@@ -172,6 +181,7 @@ const YesterdayOrders = async()=>{
   }
 }
 
+// current month orders
 const ThisMonthOrders = async()=>{
   try{
   const response = await axios.get(this_month_orders)
@@ -182,6 +192,7 @@ const ThisMonthOrders = async()=>{
   }
 }
 
+// last month orders
 const LastMonthOrders = async()=>{
   try{
   const response = await axios.get(last_month_orders)
@@ -211,25 +222,19 @@ const OrderStatusPerfomance = async()=>{
     console.log('err', err)
   }
 }
-
+console.log('current orders', CurrentOrders)
 
 //data for different time periods
 const generateSampleData = (period) => {
   const baseData = {
     today: {
-      revenue: 15420,
-      orders: 45,
-      customers: 38,
-      avgRevenue: 342.67,
-      chartData: [
-        { time: "9AM", orders: 5, revenue: 1200 },
-        { time: "11AM", orders: 8, revenue: 2100 },
-        { time: "1PM", orders: 12, revenue: 3200 },
-        { time: "3PM", orders: 7, revenue: 1800 },
-        { time: "6PM", orders: 15, revenue: 4100 },
-        { time: "8PM", orders: 10, revenue: 2800 },
-      ],
+      revenue: CurrentOrders.today_revenue || 0,
+      orders: CurrentOrders.today_orders || 0,
+      customers:CurrentOrders.today_customers || 0,
+      avgRevenue: CurrentOrders.today_avg_revenue || 0,
+      chartData: CurrentOrders.chartData || [],
     },
+    
     yesterday: {
       revenue: yesterday.yesterday_revenue,
       orders: yesterday.yesterday_orders,
@@ -325,18 +330,19 @@ const currentData = generateSampleData(periods[selectedPeriod]);
 
   const fetchTables = async () => {
     try {
-      const response = await fetch(tablesUrl);
-      const data = await response.json();
-      setTables(data);
+      const response = await axiosInstance.get(tablesUrl);
+      setTables(response.data);
     } catch (err) {
       console.log("No table");
     }
   };
+  console.log('tables', tables)
 
   useEffect(()=>{
   const loadData = async()=>{
     await Promise.all(YesterdayOrders(), ThisMonthOrders(), LastMonthOrders(), fetchTables())
   }
+  TodayOrders()
   CatPerfomance()
   OrderStatusPerfomance()
   loadData()
@@ -377,6 +383,8 @@ const currentData = generateSampleData(periods[selectedPeriod]);
   const tabLabels = ["Today", "Yesterday", "This Month", "Last Month"];
 
   return (
+    <>
+   <NavigationBar/>
     <ThemeProvider theme={theme}>
       <Box sx={{ p: 3, backgroundColor: "#f5f7fa", minHeight: "100vh" }}>
         {/* Welcome Header */}
@@ -859,6 +867,8 @@ const currentData = generateSampleData(periods[selectedPeriod]);
         </Snackbar>
       </Box>
     </ThemeProvider>
+    </>
+    
   );
 }
 

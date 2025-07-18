@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import {jwtDecode} from 'jwt-decode';
 import Swal from 'sweetalert2';
 
-const baseURL = 'https://restaurant-backend5.onrender.com/restaurant/';
+const baseURL = 'http://127.0.0.1:8000/restaurant/';
 
 const useAxios = () => {
   const { setUser, authTokens, setAuthTokens } = useContext(AuthContext);
@@ -27,7 +27,7 @@ const useAxios = () => {
 
     try {
       // Sending a request to refresh the access token using the refresh token
-      const response = await axios.post("https://restaurant-backend5.onrender.com/api/token/refresh/", {
+      const response = await axios.post("http://127.0.0.1:8000/api/token/refresh/", {
         refresh: authTokens.refresh,
       });
 

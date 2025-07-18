@@ -156,6 +156,10 @@ gap: 20px;
     padding: 5px;
   }
 
+  .link{
+    text-decoration: none;
+  }
+
   /* media screen */
   @media screen and (max-width: 1000px) {
    .socials{

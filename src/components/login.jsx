@@ -120,7 +120,7 @@ onChange={handleChange}/>
 </form>
  
  {/* <p className='text-center w-100'>forgot Password ? <Link to='/forgot-password'>Reset Password</Link></p> */}
-<p className='text-center w-100'>No account? <Link to='/register'>Create one</Link></p>
+<p className='text-center w-100'>No account? <Link to='/signup'>Create one</Link></p>
 
 </Box>
 </div>

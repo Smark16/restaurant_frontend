@@ -407,7 +407,7 @@ function ProfileManagement() {
 
                 <Stack spacing={2} alignItems="center">
                   <Chip
-                    icon={myUser.is_staff ? <AdminIcon /> : <CustomerIcon />}
+                    icon={myUser.is_staff && <AdminIcon /> }
                     label={myUser.is_staff ? "Staff Member" : "Customer"}
                     color={myUser.is_staff ? "secondary" : "primary"}
                     variant="outlined"

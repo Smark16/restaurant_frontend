@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Box,
@@ -39,12 +39,15 @@ import {
   LocalDining as IngredientsIcon,
 } from "@mui/icons-material"
 import { Link } from "react-router-dom"
-import axios from "axios"
+import { AuthContext } from "../Context/AuthContext"
 import Swal from "sweetalert2"
+import useAxios from "../components/useAxios"
 
 const url = "http://127.0.0.1:8000/restaurant/items"
 
 function AddItem() {
+  const axiosInstance = useAxios()
+  const {setFood} = useContext(AuthContext)
   const navigate = useNavigate()
   const [product, setProduct] = useState({
     pname: "",
@@ -52,6 +55,7 @@ function AddItem() {
     desc: "",
     image: null,
     category: "",
+    is_available:true,
     ingredients: [], // Added ingredients field
   })
   const [imagePreview, setImagePreview] = useState("")
@@ -183,13 +187,14 @@ function AddItem() {
     formData.append("price", product.price)
     formData.append("descriptions", product.desc)
     formData.append("category", product.category)
+    formData.append("is_available", product.is_available)
     formData.append("ingredients", JSON.stringify(product.ingredients)) // Send ingredients as JSON string
     if (product.image) {
       formData.append("image", product.image)
     }
 
     try {
-      const response = await axios.post(url, formData, {
+      const response = await axiosInstance.post(url, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -199,6 +204,9 @@ function AddItem() {
         // Reset form
         setProduct({ pname: "", price: "", desc: "", image: null, category: "", ingredients: [] })
         setImagePreview("")
+
+        // const menuResponse = await axiosInstance.get('http://127.0.0.1:8000/restaurant/food_items');
+        // setFood(menuResponse.data)
         setCurrentIngredient("")
         setTimeout(() => {
           navigate("/staff/dashboard/menu")

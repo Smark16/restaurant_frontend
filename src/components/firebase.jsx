@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+
+import React, { useContext, useEffect } from 'react';
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken } from "firebase/messaging";
-import useAxios from './useAxios';
 import { AuthContext } from '../Context/AuthContext';
-import axios from 'axios';
+import useAxios from './useAxios';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDnNFszqf2n5P8ekFhbIcR_HDufhtHXzdk",
@@ -15,38 +15,61 @@ const firebaseConfig = {
     measurementId: "G-HLBB29FJ4C"
 };
 
-export const tokenGeneration = ()=>{
-    const { user } = useContext(AuthContext);  // Use useContext inside function
+export const tokenGeneration = () => {
+    const { user } = useContext(AuthContext);  
     const axiosInstance = useAxios();
+
     // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Cloud Messaging and get a reference to the service
-const messaging = getMessaging(app);
+    // Initialize Firebase Cloud Messaging and get a reference to the service
+    const messaging = getMessaging(app);
 
-const generateToken = async () => {
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            const fcm_token = await getToken(messaging, {
-                vapidKey: "BNK4QUakbgI1EuK6GXomrSYe8bWdoYNhDFH0mHtM5oRSL2prjMV8K8sUDWZjgxv_-WSm-Y67Q7bVdlusq13Lizg"
-            });
-            if (fcm_token && user) {
-                await axios.patch(`https://restaurant-backend5.onrender.com/restaurant/fcm_token/${user.user_id}`, {fcm_token})
+    const generateToken = async () => {
+        try {
+            const permission = await Notification.requestPermission();
+
+            if (permission === 'granted') {
+                const currentToken = await getToken(messaging, { 
+                    vapidKey: "BNK4QUakbgI1EuK6GXomrSYe8bWdoYNhDFH0mHtM5oRSL2prjMV8K8sUDWZjgxv_-WSm-Y67Q7bVdlusq13Lizg"
+                });
+
+                if (currentToken && user) {
+                    await axiosInstance.patch(`http://127.0.0.1:8000/restaurant/fcm_token/${user?.user_id}`, { fcm_token: currentToken })
+                        .then(response => {
+                            // console.log('FCM token saved successfully:', response);
+                        })
+                        .catch(error => {
+                            // console.error('Error saving FCM token:', error);
+                        });
+                } else {
+                    // console.log('No registration token available. Request permission to generate one.');
+                }
             } else {
-                console.warn('No FCM token received.');
+                // console.warn('Notification permission not granted.');
             }
-        } else {
-            console.warn('Notification permission not granted.');
+        } catch (err) {
+            // console.error('An error occurred while retrieving token:', err);
         }
-    } catch (error) {
-        console.error('Error generating FCM token:', error);
-    }
-};
+    };
 
+    // Call generateToken when the component mounts
+    useEffect(() => {
+        generateToken();
+    }, []);
+
+    // Call generateToken whenever the user changes (e.g., on login)
+    useEffect(() => {
+        if (user) {
+            generateToken();
+        }
+    }, [user]); // Dependency on `user` ensures this runs when the user logs in
 
     return {
-        messaging, generateToken
-    }
-}
+        messaging, 
+        generateToken
+    };
+};
+
+export default tokenGeneration;
 

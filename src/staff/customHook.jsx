@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import useAxios from '../components/useAxios';
 
 const orderUrl = 'http://127.0.0.1:8000/orders/user_orders';
 const reservationUrl = 'http://127.0.0.1:8000/reservations/all_resrvations';
-const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items';
-const latestOrderUrl = 'https://restaurant-backend5.onrender.com/restaurant/latest_orders';
-
+const foodItemUrl = 'http://127.0.0.1:8000/restaurant/food_items'
 
 function useHook() {
+    const axiosInstance = useAxios()
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [reservations, setReservations] = useState([]);
-    const [food, setFood] = useState([]);
     const [latest, setLatest] = useState([]);
+    const [foodItems, setFoodItems] = useState([])
 
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await axios(orderUrl);
+            const response = await axiosInstance.get(orderUrl);
             setOrders(response.data);
             setLoading(false);
         } catch (err) {
@@ -28,29 +27,17 @@ function useHook() {
     const fetchReservations = async () => {
         try {
             setLoading(true);
-            const response = await axios(reservationUrl);
+            const response = await axiosInstance.get(reservationUrl);
             setReservations(response.data);
             setLoading(false);
         } catch (err) {
             console.log(err);
         }
     };
-
-    const fetchFood = async () => {
+    const fetchfoodItems = async () => {
         try {
-            setLoading(true);
-            const response = await axios(foodUrl);
-            setFood(response.data);
-            setLoading(false);
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const fetchLatest = async () => {
-        try {
-            const response = await axios(latestOrderUrl);
-            setLatest(response.data);
+            const response = await axiosInstance.get(foodItemUrl);
+            setFoodItems(response.data);
         } catch (err) {
             console.log(err);
         }
@@ -59,12 +46,11 @@ function useHook() {
     useEffect(() => {
         fetchOrders();
         fetchReservations();
-        fetchFood();
-        fetchLatest();
+        fetchfoodItems();
     }, []);
 
     return {
-        orders, loading, reservations, food, latest
+        orders, loading, reservations, latest, foodItems
     };
 }
 

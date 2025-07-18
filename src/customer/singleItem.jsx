@@ -49,6 +49,8 @@ import { useParams, Link, useNavigate } from "react-router-dom"
 import { AuthContext } from "../Context/AuthContext"
 import axios from "axios"
 
+import { IndexedData } from "../components/IndexedDB";
+
 const post_reviews = 'http://127.0.0.1:8000/reviews/post_review'
 const post_rates = 'http://127.0.0.1:8000/ratings/rates'
 
@@ -149,9 +151,10 @@ const ReviewCard = ({ review }) => (
 
 function SingleMenuEnhanced() {
   const { id } = useParams()
+  const { getSingleItem } = IndexedData()
   const navigate = useNavigate()
   const theme = useTheme()
-  const { user, handleCart } = useContext(AuthContext)
+  const { user, handleCart, Increase, Reduce, addItem } = useContext(AuthContext)
   const ItemUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`
   const product_reviews = `http://127.0.0.1:8000/reviews/product_review/${id}`
  
@@ -159,7 +162,7 @@ function SingleMenuEnhanced() {
   const [loading, setLoading] = useState(true)
   const [reviews, setReviews] = useState([])
   const [similarProducts, setSimilarProducts] = useState([])
-  const [quantity, setQuantity] = useState(1)
+  const [quantity, setQuantity] = useState(0)
   const [userRating, setUserRating] = useState(0)
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const [reviewText, setReviewText] = useState("")
@@ -168,6 +171,14 @@ function SingleMenuEnhanced() {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState("")
   const [expandedInfo, setExpandedInfo] = useState(false)
+
+  // handle item when offline
+  useEffect(()=>{
+    getSingleItem(id)
+    .then(data => setItem(data))
+    .catch(err => console.log('indexed bd err', err))
+  }, [id])
+
 
   // Fetch product data and reviews
   const fetchData = async () => {
@@ -193,6 +204,15 @@ function SingleMenuEnhanced() {
     }
   }
 
+   // Sync cart quantity with local storage
+  useEffect(() => {
+    const storedItems = JSON.parse(localStorage.getItem('clickedItem')) || []
+    if (storedItems.length > 0 && addItem.length === 0) {
+      // If localStorage has items but addItem is empty, sync them
+      setQuantity(storedItems.find((cart) => cart.menu === Number(id))?.quantity || 0)
+    }
+  }, [addItem, id])
+
   const handleAddToCart = (product) => {
     if (!product || !product.name) {
       setSnackbarMessage("Cannot add item to cart: Invalid product")
@@ -203,6 +223,9 @@ function SingleMenuEnhanced() {
     setSnackbarMessage(`${product.name} added to cart!`)
     setSnackbarOpen(true)
   }
+
+    // Get cart item for the current product
+  const cartItem = item ? addItem.find((cart) => cart.menu === item.id) : null
 
   // Handle rating and review submission
   const handleRatingReviewSubmit = async () => {
@@ -445,13 +468,27 @@ function SingleMenuEnhanced() {
                   Quantity
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-                  <IconButton onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>
-                    <Remove />
-                  </IconButton>
+                  <IconButton
+                      onClick={() => {
+                        if (cartItem) {
+                          Reduce(item)
+                        } 
+                      }}
+                      disabled={!cartItem && quantity <= 1}
+                    >
+                       <Remove />
+                       </IconButton>
                   <Typography variant="h6" sx={{ minWidth: 40, textAlign: "center" }}>
-                    {quantity}
+                    {cartItem ? cartItem.quantity : quantity}
                   </Typography>
-                  <IconButton onClick={() => setQuantity(quantity + 1)}>
+                  <IconButton
+                      onClick={() => {
+                        if (cartItem) {
+                          Increase(item)
+                        } 
+                      }}
+                      disabled={!cartItem}
+                    >
                     <Add />
                   </IconButton>
                 </Box>
@@ -464,9 +501,9 @@ function SingleMenuEnhanced() {
                   disabled={!item?.is_available}
                   sx={{ py: 1.5, fontSize: "1.1rem", fontWeight: "bold" }}
                 >
-                  {item?.is_available
-                    ? `Add to Cart - UGX ${(item?.price * quantity || 0).toLocaleString()}`
-                    : "Out of Stock"}
+                   {item.is_available
+                      ? `Add to Cart - UGX ${(item.price * (cartItem?.quantity || 1)).toLocaleString()}`
+                      : "Out of Stock"}
                 </Button>
               </Box>
             </Box>
@@ -589,7 +626,7 @@ function SingleMenuEnhanced() {
         component={Link}
         to="/customer/dashboard/cart"
       >
-        <Badge badgeContent={quantity} color="error">
+        <Badge badgeContent={cartItem ? cartItem.quantity : quantity} color="error">
           <ShoppingCart />
         </Badge>
       </Fab>

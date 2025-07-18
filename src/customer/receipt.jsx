@@ -36,15 +36,6 @@ import {
 import jsPDF from "jspdf"
 import html2canvas from "html2canvas"
 
-// Mock AuthContext for demonstration
-const AuthContext = React.createContext({
-  user: {
-    user_id: 1,
-    username: "John Doe",
-    email: "john@example.com",
-  },
-})
-
 function EnhancedReceipt() {
   const { user } = useContext(AuthContext)
   const theme = useTheme()

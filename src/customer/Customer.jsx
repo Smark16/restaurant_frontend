@@ -42,14 +42,9 @@ import {
 } from "@mui/icons-material"
 import { Link } from "react-router-dom"
 import axios from "axios"
-// import { AuthContext } from '../Context/AuthContext'
+import { AuthContext } from '../Context/AuthContext'
 import Calendar from "./calendar"
-
-// Mock AuthContext for demonstration
-const AuthContext = React.createContext({
-  user: { user_id: 1, username: "John Doe" },
-  Loginloading: false,
-})
+import NavigationBar from "../components/Navbar"
 
 // Stats Card Component
 const StatsCard = ({ title, value, icon, color, trend, subtitle }) => {
@@ -130,7 +125,7 @@ const StatusChip = ({ status }) => {
 }
 
 function Customer() {
-  const { user, Loginloading } = useContext(AuthContext)
+  const { user, Loginloading} = useContext(AuthContext)
   const theme = useTheme()
 
   const [expense, setExpense] = useState(0)
@@ -140,14 +135,15 @@ function Customer() {
   const [reservations, setReservations] = useState([])
 
   // API endpoints
-  const user_order = `https://restaurant-backend5.onrender.com/restaurant/user_order/${user.user_id}`
-  const orderPlaced = `https://restaurant-backend5.onrender.com/restaurant/userOrder/${user.user_id}`
-  const userReservation = `https://restaurant-backend5.onrender.com/restaurant/user-reservation/${user.user_id}`
+  const user_order = `http://127.0.0.1:8000/orders/userOrder/${user?.user_id}`
+  const userReservation = `http://127.0.0.1:8000/reservations/user-reservation/${user?.user_id}`
+  const total_expense = `http://127.0.0.1:8000/dashboard/user_expense/${user?.user_id}`
 
+  // get user orders
   const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(orderPlaced)
+      const response = await axios.get(user_order)
       setOrders(response.data)
     } catch (err) {
       console.log("Error occurred", err)
@@ -156,6 +152,7 @@ function Customer() {
     }
   }
 
+  // get user reservations
   const fetchReservations = async () => {
     try {
       setLoading(true)
@@ -168,26 +165,23 @@ function Customer() {
     }
   }
 
-  const fetchOrder = async () => {
-    try {
-      const response = await axios.get(user_order)
-      const data = response.data
-      setUserOrder(data)
-
-      const totalExpense = data.reduce((total, order) => {
-        const orderTotal = order.menu.reduce((sum, item) => sum + item.price * item.quantity, 0)
-        return total + orderTotal
-      }, 0)
-      setExpense(totalExpense)
-    } catch (err) {
-      console.log(err)
+  // get total Expense
+  const totalExpense = async()=>{
+    try{
+   const response = await axios.get(total_expense)
+   setExpense(response.data)
+    }catch(err){
+      console.log('err', err)
     }
   }
 
+
   useEffect(() => {
-    fetchData()
-    fetchReservations()
-    fetchOrder()
+    const loadData = async() =>{
+      await Promise.all([fetchData(),  fetchReservations()])
+    }
+    loadData()
+    totalExpense()
   }, [])
 
   if (Loginloading) {
@@ -211,8 +205,11 @@ function Customer() {
   }
 
   return (
+    <>
+    <NavigationBar/>
     <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "100vh" }}>
-      {/* Welcome Header */}
+  
+
       <Card sx={{ mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", color: "white" }}>
@@ -245,7 +242,7 @@ function Customer() {
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
             title="Total Expense"
-            value={`UGX ${expense.toFixed(2)}`}
+            value={`UGX ${expense.Total_expense || 0}`}
             icon={<TrendingUp />}
             color={theme.palette.success.main}
             subtitle="This month"
@@ -254,7 +251,7 @@ function Customer() {
         <Grid item xs={12} sm={6} md={3}>
           <StatsCard
             title="Total Orders"
-            value={userOrder.length}
+            value={orders.length}
             icon={<Restaurant />}
             color={theme.palette.warning.main}
             trend="+8% from last week"
@@ -304,7 +301,6 @@ function Customer() {
                         <TableCell>Contact</TableCell>
                         <TableCell>Status</TableCell>
                         <TableCell>Date</TableCell>
-                        <TableCell>Action</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -335,13 +331,6 @@ function Customer() {
                             <Typography variant="body2" color="text.secondary">
                               {new Date(order.order_date).toLocaleDateString()}
                             </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Tooltip title="View Details">
-                              <IconButton size="small">
-                                <Visibility />
-                              </IconButton>
-                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -452,7 +441,7 @@ function Customer() {
                   Pending Orders
                 </Typography>
                 <Chip
-                  label={orders.filter((order) => order.status === "In Progress").length}
+                  label={orders.filter((order) => order.status === "Pending").length}
                   color="warning"
                   size="small"
                 />
@@ -476,7 +465,7 @@ function Customer() {
                   Member since
                 </Typography>
                 <Typography variant="h6" color="primary" fontWeight="bold">
-                  January 2024
+                  {user.date_joined}
                 </Typography>
               </Box>
             </CardContent>
@@ -484,6 +473,8 @@ function Customer() {
         </Grid>
       </Grid>
     </Box>
+    </>
+    
   )
 }
 

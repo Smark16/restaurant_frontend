@@ -1,334 +1,314 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { styled, alpha } from '@mui/material/styles';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Badge from '@mui/material/Badge';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import MoreIcon from '@mui/icons-material/MoreVert';
-import { Link } from 'react-router-dom';
-import { AuthContext } from '../Context/AuthContext';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import Notifications from '../customer/Notifications';
-import NotificationsPanel from './allnotifications';
+// components/NavigationBar.js
+import React, { useState, useContext } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Badge,
+  Menu,
+  MenuItem,
+  Box,
+  Button,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Avatar,
+  Tooltip,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import {
+  Menu as MenuIcon,
+  Notifications as NotificationsIcon,
+  Dashboard as DashboardIcon,
+  Person as PersonIcon,
+  ExitToApp as LogoutIcon,
+  Settings as SettingsIcon,
+  MoreVert as MoreVertIcon,
+} from "@mui/icons-material";
+import { styled, alpha } from "@mui/material/styles";
+import { AuthContext } from "../Context/AuthContext";
+import NotificationsPanel from "../customer/UserNotifications";
+import { Link } from "react-router-dom";
 
-import '../App.css';
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
+const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+  boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+  backdropFilter: "blur(10px)",
 }));
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
+const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+  minHeight: "70px",
   padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
+  [theme.breakpoints.up("sm")]: {
+    padding: theme.spacing(0, 3),
+  },
 }));
 
-const Bar = () => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  const { user, staff, customer, clicked, setClicked, orderNotify, total, showNotifications, notifyAll, setNotifyAll, setShowNotifications, handleMessages, handleAllMessages, setShowNotificationsAll, handleDisplay, showNotificationsAll } = useContext(AuthContext);
-  const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  console.log(showNotifications)
+const Logo = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  fontSize: "1.5rem",
+  background: "linear-gradient(45deg, #fff 30%, #f0f0f0 90%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "scale(1.05)",
+  },
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  margin: theme.spacing(0, 0.5),
+  transition: "all 0.3s ease",
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.1),
+    transform: "translateY(-2px)",
+  },
+}));
+
+const AuthButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(0, 1),
+  borderRadius: theme.spacing(3),
+  padding: theme.spacing(1, 3),
+  fontWeight: 600,
+  textTransform: "none",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: theme.shadows[4],
+  },
+}));
+
+const NavigationBar = ({ onMenuToggle }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { user, staff, customer, logout, unreadUserNotifications, showUserNotifications, setShowUserNotifications} = useContext(AuthContext);
+
+  // State management
+  const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Mock data - replace with your actual data
+  const cartItems = 3;
+
+  // Event handlers
+  const handleMobileMenuOpen = (event) => {
+    setMobileMenuAnchor(event.currentTarget);
+  };
 
   const handleMobileMenuClose = () => {
-    setMobileMoreAnchorEl(null);
+    setMobileMenuAnchor(null);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    handleMobileMenuClose();
+  const handleProfileMenuOpen = (event) => {
+    setProfileMenuAnchor(event.currentTarget);
   };
 
-  const handleMobileMenuOpen = (event) => {
-    setMobileMoreAnchorEl(event.currentTarget);
+  const handleProfileMenuClose = () => {
+    setProfileMenuAnchor(null);
   };
 
-  const removeContent = () => {
-    setClicked(true);
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen);
+    if (onMenuToggle) onMenuToggle();
   };
 
-  const fetchNotifications = async (userId) => {
-    try {
-      const response = await fetch(`https://restaurant-backend5.onrender.com/restaurant/usermsg/${userId}`);
-      const data = await response.json();
-      setNotifyAll(data);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchNotifications(user.user_id);
-    }
-  }, [user]);
-
-  const menuId = 'primary-search-account-menu';
-  const renderMenu = (
+  const renderProfileMenu = () => (
     <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
+      anchorEl={profileMenuAnchor}
+      open={Boolean(profileMenuAnchor)}
+      onClose={handleProfileMenuClose}
+      PaperProps={{
+        sx: {
+          mt: 1,
+          minWidth: 200,
+          borderRadius: 2,
+          boxShadow: theme.shadows[8],
+        },
       }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    />
+      transformOrigin={{ horizontal: "right", vertical: "top" }}
+      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+    >
+      <Box sx={{ px: 2, py: 1 }}>
+        <Typography variant="subtitle1" fontWeight={600}>
+          {user && user.name ? user.name : "User"}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {user && user.email ? user.email : "user@example.com"}
+        </Typography>
+      </Box>
+      <Divider />
+     
+      <Divider />
+      <MenuItem
+        onClick={() => {
+          handleProfileMenuClose();
+          logout();
+        }}
+      >
+        <ListItemIcon>
+          <LogoutIcon fontSize="small" />
+        </ListItemIcon>
+        Logout
+      </MenuItem>
+    </Menu>
   );
 
-  const mobileMenuId = 'primary-search-account-menu-mobile';
-  const renderMobileMenu = (
+  const renderMobileMenu = () => (
     <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      open={isMobileMenuOpen}
+      anchorEl={mobileMenuAnchor}
+      open={Boolean(mobileMenuAnchor)}
       onClose={handleMobileMenuClose}
+      PaperProps={{
+        sx: {
+          mt: 1,
+          minWidth: 200,
+          borderRadius: 2,
+          boxShadow: theme.shadows[8],
+        },
+      }}
     >
-      {user && customer && (
-        <MenuItem>
-          <IconButton size="large" aria-label="show items in cart" color="inherit">
-            <Link to='/customer/dashboard/cart' className='text-black'>
-              {total > 0 ? (
-                <Badge badgeContent={total} color="error" onClick={removeContent}>
-                  <ShoppingCartIcon />
-                </Badge>
-              ) : (
-                <ShoppingCartIcon />
-              )}
-            </Link>
-          </IconButton>
-          <p>Cart</p>
-        </MenuItem>
-      )}
-
-      {user && staff && (
-        <MenuItem>
-          <IconButton size="large" aria-label="show new notifications" color="inherit">
-            <Badge badgeContent={orderNotify.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
+     
+      {user && (
+        <MenuItem onClick={handleMobileMenuClose}>
+          <ListItemIcon>
+            <Badge badgeContent={unreadUserNotifications} color="error">
               <NotificationsIcon />
             </Badge>
-            <div className="container-notify">
-              {showNotificationsAll && <NotificationsPanel />}
-            </div>
-          </IconButton>
-          <p>Notifications</p>
+          </ListItemIcon>
+          Notifications
         </MenuItem>
       )}
-
-      {user && customer && (
-        <MenuItem>
-          <IconButton size="large" aria-label="show new notifications" color="inherit">
-            <Link to='/customer/dashboard/notify'>
-              {showNotifications ? (
-                <Badge badgeContent={0} color="error" onClick={() => setShowNotifications(!showNotifications)}>
-                  <NotificationsIcon />
-                </Badge>
-              ) : (
-                <Badge badgeContent={notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
-                  <NotificationsIcon />
-                </Badge>
-              )}
-            </Link>
-            <div className="container-notify">
-              {showNotifications && <Notifications />}
-            </div>
-          </IconButton>
-          <p>Notifications</p>
-        </MenuItem>
-      )}
-
       {!user && (
-        <MenuItem>
-          <div className="mobile_links">
-            <Link to='/login'>Login</Link>
-            <Link to='/signup'>SignUp</Link>
-          </div>
-        </MenuItem>
+        <>
+        <Link to='/login' className="text-white">
+          <MenuItem onClick={handleMobileMenuClose}>
+            <ListItemText primary="Login"/>
+          </MenuItem>
+        </Link>
+
+        <Link to='/signup' className="text-white">
+          <MenuItem onClick={handleMobileMenuClose} >
+            <ListItemText primary="Sign Up"/>
+          </MenuItem>
+        </Link>
+        </>
       )}
     </Menu>
   );
 
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar>
-          {user && customer && (
-            <>
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-                sx={{ mr: 2 }}
-              >
-                <MenuIcon onClick={handleDisplay} />
-              </IconButton>
-              <Typography
-                variant="h6"
-                noWrap
-                component="div"
-                sx={{ display: { xs: 'none', sm: 'block' } }}
-              >
-                <Link to='/customer/dashboard' className='text-white'>Dashboard</Link>
-              </Typography>
-              <Box sx={{ flexGrow: 1 }} />
-              <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                <IconButton
-                  size="large"
-                  aria-label="show items in cart"
-                  color="inherit"
-                >
-                  <Link to='/customer/dashboard/cart' className='text-white'>
-                    {total > 0 ? (
-                      <Badge badgeContent={total} color="error" onClick={removeContent}>
-                        <ShoppingCartIcon />
-                      </Badge>
-                    ) : (
-                      <ShoppingCartIcon />
-                    )}
-                  </Link>
-                </IconButton>
-                <IconButton
-                  size="large"
-                  aria-label="show new notifications"
-                  color="inherit"
-                >
-                  <Badge badgeContent={showNotifications ? 0 : notifyAll.length} color="error" onClick={() => setShowNotifications(!showNotifications)}>
-                    <NotificationsIcon />
-                  </Badge>
-                  <div className="container-notify">
-                    {showNotifications && <Notifications />}
-                  </div>
-                </IconButton>
-                <IconButton
-                  size="large"
-                  edge="end"
-                  aria-label="account of current user"
-                  aria-controls={menuId}
-                  aria-haspopup="true"
-                  color="inherit"
-                >
-                  <Link to='/customer/dashboard/CustomerProfile' className='text-white'>
-                    <AccountCircle />
-                  </Link>
-                </IconButton>
-              </Box>
-            </>
-          )}
-
-          {user && staff && (
-            <>
-              <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="open drawer"
-                sx={{ mr: 2 }}
-              >
-                <MenuIcon onClick={handleDisplay} />
-              </IconButton>
-              <Typography
-                variant="h6"
-                noWrap
-                component="div"
-                sx={{ display: { xs: 'none', sm: 'block' } }}
-              >
-                <Link to='/staff/dashboard' className='text-white'>Dashboard</Link>
-              </Typography>
-              <Box sx={{ flexGrow: 1 }} />
-              <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                <IconButton
-                  size="large"
-                  aria-label="show new notifications"
-                  color="inherit"
-                >
-                  <Badge badgeContent={orderNotify.length} color="error" onClick={() => setShowNotificationsAll(!showNotificationsAll)}>
-                    <NotificationsIcon />
-                  </Badge>
-                  <div className="container-notify">
-                    {showNotificationsAll && <NotificationsPanel />}
-                  </div>
-                </IconButton>
-              </Box>
-            </>
-          )}
-
-          {!user && (
-            <>
-              <div className="link">
-                <Link to='/' className='text-white'>Smark</Link>
-              </div>
-              <Typography
-                variant="h6"
-                noWrap
-                component="div"
-                sx={{ display: { xs: 'none', sm: 'block' } }}
-              />
-              <Box sx={{ flexGrow: 1 }} />
-              <div className="links">
-                <Link to='/login'>Login</Link>
-                <Link to='/signup'>SignUp</Link>
-              </div>
-            </>
-          )}
-
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="show more"
-              aria-controls={mobileMenuId}
-              aria-haspopup="true"
-              onClick={handleMobileMenuOpen}
-              color="inherit"
-            >
-              <MoreIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
-      {renderMobileMenu}
-      {renderMenu}
-    </Box>
+  const renderDrawer = () => (
+    <Drawer
+      anchor="left"
+      open={drawerOpen}
+      onClose={handleDrawerToggle}
+      PaperProps={{
+        sx: {
+          width: 280,
+          background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+        },
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Logo variant="h6">Smark</Logo>
+      </Box>
+      <Divider />
+      <List>
+        <ListItem button>
+          <ListItemIcon>
+            <DashboardIcon />
+          </ListItemIcon>
+          <ListItemText primary="Dashboard" />
+        </ListItem>
+        {/* Add more drawer items as needed */}
+      </List>
+    </Drawer>
   );
-}
 
-export default Bar;
+  return (
+    <>
+      <StyledAppBar position="static" elevation={0}>
+        <StyledToolbar>
+          {user && (
+            <StyledIconButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
+              <MenuIcon />
+            </StyledIconButton>
+          )}
+
+          <Logo variant="h6" component="div">
+            Smark
+          </Logo>
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          {user ? (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              {/* Desktop Actions */}
+              <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}>
+                
+                <Tooltip title="Notifications">
+                  <StyledIconButton color="inherit" onClick={()=> setShowUserNotifications(!showUserNotifications)}>
+                    <Badge badgeContent={unreadUserNotifications} color="error">
+                      <NotificationsIcon />
+                    </Badge>
+                  </StyledIconButton>
+                </Tooltip>
+
+                <Tooltip title="Profile">
+                  <StyledIconButton color="inherit" onClick={handleProfileMenuOpen}>
+                    <Avatar sx={{ width: 32, height: 32 }} src={user && user.avatar} alt={user && user.name}>
+                      {user && user.name ? user.name.charAt(0) : "U"}
+                    </Avatar>
+                  </StyledIconButton>
+                </Tooltip>
+              </Box>
+
+              {/* Mobile Menu Button */}
+              <Box sx={{ display: { xs: "flex", md: "none" } }}>
+                <StyledIconButton color="inherit" onClick={handleMobileMenuOpen}>
+                  <MoreVertIcon />
+                </StyledIconButton>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1 }}>
+
+                <Link to='/login' className="link text-white">
+                <AuthButton variant="outlined" color="inherit">
+                  Login
+                </AuthButton>
+                </Link>
+               
+               <Link to='/signup' className="text-white">
+                <AuthButton variant="contained" color="secondary">
+                  Sign Up
+                </AuthButton>
+               </Link>
+              </Box>
+              <Box sx={{ display: { xs: "flex", sm: "none" } }}>
+                <StyledIconButton color="inherit" onClick={handleMobileMenuOpen}>
+                  <MoreVertIcon />
+                </StyledIconButton>
+              </Box>
+            </Box>
+          )}
+        </StyledToolbar>
+      </StyledAppBar>
+
+      {/* Menus */}
+      {showUserNotifications && <NotificationsPanel/> }
+      {renderProfileMenu()}
+      {renderMobileMenu()}
+      {renderDrawer()}
+    </>
+  );
+};
+
+export default NavigationBar;

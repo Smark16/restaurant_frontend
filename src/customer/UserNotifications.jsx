@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -35,38 +35,53 @@ import {
   Clear as ClearAllIcon,
 } from "@mui/icons-material";
 import { AuthContext } from "../Context/AuthContext";
+import useAxios from "../components/useAxios";
 
 function NotificationsPanel() {
-  const { showNotificationsAll, orderNotify } = useContext(AuthContext);
+  const { showUserNotifications, user, setUnreadUserNotifications, setShowUserNotifications } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const userNotifictions = `http://127.0.0.1:8000/notifications/usermsg/${user?.user_id}`
+  const axiosInstance = useAxios()
+  
   const [filter, setFilter] = useState("all");
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedNotification, setSelectedNotification] = useState(null);
+  const [notifications, setNotifications] = useState([])
+  
+  // fetch user notifications
+  const fetchUserNotifications = async()=>{
+    try{
+   const response = await axiosInstance.get(userNotifictions)
+   console.log(response.data)
+   setNotifications(response.data.notifications)
+  }catch(err){
+    console.log('err', err)
+  }
+}
 
-  // Validate orderNotify is an array
-  const notifications = Array.isArray(orderNotify) ? orderNotify : [];
+useEffect(()=>{
+  fetchUserNotifications()  
+}, [])
 
-  // Enhanced notifications with additional properties
+// Enhanced notifications with additional properties
   const enhancedNotifications = notifications.map((notify) => ({
     ...notify,
     type: getNotificationType(notify.message || ""),
     read: notify.read ?? Math.random() > 0.5, // Fallback to random if read status not provided
     priority: getNotificationPriority(notify.message || ""),
   }));
-
+  
   function getNotificationType(message) {
     if (!message) return "info";
     message = message.toLowerCase();
     if (message.includes("order")) return "order";
     if (message.includes("reservation")) return "reservation";
-    if (message.includes("payment")) return "payment";
-    if (message.includes("error") || message.includes("failed")) return "error";
-    if (message.includes("warning")) return "warning";
+    if (message.includes("canceled") || message.includes("failed")) return "error";
+    if (message.includes("Pending")) return "warning";
     return "info";
   }
-
+  
   function getNotificationPriority(message) {
     if (!message) return "low";
     message = message.toLowerCase();
@@ -74,49 +89,49 @@ function NotificationsPanel() {
     if (message.includes("important") || message.includes("payment")) return "medium";
     return "low";
   }
-
+  
   const getNotificationIcon = (type) => {
     const iconProps = { fontSize: "small" };
     switch (type) {
       case "order":
         return <RestaurantIcon {...iconProps} />;
-      case "reservation":
-        return <ScheduleIcon {...iconProps} />;
+        case "reservation":
+          return <ScheduleIcon {...iconProps} />;
       case "payment":
         return <CheckCircleIcon {...iconProps} />;
       case "error":
         return <ErrorIcon {...iconProps} />;
       case "warning":
         return <WarningIcon {...iconProps} />;
-      default:
-        return <InfoIcon {...iconProps} />;
+        default:
+          return <InfoIcon {...iconProps} />;
     }
   };
-
+  
   const getNotificationColor = (type) => {
     switch (type) {
       case "order":
         return "primary";
-      case "reservation":
-        return "secondary";
-      case "payment":
-        return "success";
-      case "error":
+        case "reservation":
+          return "secondary";
+          case "payment":
+            return "success";
+            case "error":
         return "error";
-      case "warning":
-        return "warning";
+        case "warning":
+          return "warning";
       default:
         return "info";
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "high":
-        return "#f44336";
-      case "medium":
-        return "#ff9800";
-      default:
+      }
+    };
+    
+    const getPriorityColor = (priority) => {
+      switch (priority) {
+        case "high":
+          return "#f44336";
+          case "medium":
+            return "#ff9800";
+            default:
         return "#4caf50";
     }
   };
@@ -128,36 +143,87 @@ function NotificationsPanel() {
   });
 
   const unreadCount = enhancedNotifications.filter((n) => !n.read).length;
-
+  setUnreadUserNotifications(unreadCount)
+  
   const handleMenuOpen = (event, notification) => {
     setAnchorEl(event.currentTarget);
     setSelectedNotification(notification);
   };
+ 
 
-  const handleMenuClose = () => {
+   // change read status
+   const handleReadStatus = async () => {
+     try {
+       const newReadStatus = !selectedNotification?.read;
+       await axiosInstance.patch(
+         `http://127.0.0.1:8000/notifications/mark_as_read/${selectedNotification?.id}`,
+         { read: newReadStatus }
+         );
+      setNotifications((prev) =>
+      prev.map((notify) =>
+      notify.id === selectedNotification.id ? {...notify, read: newReadStatus } : notify
+        )
+      );
+    } catch (err) {
+      console.error("Error updating read status:", err);
+      setError("Failed to update notification status");
+    }
+  };
+  
+  // mark all as read
+  const handleAllReadStatus = async ()=>{
+    try{
+     const notread = notifications.filter(n => !n.read)
+     await Promise.all(
+      notread.map(async(notify) =>{
+        await axiosInstance.patch( `http://127.0.0.1:8000/notifications/mark_as_read/${notify?.id}`, {read : true})
+      })
+      )
+      setNotifications((prev) => prev.map((notify) => ({...notify, read:true})))
+      
+    }catch(err){
+      console.log('err', err)
+    }
+  }
+  
+  // delete notifications
+  const handleDelete = async()=>{
+    try{
+      await axiosInstance.delete(`http://127.0.0.1:8000/notifications/delete_notitfication/${selectedNotification?.id}`)
+      setNotifications((prev) => prev.filter(notify => notify.id !== selectedNotification?.id))
+     }catch(err){
+      console.log('err', err)
+     }
+  }
+  
+  const handleMenuClose = async() => {
+    await handleReadStatus()
+    await handleDelete()
     setAnchorEl(null);
     setSelectedNotification(null);
   };
-
+  
   const formatDate = (dateString) => {
     if (!dateString) return "Unknown";
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "Invalid date";
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-
+    
     if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
     if (diffInHours < 48) return "Yesterday";
     return date.toLocaleDateString();
   };
 
-  if (!showNotificationsAll) {
+ 
+  
+  if (!showUserNotifications) {
     return null;
   }
-
+  
   return (
-    <Fade in={showNotificationsAll}>
+    <Fade in={showUserNotifications}>
       <Box
         sx={{
           position: "fixed",
@@ -181,7 +247,7 @@ function NotificationsPanel() {
                   Notifications
                 </Typography>
               </Box>
-              <IconButton size="small" color="primary">
+              <IconButton size="small" color="primary" onClick={()=>setShowUserNotifications(false)}>
                 <ClearAllIcon />
               </IconButton>
             </Box>
@@ -303,7 +369,7 @@ function NotificationsPanel() {
             <>
               <Divider />
               <CardContent sx={{ pt: 2, pb: 2 }}>
-                <Button fullWidth variant="outlined" size="small" startIcon={<MarkReadIcon />}>
+                <Button fullWidth variant="outlined" size="small" startIcon={<MarkReadIcon />} onClick={()=>handleAllReadStatus()}>
                   Mark All as Read
                 </Button>
               </CardContent>
@@ -314,7 +380,7 @@ function NotificationsPanel() {
         {/* Context Menu */}
         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
           <MenuItem onClick={handleMenuClose}>
-            <MarkReadIcon sx={{ mr: 1 }} fontSize="small" />
+            <MarkReadIcon sx={{ mr: 1 }} fontSize="small"/>
             Mark as {selectedNotification?.read ? "Unread" : "Read"}
           </MenuItem>
           <MenuItem onClick={handleMenuClose}>
