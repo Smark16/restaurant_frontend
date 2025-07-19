@@ -87,15 +87,11 @@ const AuthButton = styled(Button)(({ theme }) => ({
 const NavigationBar = ({ onMenuToggle }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { user, staff, customer, logout, unreadUserNotifications, showUserNotifications, setShowUserNotifications} = useContext(AuthContext);
+  const { user, logout, unreadUserNotifications, showUserNotifications, setShowUserNotifications} = useContext(AuthContext);
 
   // State management
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // Mock data - replace with your actual data
-  const cartItems = 3;
 
   // Event handlers
   const handleMobileMenuOpen = (event) => {
@@ -112,11 +108,6 @@ const NavigationBar = ({ onMenuToggle }) => {
 
   const handleProfileMenuClose = () => {
     setProfileMenuAnchor(null);
-  };
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-    if (onMenuToggle) onMenuToggle();
   };
 
   const renderProfileMenu = () => (
@@ -203,47 +194,29 @@ const NavigationBar = ({ onMenuToggle }) => {
     </Menu>
   );
 
-  const renderDrawer = () => (
-    <Drawer
-      anchor="left"
-      open={drawerOpen}
-      onClose={handleDrawerToggle}
-      PaperProps={{
-        sx: {
-          width: 280,
-          background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
-        },
-      }}
-    >
-      <Box sx={{ p: 2 }}>
-        <Logo variant="h6">Smark</Logo>
-      </Box>
-      <Divider />
-      <List>
-        <ListItem button>
-          <ListItemIcon>
-            <DashboardIcon />
-          </ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItem>
-        {/* Add more drawer items as needed */}
-      </List>
-    </Drawer>
-  );
-
   return (
     <>
       <StyledAppBar position="static" elevation={0}>
         <StyledToolbar>
           {user && (
-            <StyledIconButton edge="start" color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
+            <>
+            <StyledIconButton edge="start" color="inherit" aria-label="menu">
               <MenuIcon />
             </StyledIconButton>
+
+              <Logo variant="h6" component="div">
+              Smookies
+              </Logo>
+            </>
           )}
 
+         {!user && (
+          <Link to='/' className="text-white">
           <Logo variant="h6" component="div">
-            Smark
+            Smookies
           </Logo>
+          </Link>
+         )}
 
           <Box sx={{ flexGrow: 1 }} />
 
@@ -306,7 +279,6 @@ const NavigationBar = ({ onMenuToggle }) => {
       {showUserNotifications && <NotificationsPanel/> }
       {renderProfileMenu()}
       {renderMobileMenu()}
-      {renderDrawer()}
     </>
   );
 };

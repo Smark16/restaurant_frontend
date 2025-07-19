@@ -1,287 +1,382 @@
-"use client"
-import { Link, useLocation } from "react-router-dom"
+import React, { useContext, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
+  Box,
   Drawer,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Box,
   Typography,
   Divider,
+  Avatar,
+  Chip,
   IconButton,
   useTheme,
   useMediaQuery,
-  Avatar,
-  Chip,
-} from "@mui/material"
+  AppBar,
+  Toolbar,
+  Badge
+} from "@mui/material";
 import {
-  Dashboard as DashboardIcon,
-  Restaurant as MenuIcon,
-  ShoppingBag as OrderIcon,
-  Person as ProfileIcon,
-  EventSeat as ReservationIcon,
-  Logout as LogoutIcon,
+  Dashboard,
+  Restaurant,
+  ShoppingCart,
+  EventSeat,
+  Star,
+  Person,
+  Logout,
+  AdminPanelSettings,
+  Menu as MenuIcon,
   Close as CloseIcon,
-} from "@mui/icons-material"
+  Notifications as NotificationsIcon,
+} from "@mui/icons-material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { AuthContext } from "../Context/AuthContext";
 
-const drawerWidth = 280
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#1976d2",
+      light: "#42a5f5",
+      dark: "#1565c0",
+    },
+    secondary: {
+      main: "#f50057",
+    },
+    background: {
+      default: "#f5f7fa",
+      paper: "#ffffff",
+    },
+    text: {
+      primary: "#2c3e50",
+      secondary: "#7f8c8d",
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h6: {
+      fontWeight: 600,
+    },
+    body2: {
+      fontWeight: 500,
+    },
+  },
+  components: {
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          margin: "4px 8px",
+          "&:hover": {
+            backgroundColor: "rgba(25, 118, 210, 0.08)",
+          },
+          "&.Mui-selected": {
+            backgroundColor: "rgba(25, 118, 210, 0.12)",
+            "&:hover": {
+              backgroundColor: "rgba(25, 118, 210, 0.16)",
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
-const menuItems = [
-  {
-    text: "Dashboard",
-    icon: <DashboardIcon />,
-    path: "/customer/dashboard",
-    color: "#1976d2",
-  },
-  {
-    text: "Menu",
-    icon: <MenuIcon />,
-    path: "/customer/dashboard/customermenuDisplay",
-    color: "#388e3c",
-  },
-  {
-    text: "Orders",
-    icon: <OrderIcon />,
-    path: "/customer/dashboard/customerOrder",
-    color: "#f57c00",
-  },
-  {
-    text: "Profile",
-    icon: <ProfileIcon />,
-    path: "/customer/dashboard/CustomerProfile",
-    color: "#7b1fa2",
-  },
-  {
-    text: "Reservations",
-    icon: <ReservationIcon />,
-    path: "/customer/dashboard/CustomerReservation",
-    color: "#d32f2f",
-  },
-]
+const drawerWidth = 280;
 
-function Custbar({ mobileOpen = false, onMobileToggle }) {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
-  const location = useLocation()
+function Custbar({ children }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const isActive = (path) => {
-    return location.pathname === path
-  }
+  const {unreadUserNotifications, showUserNotifications, setShowUserNotifications} = useContext(AuthContext)
+
+  const menuItems = [
+    {
+      text: "Dashboard",
+      icon: <Dashboard />,
+      path: "/customer/dashboard",
+      color: "#1976d2",
+    },
+    {
+      text: "Menu",
+      icon: <Restaurant />,
+      path: "/customer/dashboard/customermenuDisplay",
+      color: "#ff9800",
+    },
+    {
+      text: "Orders",
+      icon: <ShoppingCart />,
+      path: "/customer/dashboard/customerOrder",
+      color: "#4caf50",
+    },
+    {
+      text: "Reservations",
+      icon: <EventSeat />,
+      path: "/customer/dashboard/CustomerReservation",
+      color: "#9c27b0",
+    },
+    {
+      text: "Profile",
+      icon: <Person />,
+      path: "/customer/dashboard/CustomerProfile",
+      color: "#607d8b",
+    },
+  ];
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    if (isMobile) {
+      setMobileOpen(false);
+    }
+  };
+
+  const handleLogout = () => {
+    navigate("/staff/dashboard/logout");
+    if (isMobile) {
+      setMobileOpen(false);
+    }
+  };
 
   const drawerContent = (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Header Section */}
+    <Box
+      sx={{
+        height: "100%",
+        background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* Mobile Close Button */}
+      {isMobile && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
+          <IconButton onClick={handleDrawerToggle} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      )}
+
+      {/* Header */}
       <Box
         sx={{
           p: 3,
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           color: "white",
           position: "relative",
+          overflow: "hidden",
+          mt: isMobile ? -1 : 0,
         }}
       >
-        {isMobile && (
-          <IconButton
-            onClick={onMobileToggle}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: "white",
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        )}
-
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: -20,
+            right: -20,
+            width: 100,
+            height: 100,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.1)",
+          }}
+        />
+        <Box display="flex" alignItems="center" gap={2} position="relative" zIndex={1}>
           <Avatar
             sx={{
-              width: 50,
-              height: 50,
-              bgcolor: "rgba(255,255,255,0.2)",
-              mr: 2,
+              width: 48,
+              height: 48,
+              background: "rgba(255,255,255,0.2)",
+              backdropFilter: "blur(10px)",
             }}
           >
-            <ProfileIcon />
+            <AdminPanelSettings />
           </Avatar>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Welcome Back
+            <Typography variant="h6" fontWeight="bold">
+              Customer Panel
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              Customer Portal
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+              Restaurant Management
             </Typography>
           </Box>
         </Box>
-
-        <Chip
-          label="Premium Member"
-          size="small"
-          sx={{
-            bgcolor: "rgba(255,255,255,0.2)",
-            color: "white",
-            fontWeight: 500,
-          }}
-        />
       </Box>
 
       {/* Navigation Menu */}
       <Box sx={{ flex: 1, py: 2 }}>
-        <List sx={{ px: 2 }}>
-          {menuItems.map((item) => {
-            const active = isActive(item.path)
-
-            return (
-              <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
-                <ListItemButton
-                  component={Link}
-                  to={item.path}
-                  onClick={isMobile ? onMobileToggle : undefined}
-                  sx={{
-                    borderRadius: 2,
-                    py: 1.5,
-                    px: 2,
-                    transition: "all 0.3s ease",
-                    bgcolor: active ? `${item.color}15` : "transparent",
-                    border: active ? `2px solid ${item.color}` : "2px solid transparent",
-                    "&:hover": {
-                      bgcolor: active ? `${item.color}20` : "rgba(0,0,0,0.04)",
-                      transform: "translateX(4px)",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        <List sx={{ px: 1 }}>
+          {menuItems.map((item) => (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                selected={location.pathname === item.path}
+                onClick={() => handleNavigation(item.path)}
+                sx={{
+                  minHeight: 48,
+                  "&.Mui-selected": {
+                    background: `linear-gradient(90deg, ${item.color}15, ${item.color}08)`,
+                    borderLeft: `3px solid ${item.color}`,
+                    "& .MuiListItemIcon-root": {
+                      color: item.color,
                     },
+                    "& .MuiListItemText-primary": {
+                      color: item.color,
+                      fontWeight: 600,
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 40,
+                    color: location.pathname === item.path ? item.color : "text.secondary",
                   }}
                 >
-                  <ListItemIcon
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    fontSize: "0.95rem",
+                    fontWeight: location.pathname === item.path ? 600 : 500,
+                  }}
+                />
+                {item.badge && (
+                  <Chip
+                    label={item.badge}
+                    size="small"
+                    color="error"
                     sx={{
-                      color: active ? item.color : "text.secondary",
-                      minWidth: 40,
-                      transition: "color 0.3s ease",
-                    }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.text}
-                    sx={{
-                      "& .MuiListItemText-primary": {
-                        fontWeight: active ? 600 : 500,
-                        color: active ? item.color : "text.primary",
-                        fontSize: "0.95rem",
-                      },
+                      height: 20,
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
                     }}
                   />
-                  {active && (
-                    <Box
-                      sx={{
-                        width: 4,
-                        height: 20,
-                        bgcolor: item.color,
-                        borderRadius: 2,
-                        ml: 1,
-                      }}
-                    />
-                  )}
-                </ListItemButton>
-              </ListItem>
-            )
-          })}
+                )}
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
       </Box>
 
-      {/* Footer Section */}
+      {/* Footer */}
       <Box sx={{ p: 2 }}>
         <Divider sx={{ mb: 2 }} />
-        <ListItem disablePadding>
+
           <ListItemButton
-            component={Link}
-            to="/customer/dashboard/logout"
-            onClick={isMobile ? onMobileToggle : undefined}
+            onClick={handleLogout}
             sx={{
-              borderRadius: 2,
-              py: 1.5,
-              px: 2,
-              color: "error.main",
-              "&:hover": {
-                bgcolor: "error.light",
-                color: "error.contrastText",
-                transform: "translateX(4px)",
-              },
-              transition: "all 0.3s ease",
+              borderRadius: 1,
+              background: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
             }}
           >
-            <ListItemIcon sx={{ color: "inherit", minWidth: 40 }}>
-              <LogoutIcon />
+            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
+              <Logout />
             </ListItemIcon>
             <ListItemText
               primary="Logout"
-              sx={{
-                "& .MuiListItemText-primary": {
-                  fontWeight: 500,
-                  fontSize: "0.95rem",
-                },
+              primaryTypographyProps={{
+                fontWeight: 600,
+                fontSize: "0.95rem",
               }}
             />
           </ListItemButton>
-        </ListItem>
 
-        <Typography
-          variant="caption"
-          sx={{
-            display: "block",
-            textAlign: "center",
-            mt: 2,
-            color: "text.secondary",
-            opacity: 0.7,
-          }}
-        >
-          © 2024 Restaurant App
-        </Typography>
+        {/* Version Info */}
+        <Box mt={2} textAlign="center">
+          <Typography variant="caption" color="text.secondary">
+            Version 2.1.0
+          </Typography>
+        </Box>
       </Box>
     </Box>
-  )
+  );
 
   return (
-    <Box component="nav" sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
-      {/* Mobile Drawer */}
-      {isMobile ? (
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={onMobileToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
+    <ThemeProvider theme={theme}>
+      <Box sx={{ display: "flex" }}>
+        {/* Mobile App Bar */}
+        {isMobile && (
+          <AppBar
+            position="fixed"
+            sx={{
+              width: "100%",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              zIndex: muiTheme.zIndex.drawer + 1,
+            }}
+          >
+            <Toolbar>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2 }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+                Smookies
+              </Typography>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Badge badgeContent={unreadUserNotifications} color="error" onClick={()=> setShowUserNotifications(!showUserNotifications)}>
+                  <NotificationsIcon color="white" />
+                </Badge>
+              </Box>
+            </Toolbar>
+          </AppBar>
+        )}
+
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <Drawer
+            variant="permanent"
+            sx={{
               width: drawerWidth,
-              border: "none",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
-      ) : (
-        /* Desktop Drawer */
-        <Drawer
-          variant="permanent"
-          sx={{
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-              border: "none",
-              boxShadow: "2px 0 12px rgba(0,0,0,0.08)",
-              bgcolor: "background.paper",
-            },
-          }}
-          open
-        >
-          {drawerContent}
-        </Drawer>
-      )}
-    </Box>
-  )
+              flexShrink: 0,
+              "& .MuiDrawer-paper": {
+                width: drawerWidth,
+                boxSizing: "border-box",
+                border: "none",
+                boxShadow: "0 0 20px rgba(0,0,0,0.1)",
+              },
+            }}
+          >
+            {drawerContent}
+          </Drawer>
+        )}
+
+        {/* Mobile Sidebar */}
+        {isMobile && (
+          <Drawer
+            variant="temporary"
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile
+            }}
+            sx={{
+              "& .MuiDrawer-paper": {
+                width: drawerWidth,
+                boxSizing: "border-box",
+                border: "none",
+                boxShadow: "0 0 20px rgba(0,0,0,0.1)",
+              },
+            }}
+          >
+            {drawerContent}
+          </Drawer>
+        )}
+  
+      </Box>
+    </ThemeProvider>
+  );
 }
 
-export default Custbar
+export default Custbar;

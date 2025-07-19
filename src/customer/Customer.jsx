@@ -9,6 +9,7 @@ import {
   Typography,
   Avatar,
   Chip,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -20,10 +21,9 @@ import {
   Button,
   LinearProgress,
   Divider,
-  IconButton,
-  Tooltip,
   useTheme,
   alpha,
+  Badge
 } from "@mui/material"
 import {
   TrendingUp,
@@ -39,12 +39,13 @@ import {
   Phone,
   LocationOn,
   People,
+  Notifications as NotificationsIcon,
 } from "@mui/icons-material"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import { AuthContext } from '../Context/AuthContext'
 import Calendar from "./calendar"
-import NavigationBar from "../components/Navbar"
+import NotificationsPanel from "./UserNotifications"
 
 // Stats Card Component
 const StatsCard = ({ title, value, icon, color, trend, subtitle }) => {
@@ -125,11 +126,12 @@ const StatusChip = ({ status }) => {
 }
 
 function Customer() {
-  const { user, Loginloading} = useContext(AuthContext)
+  const { user, Loginloading, unreadUserNotifications, showUserNotifications, setShowUserNotifications } = useContext(AuthContext)
+
+  console.log('bool', showUserNotifications)
   const theme = useTheme()
 
   const [expense, setExpense] = useState(0)
-  const [userOrder, setUserOrder] = useState([])
   const [loading, setLoading] = useState(false)
   const [orders, setOrders] = useState([])
   const [reservations, setReservations] = useState([])
@@ -166,19 +168,19 @@ function Customer() {
   }
 
   // get total Expense
-  const totalExpense = async()=>{
-    try{
-   const response = await axios.get(total_expense)
-   setExpense(response.data)
-    }catch(err){
+  const totalExpense = async () => {
+    try {
+      const response = await axios.get(total_expense)
+      setExpense(response.data)
+    } catch (err) {
       console.log('err', err)
     }
   }
 
 
   useEffect(() => {
-    const loadData = async() =>{
-      await Promise.all([fetchData(),  fetchReservations()])
+    const loadData = async () => {
+      await Promise.all([fetchData(), fetchReservations()])
     }
     loadData()
     totalExpense()
@@ -206,275 +208,291 @@ function Customer() {
 
   return (
     <>
-    <NavigationBar/>
-    <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "100vh" }}>
-  
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          flexGrow: 1,
+          gap: 1,
+        }}
+      >
+        <IconButton onClick={() => setShowUserNotifications(!showUserNotifications)}>
+          <Badge badgeContent={unreadUserNotifications} color="error">
+            <NotificationsIcon />
+          </Badge>
+        </IconButton>
+      </Box>
 
-      <Card sx={{ mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", color: "white" }}>
-            <Avatar sx={{ width: 60, height: 60, bgcolor: "rgba(255,255,255,0.2)", mr: 2 }}>
-              {user.username.charAt(0).toUpperCase()}
-            </Avatar>
-            <Box>
-              <Typography variant="h4" fontWeight="bold">
-                Welcome back, {user.username}!
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Here's what's happening with your account today.
-              </Typography>
+
+      {showUserNotifications && <NotificationsPanel />}
+
+      <Box sx={{ p: 3, bgcolor: "background.default", minHeight: "100vh" }}>
+        <Card sx={{ mb: 3, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", color: "white" }}>
+              <Avatar sx={{ width: 60, height: 60, bgcolor: "rgba(255,255,255,0.2)", mr: 2 }}>
+                {user.username.charAt(0).toUpperCase()}
+              </Avatar>
+              <Box>
+                <Typography variant="h4" fontWeight="bold">
+                  Welcome back, {user.username}!
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                  Here's what's happening with your account today.
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Total Reservations"
-            value={reservations.length}
-            icon={<EventSeat />}
-            color={theme.palette.primary.main}
-            trend="+12% from last month"
-          />
+        {/* Stats Cards */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatsCard
+              title="Total Reservations"
+              value={reservations.length}
+              icon={<EventSeat />}
+              color={theme.palette.primary.main}
+              trend="+12% from last month"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatsCard
+              title="Total Expense"
+              value={`UGX ${expense.Total_expense || 0}`}
+              icon={<TrendingUp />}
+              color={theme.palette.success.main}
+              subtitle="This month"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatsCard
+              title="Total Orders"
+              value={orders.length}
+              icon={<Restaurant />}
+              color={theme.palette.warning.main}
+              trend="+8% from last week"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatsCard
+              title="Wallet Balance"
+              value="UGX 0.00"
+              icon={<AccountBalanceWallet />}
+              color={theme.palette.info.main}
+              subtitle="Available balance"
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Total Expense"
-            value={`UGX ${expense.Total_expense || 0}`}
-            icon={<TrendingUp />}
-            color={theme.palette.success.main}
-            subtitle="This month"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Total Orders"
-            value={orders.length}
-            icon={<Restaurant />}
-            color={theme.palette.warning.main}
-            trend="+8% from last week"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard
-            title="Wallet Balance"
-            value="UGX 0.00"
-            icon={<AccountBalanceWallet />}
-            color={theme.palette.info.main}
-            subtitle="Available balance"
-          />
-        </Grid>
-      </Grid>
 
-      <Grid container spacing={3}>
-        {/* Recent Orders */}
-        <Grid item xs={12} lg={8}>
-          <Card sx={{ height: "fit-content" }}>
-            <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-                <Typography variant="h6" fontWeight="bold" color="primary">
-                  Recent Orders
-                </Typography>
-                <Button component={Link} to="/customer/dashboard/customerOrder" endIcon={<ArrowForward />} size="small">
-                  View All
-                </Button>
-              </Box>
-
-              {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                  <CircularProgress />
+        <Grid container spacing={3}>
+          {/* Recent Orders */}
+          <Grid item xs={12} lg={8}>
+            <Card sx={{ height: "fit-content" }}>
+              <CardContent>
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" color="primary">
+                    Recent Orders
+                  </Typography>
+                  <Button component={Link} to="/customer/dashboard/customerOrder" endIcon={<ArrowForward />} size="small">
+                    View All
+                  </Button>
                 </Box>
-              ) : orders.length === 0 ? (
-                <Alert severity="info" sx={{ textAlign: "center" }}>
-                  No orders found. Start by placing your first order!
-                </Alert>
-              ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Order ID</TableCell>
-                        <TableCell>Customer</TableCell>
-                        <TableCell>Location</TableCell>
-                        <TableCell>Contact</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Date</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {orders.slice(0, 5).map((order) => (
-                        <TableRow key={order.id} hover>
-                          <TableCell>
-                            <Typography variant="body2" fontWeight="bold">
-                              #{order.id}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>{order.user.username}</TableCell>
-                          <TableCell>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <LocationOn sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
-                              {order.location}
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Phone sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
-                              {order.contact}
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <StatusChip status={order.status} />
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2" color="text.secondary">
-                              {new Date(order.order_date).toLocaleDateString()}
-                            </Typography>
-                          </TableCell>
+
+                {loading ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : orders.length === 0 ? (
+                  <Alert severity="info" sx={{ textAlign: "center" }}>
+                    No orders found. Start by placing your first order!
+                  </Alert>
+                ) : (
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Order ID</TableCell>
+                          <TableCell>Customer</TableCell>
+                          <TableCell>Location</TableCell>
+                          <TableCell>Contact</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell>Date</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </CardContent>
-          </Card>
+                      </TableHead>
+                      <TableBody>
+                        {orders.slice(0, 5).map((order) => (
+                          <TableRow key={order.id} hover>
+                            <TableCell>
+                              <Typography variant="body2" fontWeight="bold">
+                                #{order.id}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>{order.user.username}</TableCell>
+                            <TableCell>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <LocationOn sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+                                {order.location}
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <Phone sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+                                {order.contact}
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <StatusChip status={order.status} />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" color="text.secondary">
+                                {new Date(order.order_date).toLocaleDateString()}
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* Recent Reservations */}
-          <Card sx={{ mt: 3 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight="bold" color="primary" gutterBottom>
-                Recent Reservations
-              </Typography>
+            {/* Recent Reservations */}
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" color="primary" gutterBottom>
+                  Recent Reservations
+                </Typography>
 
-              {loading ? (
-                <LinearProgress sx={{ my: 2 }} />
-              ) : reservations.length === 0 ? (
-                <Alert severity="info">No reservations found. Make your first reservation today!</Alert>
-              ) : (
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Customer</TableCell>
-                        <TableCell>Table</TableCell>
-                        <TableCell>Contact</TableCell>
-                        <TableCell>Party Size</TableCell>
-                        <TableCell>Status</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {reservations.slice(0, 5).map((reservation) => (
-                        <TableRow key={reservation.id} hover>
-                          <TableCell>
-                            <Typography variant="body2" fontWeight="bold">
-                              #{reservation.id}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>{reservation.user.username}</TableCell>
-                          <TableCell>
-                            <Chip label={`Table ${reservation.table}`} size="small" variant="outlined" />
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Phone sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
-                              {reservation.contact}
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <People sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
-                              {reservation.party_size} people
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <StatusChip status={reservation.status} />
-                          </TableCell>
+                {loading ? (
+                  <LinearProgress sx={{ my: 2 }} />
+                ) : reservations.length === 0 ? (
+                  <Alert severity="info">No reservations found. Make your first reservation today!</Alert>
+                ) : (
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>ID</TableCell>
+                          <TableCell>Customer</TableCell>
+                          <TableCell>Table</TableCell>
+                          <TableCell>Contact</TableCell>
+                          <TableCell>Party Size</TableCell>
+                          <TableCell>Status</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </CardContent>
-          </Card>
+                      </TableHead>
+                      <TableBody>
+                        {reservations.slice(0, 5).map((reservation) => (
+                          <TableRow key={reservation.id} hover>
+                            <TableCell>
+                              <Typography variant="body2" fontWeight="bold">
+                                #{reservation.id}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>{reservation.user.username}</TableCell>
+                            <TableCell>
+                              <Chip label={`Table ${reservation.table}`} size="small" variant="outlined" />
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <Phone sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+                                {reservation.contact}
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <People sx={{ fontSize: 16, mr: 0.5, color: "text.secondary" }} />
+                                {reservation.party_size} people
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <StatusChip status={reservation.status} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Sidebar */}
+          <Grid item xs={12} lg={4}>
+            {/* Calendar */}
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <CalendarToday sx={{ mr: 1, color: "primary.main" }} />
+                  <Typography variant="h6" fontWeight="bold">
+                    Calendar
+                  </Typography>
+                </Box>
+                <Calendar />
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats */}
+            <Card>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  Quick Overview
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Completed Orders
+                  </Typography>
+                  <Chip
+                    label={orders.filter((order) => order.status === "Completed").length}
+                    color="success"
+                    size="small"
+                  />
+                </Box>
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Pending Orders
+                  </Typography>
+                  <Chip
+                    label={orders.filter((order) => order.status === "Pending").length}
+                    color="warning"
+                    size="small"
+                  />
+                </Box>
+
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Confirmed Reservations
+                  </Typography>
+                  <Chip
+                    label={reservations.filter((res) => res.status === "Accepted").length}
+                    color="primary"
+                    size="small"
+                  />
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+
+                <Box sx={{ textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Member since
+                  </Typography>
+                  <Typography variant="h6" color="primary" fontWeight="bold">
+                    {user.date_joined}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-
-        {/* Sidebar */}
-        <Grid item xs={12} lg={4}>
-          {/* Calendar */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                <CalendarToday sx={{ mr: 1, color: "primary.main" }} />
-                <Typography variant="h6" fontWeight="bold">
-                  Calendar
-                </Typography>
-              </Box>
-              <Calendar />
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                Quick Overview
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Completed Orders
-                </Typography>
-                <Chip
-                  label={orders.filter((order) => order.status === "Completed").length}
-                  color="success"
-                  size="small"
-                />
-              </Box>
-
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Pending Orders
-                </Typography>
-                <Chip
-                  label={orders.filter((order) => order.status === "Pending").length}
-                  color="warning"
-                  size="small"
-                />
-              </Box>
-
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Confirmed Reservations
-                </Typography>
-                <Chip
-                  label={reservations.filter((res) => res.status === "Accepted").length}
-                  color="primary"
-                  size="small"
-                />
-              </Box>
-
-              <Divider sx={{ my: 2 }} />
-
-              <Box sx={{ textAlign: "center" }}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Member since
-                </Typography>
-                <Typography variant="h6" color="primary" fontWeight="bold">
-                  {user.date_joined}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Box>
+      </Box>
     </>
-    
+
   )
 }
 

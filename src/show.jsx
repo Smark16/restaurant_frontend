@@ -4,7 +4,6 @@ import React, { useContext, useEffect, lazy, Suspense } from 'react';
 import {Route, Routes} from 'react-router-dom';
 import { CircularProgress } from '@mui/material'
 import './App.css';
-import NavigationBar from './components/Navbar';
 import PrivateRoute from './components/privateRoute';
 import Sidebar from './staff/Sidebar';
 import { AuthContext } from './Context/AuthContext';
@@ -47,7 +46,6 @@ const ProfileManagement = lazy(()=>import('./staff/Profile'));
 const Checkout = lazy(()=>import('./customer/checkout'));
 
 function Show() {
-  const {display} = useContext(AuthContext)
   const {messaging, generateToken} = tokenGeneration()
 
   const LoadingSpinner = () => (
@@ -83,7 +81,6 @@ function Show() {
     <>
      <Toaster position='top-right'/> 
      <NetworkStatus/>
-          {/* <NavigationBar/> */}
           <Routes>
             {/* Public Routes */}
             <Route path='/' element={<Suspense fallback={<LoadingSpinner/>}><Home /></Suspense>} />
@@ -106,7 +103,7 @@ function Show() {
               element={
                 <PrivateRoute>
                   <div className="sidewidth">
-                    <div className={`sides ${display ? 'show' : ''}`}>
+                    <div>
                       <Sidebar />
                     </div>
                     <div className="props p-3">
@@ -134,7 +131,7 @@ function Show() {
               element={
                 <PrivateRoute>
                   <div className="sidewidth">        
-                  <div className={`sides ${display ? 'show' : ''}`}>
+                  <div>
                     <Custbar />
                   </div>
               

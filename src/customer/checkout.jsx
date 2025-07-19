@@ -406,11 +406,14 @@ function EnhancedCheckout() {
 
     setAddItem([]);
     setTotal('');
-    setSnackbarMessage("An order receipt will be sent to your gmail")
+    setSnackbarMessage("Order Successfully Placed\n An order receipt will be sent to your gmail")
     setSnackbarOpen(true)
     localStorage.removeItem('clickedItem');
     localStorage.removeItem('info');
-    navigate('/customer/dashboard/customerOrder');
+
+    setTimeout(()=>{
+      navigate('/customer/dashboard/customerOrder');
+    }, 5000)
 
   } catch (err) {
     console.error('Error response:', err);

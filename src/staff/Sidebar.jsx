@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
@@ -18,6 +18,7 @@ import {
   useMediaQuery,
   AppBar,
   Toolbar,
+  Badge
 } from "@mui/material";
 import {
   Dashboard,
@@ -30,8 +31,10 @@ import {
   AdminPanelSettings,
   Menu as MenuIcon,
   Close as CloseIcon,
+  Notifications as NotificationsIcon,
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { AuthContext } from "../Context/AuthContext";
 
 const theme = createTheme({
   palette: {
@@ -91,6 +94,8 @@ function Sidebar({ children }) {
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const {unreadUserNotifications, showUserNotifications, setShowUserNotifications} = useContext(AuthContext)
+
   const menuItems = [
     {
       text: "Dashboard",
@@ -109,14 +114,12 @@ function Sidebar({ children }) {
       icon: <ShoppingCart />,
       path: "/staff/dashboard/orders",
       color: "#4caf50",
-      badge: "12", // Example badge for new orders
     },
     {
       text: "Reservations",
       icon: <EventSeat />,
       path: "/staff/dashboard/reservations",
       color: "#9c27b0",
-      badge: "3", // Example badge for new reservations
     },
     {
       text: "Menu Analytics",
@@ -325,8 +328,14 @@ function Sidebar({ children }) {
                 <MenuIcon />
               </IconButton>
               <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-                Restaurant Staff Panel
+                 Smookies
               </Typography>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Badge badgeContent={unreadUserNotifications} color="error" onClick={()=> setShowUserNotifications(!showUserNotifications)}>
+                  <NotificationsIcon color="white" />
+                </Badge>
+              </Box>
             </Toolbar>
           </AppBar>
         )}

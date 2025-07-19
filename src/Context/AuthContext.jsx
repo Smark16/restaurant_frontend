@@ -24,12 +24,10 @@ export const AuthProvider = ({children}) =>{
  const [food, setFood] = useState([])
  const [clicked, setClicked] = useState(false)
  const [total, setTotal] = useState('')
- const [display, setDisplay] = useState(true)
  const [noAccount, setNoAccount] = useState('')
  
 
  const [showUserNotifications, setShowUserNotifications] = useState(false)
- const [showAdminNotifications, setShowAdminNotifications] = useState(false)
  const [unreadUserNotifications, setUnreadUserNotifications] = useState([])
 
 //  live updates
@@ -79,24 +77,7 @@ useEffect(()=>{
     };
   }
 }, [user])
-
-//  this is the code for removing the custbar component
-const handleDisplay = ()=> {
-  setDisplay(!display)
-}
  
-//  const fetchFood = async ()=>{
-//   try {
-//     const response = await axios(foodUrl)
-//     const data = response.data
-//     setFood(data)
-//   }catch (err){
-//    console.log("there was an error")
-//   }
-// }
-
-
-
    // Add item to cart
   const handleCart = (product) => {
     setAddItem((prevAddItem) => {
@@ -270,7 +251,7 @@ const contextData = {
     showSuccessAlert, showErrorAlert ,handleCart,
     setAddItem, addItem,
     food, setFood, clicked, setClicked, total,handleDelete,
-    handleDisplay, display, setDisplay,Increase, Reduce, noAccount,setTotal,
+   Increase, Reduce, noAccount,setTotal,
     showUserNotifications, setShowUserNotifications,
     unreadUserNotifications, setUnreadUserNotifications,
     websocket,
