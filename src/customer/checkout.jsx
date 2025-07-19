@@ -19,7 +19,6 @@ import {
   Step,
   StepLabel,
   Divider,
-  Alert,
   CircularProgress,
   Chip,
   Avatar,
@@ -33,6 +32,8 @@ import {
   ListItem,
   ListItemText,
   ListItemAvatar,
+  Alert,
+  Snackbar,
 } from "@mui/material"
 import {
   LocationOn,
@@ -49,7 +50,6 @@ import {
   ShoppingBag,
 } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
-import axios from 'axios'
 import { AuthContext } from "../Context/AuthContext"
 import useAxios from '../components/useAxios'
 
@@ -309,6 +309,8 @@ function EnhancedCheckout() {
   const [activeStep, setActiveStep] = useState(0)
   const [infoSaved, setInfoSaved] = useState(false)
   const [trackId, setTrackId] = useState('')
+  const [snackbarMessage, setSnackbarMessage] = useState("")
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const steps = ["Delivery Info", "Payment Method", "Confirm Order"]
 
@@ -404,13 +406,17 @@ function EnhancedCheckout() {
 
     setAddItem([]);
     setTotal('');
+    setSnackbarMessage("An order receipt will be sent to your gmail")
+    setSnackbarOpen(true)
     localStorage.removeItem('clickedItem');
     localStorage.removeItem('info');
-    navigate('/customer/dashboard/receipt');
+    navigate('/customer/dashboard/customerOrder');
 
   } catch (err) {
     console.error('Error response:', err);
     setOrderError('Please fill in all the required credentials');
+    setSnackbarMessage("Failed to process receit")
+    setSnackbarOpen(true)
     setLoader(false);
   }
 };
@@ -595,6 +601,19 @@ function EnhancedCheckout() {
           </Grid>
         </Grid>
       </Container>
+
+       {/* Success Snackbar */}
+       <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success" variant="filled" sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
     </Box>
   )
 }

@@ -42,7 +42,6 @@ const Service = lazy(()=>import('./LandingPage/service'));
 const Team = lazy(()=>import('./LandingPage/team'));
 const Menus = lazy(()=>import('./LandingPage/menu'));
 const Index = lazy(()=>import('./LandingPage'));
-const Receipt = lazy(()=>import('./customer/receipt'));
 const CustomerProfileManagement = lazy(()=>import('./customer/Profile'));
 const ProfileManagement = lazy(()=>import('./staff/Profile'));
 const Checkout = lazy(()=>import('./customer/checkout'));
@@ -148,7 +147,6 @@ function Show() {
                         <Route path='CustomerReservation' element={<Suspense fallback={<LoadingSpinner/>}><Reservations /></Suspense>} />
                         <Route path='/' element={<Suspense fallback={<LoadingSpinner/>}><Customer /></Suspense>} />
                         <Route path='cart' element={<Suspense fallback={<LoadingSpinner/>}><Cart/></Suspense>}/>
-                        <Route path='receipt' element={<Suspense fallback={<LoadingSpinner/>}><Receipt/></Suspense>}/>
                         <Route path='Checkout' element={<Suspense fallback={<LoadingSpinner/>}><Checkout/></Suspense>}/>
                         <Route path='/logout' element={<Suspense fallback={<LoadingSpinner/>}><Logout/></Suspense>}></Route>
                       </Routes>
