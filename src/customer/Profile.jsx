@@ -43,7 +43,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import useAxios from "../components/useAxios";
 
-const changePasswordUrl = "http://127.0.0.1:8000/restaurant/change-password/";
+const changePasswordUrl = "https://restaurant-backend5.onrender.com/restaurant/change-password/";
 
 function CustomerProfileManagement() {
   const { user } = useContext(AuthContext);
@@ -52,16 +52,16 @@ function CustomerProfileManagement() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const updateUser = user?.user_id
-    ? `http://127.0.0.1:8000/restaurant/update_user/${user.user_id}`
+    ? `https://restaurant-backend5.onrender.com/restaurant/update_user/${user.user_id}`
     : "";
   const getUser = user?.user_id
-    ? `http://127.0.0.1:8000/restaurant/get_user/${user.user_id}`
+    ? `https://restaurant-backend5.onrender.com/restaurant/get_user/${user.user_id}`
     : "";
   const updateProfileUrl = user?.user_id
-    ? `http://127.0.0.1:8000/restaurant/update_profile/${user.user_id}`
+    ? `https://restaurant-backend5.onrender.com/restaurant/update_profile/${user.user_id}`
     : "";
   const profileUrl = user?.user_id
-    ? `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`
+    ? `https://restaurant-backend5.onrender.com/restaurant/profile/${user.user_id}`
     : "";
 
   const [profileImage, setProfileImage] = useState([]);

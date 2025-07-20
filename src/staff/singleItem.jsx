@@ -47,7 +47,7 @@ import axios from "axios";
 import useHook from "./customHook";
 import { IndexedData } from "../components/IndexedDB";
 
-const foodUrl = "http://127.0.0.1:8000/restaurant/food_items";
+const foodUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items";
 
 // Function to categorize food items (same as in menu component)
 const categorizeFoodItem = (item) => {
@@ -100,7 +100,7 @@ function SingleItem() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const singleUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`;
+  const singleUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`;
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -135,7 +135,7 @@ function SingleItem() {
 
     try {
       setDeleting(true);
-      await axios.delete(`http://127.0.0.1:8000/restaurant/delete_items/${id}`);
+      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_items/${id}`);
       navigate("/staff/dashboard/menu");
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -149,7 +149,7 @@ function SingleItem() {
   // change availability status
   const changeStatus = async(id, available)=>{
     try{
-       const change_status = `http://127.0.0.1:8000/restaurant/update_availability/${id}`
+       const change_status = `https://restaurant-backend5.onrender.com/restaurant/update_availability/${id}`
        const newStatus = !available
        await axios.patch(change_status, {is_available : newStatus})
 
@@ -261,7 +261,7 @@ function SingleItem() {
             <Card sx={{ boxShadow: 3 }}>
               <CardMedia
                 component="img"
-                image={`http://127.0.0.1:8000${item.image}`}
+                image={`https://restaurant-backend5.onrender.com${item.image}`}
                 alt={item.name}
                 sx={{
                   height: { xs: 300, md: 400 },
@@ -411,7 +411,7 @@ function SingleItem() {
                     <CardMedia
                       component="img"
                       height="150"
-                      image={`http://127.0.0.1:8000/media/${relatedItem.image}`}
+                      image={`https://restaurant-backend5.onrender.com/media/${relatedItem.image}`}
                       alt={relatedItem.name}
                       sx={{ objectFit: "cover" }}
                     />

@@ -17,7 +17,7 @@ export function IndexedData(){
 // cache single item
 const getSingleItem = async (id)=>{
     try{
-     const response = await axiosInstance.get(`http://127.0.0.1:8000/restaurant/food_items/${id}`)
+     const response = await axiosInstance.get(`https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`)
      const data = response.data
 
      await db.Item.put({
@@ -46,7 +46,7 @@ const getSingleItem = async (id)=>{
 // cache user orders
 const getUserOrders = async(user_id)=>{
    try{
-    const response = await axiosInstance.get(`http://127.0.0.1:8000/orders/userOrder/${user_id}`)
+    const response = await axiosInstance.get(`https://restaurant-backend5.onrender.com/orders/userOrder/${user_id}`)
     const data = response.data
 
     // Validate API response

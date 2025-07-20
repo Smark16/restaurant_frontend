@@ -153,37 +153,5 @@ font-size: 15px;
 
   /* ------------------------------------------------media screens------------------------- */
   
-  @media screen and (max-width: 1000px) {
-    .sidewidth{
-      position: relative;
-        display: flex;
-        gap: 50px;
-    } 
-    .props{
-      height: 100vh;
-      overflow-y:scroll;
-    }
-    .sides{
-      position: absolute;
-      z-index: 10;
-      background-color: #fff;
-      height: 100%;
-      width: 200px;
-    }
-    .sidelists{
-      margin-left: -60px;
-    }
-body{
-  width: 100%;
-}
-.sides.show {
-  left: -250px; /* Start off-screen */
-}
-.sides {
-  left: 0px; /* Slide into view */
-}
-.links{
-  display: none;
-}
-  }
+  
   

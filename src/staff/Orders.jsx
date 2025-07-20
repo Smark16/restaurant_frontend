@@ -44,7 +44,7 @@ import axios from "axios";
 import useAxios from "../components/useAxios";
 import { AuthContext } from "../Context/AuthContext";
 
-const orderUrl = "http://127.0.0.1:8000/orders/user_orders";
+const orderUrl = "https://restaurant-backend5.onrender.com/orders/user_orders";
 
 function OrdersManagement() {
   const { authTokens } = useContext(AuthContext);
@@ -85,7 +85,7 @@ function OrdersManagement() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/orders/delete_order/${id}`);
+      await axios.delete(`https://restaurant-backend5.onrender.com/orders/delete_order/${id}`);
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
       setDeleteDialogOpen(false);
       setOrderToDelete(null);
@@ -101,7 +101,7 @@ function OrdersManagement() {
       return;
     }
     try {
-      await axiosInstance.patch(`http://127.0.0.1:8000/orders/update_status/${id}`, {
+      await axiosInstance.patch(`https://restaurant-backend5.onrender.com/orders/update_status/${id}`, {
         newStatus,
       });
       setOrders((prevOrders) => prevOrders.map((order) => (order.id === id ? { ...order, status: newStatus } : order)));
@@ -122,7 +122,7 @@ function OrdersManagement() {
     setShowModal(true);
     setItemsLoading(true);
 
-    const SingleOrderItemUrl = `http://127.0.0.1:8000/orders/single_order_item/${order?.id}`;
+    const SingleOrderItemUrl = `https://restaurant-backend5.onrender.com/orders/single_order_item/${order?.id}`;
 
     try {
       const response = await axios.get(SingleOrderItemUrl);
@@ -454,7 +454,7 @@ function OrdersManagement() {
                   <Grid item xs={12} key={item.id}>
                     <Paper sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
-                        src={item.menu.image ? `http://127.0.0.1:8000${item.menu.image}` : "/placeholder.svg"}
+                        src={item.menu.image ? `https://restaurant-backend5.onrender.com${item.menu.image}` : "/placeholder.svg"}
                         alt={item.name || "Item"}
                         sx={{ width: 60, height: 60 }}
                         variant="rounded"

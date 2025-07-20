@@ -12,12 +12,12 @@ import './compo.css'
 // import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Index from '../LandingPage/index'
-import Bar from './Navbar'
+import NavigationBar from './Navbar'
 
 function Home() {
   return (
     <>
-    <Bar/>
+    <NavigationBar/>
 <Index/>
     </>
   )

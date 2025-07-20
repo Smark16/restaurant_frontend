@@ -14,6 +14,7 @@ export default defineConfig({
         manifest: {
           includeAssets: [
           "assets/*", 
+          'assets/**/*',
           'assets/*.js',
           'assets/*.css',
           'assets/*.png',
@@ -21,7 +22,9 @@ export default defineConfig({
           'assets/*.svg',
           'staff/dashboard/images/*.jpg',
           'staff/dashboard/items/images/*.jpg',
-          'vite.svg'
+          'vite.svg',
+          'cutlery.png',
+
         ],
 
           name: 'Smookies',
@@ -34,16 +37,11 @@ export default defineConfig({
           scope: '/',
           icons: [
             {
-              src: '/vite.svg', // Replace with your app icon
+              src: '/cutlery.png',
               sizes: '192x192',
-              type: 'image/svg+xml',
+              type: 'image/png',
+              purpose: 'any maskable',
             },
-            // {
-            //   src: '/icon-192.png',
-            //   sizes: '192x192',
-            //   type: 'image/png',
-            //   purpose: 'any maskable',
-            // },
             // {
             //   src: '/icon-512.png',
             //   sizes: '512x512',
@@ -53,7 +51,7 @@ export default defineConfig({
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,svg,png,ico, webmanifest}'],
+          globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
 
           runtimeCaching: [
             {

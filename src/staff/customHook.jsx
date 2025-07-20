@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import useAxios from '../components/useAxios';
 
-const orderUrl = 'http://127.0.0.1:8000/orders/user_orders';
-const reservationUrl = 'http://127.0.0.1:8000/reservations/all_resrvations';
-const foodItemUrl = 'http://127.0.0.1:8000/restaurant/food_items'
+const orderUrl = 'https://restaurant-backend5.onrender.com/orders/user_orders';
+const reservationUrl = 'https://restaurant-backend5.onrender.com/reservations/all_resrvations';
+const foodItemUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
 
 function useHook() {
     const axiosInstance = useAxios()

@@ -4,8 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 //import { tokenGeneration } from '../components/firebase';
 import Swal from 'sweetalert2'
 
-const loginurl = 'http://127.0.0.1:8000/restaurant/'
-const foodUrl = 'http://127.0.0.1:8000/restaurant/food_items'
+const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
 
 import axios from 'axios'
 
@@ -228,15 +227,20 @@ useEffect(()=>{
   // fetchFood()
   if(authTokens){
     const decodedUser =  jwtDecode(authTokens.access)
+    const lastPath = localStorage.getItem('lastPath');
     setUser(decodedUser);
     setStaff(decodedUser.is_staff)
     setCustomer(decodedUser.is_customer)
     if(decodedUser.is_staff){
-      navigate("/staff/dashboard")
+      navigate(lastPath);
       setStaff(true)
     }else if(decodedUser.is_customer){
-      navigate("/customer/dashboard")
+      navigate(lastPath);
       setCustomer(true)
+    }
+    if (lastPath) {
+      navigate(lastPath);  // Redirect to last accessed page if available
+      localStorage.removeItem('lastPath');  // Clear after redirecting
     }
   }
   setLoading(false)     

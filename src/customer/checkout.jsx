@@ -113,7 +113,7 @@ const OrderSummaryCard = ({ items, totalAmount }) => {
               {items.map((item) => (
                 <ListItem key={item.menu} sx={{ px: 0 }}>
                   <ListItemAvatar>
-                    <Avatar src={`http://127.0.0.1:8000/${item.product.image}`} alt={item.product.name} sx={{ width: 50, height: 50 }} />
+                    <Avatar src={`https://restaurant-backend5.onrender.com/${item.product.image}`} alt={item.product.name} sx={{ width: 50, height: 50 }} />
                   </ListItemAvatar>
                   <ListItemText
                     primary={item.product.name}
@@ -293,9 +293,9 @@ function EnhancedCheckout() {
  const axiosInstance = useAxios()
   const navigate = useNavigate()
   const theme = useTheme()
-  const post_orderInfo = 'http://127.0.0.1:8000/orders/placed_orders'
-  const make_payment = 'http://127.0.0.1:8000/payments/make_payment'
-  const post_picked_items = 'http://127.0.0.1:8000/orders/post_picked_items'
+  const post_orderInfo = 'https://restaurant-backend5.onrender.com/orders/placed_orders'
+  const make_payment = 'https://restaurant-backend5.onrender.com/payments/make_payment'
+  const post_picked_items = 'https://restaurant-backend5.onrender.com/orders/post_picked_items'
 
   const [info, setInfo] = useState(() => {
     const savedInfo = localStorage.getItem('info')

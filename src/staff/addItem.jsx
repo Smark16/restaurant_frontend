@@ -39,15 +39,13 @@ import {
   LocalDining as IngredientsIcon,
 } from "@mui/icons-material"
 import { Link } from "react-router-dom"
-import { AuthContext } from "../Context/AuthContext"
 import Swal from "sweetalert2"
 import useAxios from "../components/useAxios"
 
-const url = "http://127.0.0.1:8000/restaurant/items"
+const url = "https://restaurant-backend5.onrender.com/restaurant/items"
 
 function AddItem() {
   const axiosInstance = useAxios()
-  const {setFood} = useContext(AuthContext)
   const navigate = useNavigate()
   const [product, setProduct] = useState({
     pname: "",
@@ -205,8 +203,6 @@ function AddItem() {
         setProduct({ pname: "", price: "", desc: "", image: null, category: "", ingredients: [] })
         setImagePreview("")
 
-        // const menuResponse = await axiosInstance.get('http://127.0.0.1:8000/restaurant/food_items');
-        // setFood(menuResponse.data)
         setCurrentIngredient("")
         setTimeout(() => {
           navigate("/staff/dashboard/menu")

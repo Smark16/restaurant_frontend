@@ -10,9 +10,6 @@ import {
   MenuItem,
   Box,
   Button,
-  Drawer,
-  List,
-  ListItem,
   ListItemIcon,
   ListItemText,
   Divider,
@@ -178,13 +175,13 @@ const NavigationBar = ({ onMenuToggle }) => {
       )}
       {!user && (
         <>
-        <Link to='/login' className="text-white">
+        <Link to='/login' className="text-black">
           <MenuItem onClick={handleMobileMenuClose}>
             <ListItemText primary="Login"/>
           </MenuItem>
         </Link>
 
-        <Link to='/signup' className="text-white">
+        <Link to='/signup' className="text-black">
           <MenuItem onClick={handleMobileMenuClose} >
             <ListItemText primary="Sign Up"/>
           </MenuItem>
@@ -253,7 +250,7 @@ const NavigationBar = ({ onMenuToggle }) => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1 }}>
 
-                <Link to='/login' className="link text-white">
+                <Link to='/login' className="text-white">
                 <AuthButton variant="outlined" color="inherit">
                   Login
                 </AuthButton>

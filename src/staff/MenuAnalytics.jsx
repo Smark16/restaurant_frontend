@@ -32,15 +32,15 @@ import {
 } from "@mui/icons-material";
 import axios from "axios";
 
-const menuUrl = "http://127.0.0.1:8000/restaurant/food_items";
+const menuUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items";
 
-const menu_stats = "http://127.0.0.1:8000/restaurant/menu_analytics"
+const menu_stats = "https://restaurant-backend5.onrender.com/restaurant/menu_analytics"
 
-const category_count = "http://127.0.0.1:8000/restaurant/category_count"
+const category_count = "https://restaurant-backend5.onrender.com/restaurant/category_count"
 
-const top_perfomers = 'http://127.0.0.1:8000/restaurant/top_perfomers'
+const top_perfomers = 'https://restaurant-backend5.onrender.com/restaurant/top_perfomers'
 
-const needs_attension = 'http://127.0.0.1:8000/restaurant/needs_attention'
+const needs_attension = 'https://restaurant-backend5.onrender.com/restaurant/needs_attention'
 
 function categorizeFoodItem(item) {
   if (item.category__name) return item.category__name.toLowerCase();
@@ -231,7 +231,7 @@ const needsAttention = async()=>{
       renderCell: (params) => (
         <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
           <Avatar
-            src={`http://127.0.0.1:8000/media/${params.value}` || "/placeholder.svg"}
+            src={`https://restaurant-backend5.onrender.com/media/${params.value}` || "/placeholder.svg"}
             alt="Product"
             sx={{
               width: 60,

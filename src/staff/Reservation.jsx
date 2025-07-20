@@ -41,7 +41,7 @@ import {
 import axios from "axios";
 import { AuthContext } from "../Context/AuthContext";
 
-const reservationUrl = "http://127.0.0.1:8000/reservations/all_resrvations";
+const reservationUrl = "https://restaurant-backend5.onrender.com/reservations/all_resrvations";
 
 function ReservationManagement() {
   const { user, notifyAll, setNotifyAll } = useContext(AuthContext);
@@ -76,7 +76,7 @@ function ReservationManagement() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/reservations/delete_reservation/${id}`);
+      await axios.delete(`https://restaurant-backend5.onrender.com/reservations/delete_reservation/${id}`);
       setReservations((prevReservations) => prevReservations.filter((reservation) => reservation.id !== id));
       setDeleteDialogOpen(false);
       setReservationToDelete(null);
@@ -93,7 +93,7 @@ function ReservationManagement() {
     }
 
     try {
-      await axios.patch(`http://127.0.0.1:8000/reservations/update_reservation/${id}`, {"status" : newStatus});
+      await axios.patch(`https://restaurant-backend5.onrender.com/reservations/update_reservation/${id}`, {"status" : newStatus});
       setReservations((prevReservations) =>
         prevReservations.map((reservation) =>
           reservation.id === id ? { ...reservation, status: newStatus } : reservation,

@@ -186,7 +186,7 @@ function SignupPage() {
                   borderRadius: 4,
                   overflow: "hidden",
                   height: 600,
-                  background: `url('/placeholder.svg?height=600&width=500')`,
+                  background: `url('/cutlery.png')`,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                   position: "relative",

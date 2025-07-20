@@ -51,8 +51,8 @@ import axios from "axios"
 
 import { IndexedData } from "../components/IndexedDB";
 
-const post_reviews = 'http://127.0.0.1:8000/reviews/post_review'
-const post_rates = 'http://127.0.0.1:8000/ratings/rates'
+const post_reviews = 'https://restaurant-backend5.onrender.com/reviews/post_review'
+const post_rates = 'https://restaurant-backend5.onrender.com/ratings/rates'
 
 // Similar Product Card Component
 const SimilarProductCard = ({ item, onAddToCart }) => {
@@ -73,7 +73,7 @@ const SimilarProductCard = ({ item, onAddToCart }) => {
         <CardMedia
           component="img"
           height="160"
-          image={`http://127.0.0.1:8000/media/${item?.image}` || "/placeholder.svg?height=160&width=300"}
+          image={`https://restaurant-backend5.onrender.com/media/${item?.image}` || "/placeholder.svg?height=160&width=300"}
           alt={item?.name || "Product"}
           loading='lazy'
         />
@@ -155,8 +155,8 @@ function SingleMenuEnhanced() {
   const navigate = useNavigate()
   const theme = useTheme()
   const { user, handleCart, Increase, Reduce, addItem } = useContext(AuthContext)
-  const ItemUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`
-  const product_reviews = `http://127.0.0.1:8000/reviews/product_review/${id}`
+  const ItemUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`
+  const product_reviews = `https://restaurant-backend5.onrender.com/reviews/product_review/${id}`
  
   const [item, setItem] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -187,7 +187,7 @@ function SingleMenuEnhanced() {
       const [itemResponse, reviewResponse, similarItemResponse] = await Promise.all([
         axios.get(ItemUrl),
         axios.get(product_reviews),
-        axios.get('http://127.0.0.1:8000/restaurant/food_items')
+        axios.get('https://restaurant-backend5.onrender.com/restaurant/food_items')
       ])
       setItem(itemResponse.data)
       setReviews(reviewResponse.data.reviews_products || [])
@@ -340,7 +340,7 @@ function SingleMenuEnhanced() {
               )}
               <CardMedia
                 component="img"
-                image={`http://127.0.0.1:8000${item?.image || "/media/images/profile.jpg"}`}
+                image={`https://restaurant-backend5.onrender.com${item?.image || "/media/images/profile.jpg"}`}
                 alt={item?.name || "Item"}
                 loading="lazy"
                 sx={{

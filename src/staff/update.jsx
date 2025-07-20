@@ -102,8 +102,8 @@ function UpdateItem() {
   const [errors, setErrors] = useState({})
   const [currentIngredient, setCurrentIngredient] = useState("") // For ingredient input
 
-  const singleUrl = `http://127.0.0.1:8000/restaurant/food_items/${id}`
-  const updateUrl = `http://127.0.0.1:8000/restaurant/update_menu/${id}`
+  const singleUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`
+  const updateUrl = `https://restaurant-backend5.onrender.com/restaurant/update_menu/${id}`
 
   const categories = [
     { id: 1, value: "breakfast", label: "Breakfast", icon: <BreakfastIcon />, color: "#FF9800" },
@@ -601,7 +601,7 @@ function UpdateItem() {
                         />
                       ) : originalImage ? (
                         <img
-                          src={`http://127.0.0.1:8000${originalImage}`}
+                          src={`https://restaurant-backend5.onrender.com${originalImage}`}
                           alt="Preview"
                           style={{
                             maxWidth: "100%",

@@ -210,7 +210,7 @@ function EnhancedOrder() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
   const axiosInstance = useAxios()
 
-  const user_orders = `http://127.0.0.1:8000/orders/userOrder/${user?.user_id}`
+  const user_orders = `https://restaurant-backend5.onrender.com/orders/userOrder/${user?.user_id}`
 
   const [loading, setLoading] = useState(false)
   const [orders, setOrders] = useState([])
@@ -243,7 +243,7 @@ function EnhancedOrder() {
 
   const handleDelete = async (id) => {
     try {
-      const delete_order = `http://127.0.0.1:8000/orders/delete_order/${id}`
+      const delete_order = `https://restaurant-backend5.onrender.com/orders/delete_order/${id}`
       const deleteResponse = await axiosInstance.delete(delete_order)
       // Mock API call
       const deleted = orders.filter((order) => order.id !== id)

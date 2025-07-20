@@ -13,6 +13,7 @@ function Logout() {
             setAuthTokens(null);
             setUser(null);
             localStorage.removeItem("authtokens");
+            localStorage.removeItem('lastPath');
             Swal.fire({
                 icon: 'success',
                 title: 'Logged Out Successfully',

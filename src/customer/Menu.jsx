@@ -117,7 +117,7 @@ const FoodItemCard = ({ item, isAdded, onAddToCart }) => {
           <CardMedia
             component="img"
             height="200"
-            image={`http://127.0.0.1:8000/media/${item.image}` || "/placeholder.svg?height=200&width=300"}
+            image={`https://restaurant-backend5.onrender.com/media/${item.image}` || "/placeholder.svg?height=200&width=300"}
             alt={item.name}
             Loading='lazy'
             onLoad={() => setImageLoaded(true)}
@@ -258,7 +258,7 @@ function EnhancedMenuDisplay() {
 
   const { handleCart, addItem } = useContext(AuthContext)
 
-  const foodUrl = "http://127.0.0.1:8000/restaurant/food_items"
+  const foodUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items"
 
   const categories = [
     { label: "All Items", value: "all", icon: <Restaurant /> },

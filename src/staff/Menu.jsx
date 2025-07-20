@@ -38,7 +38,7 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 import useAxios from "../components/useAxios";
 
-const foodUrl = "http://127.0.0.1:8000/restaurant/food_items";
+const foodUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items";
 
 // Function to categorize food items based on name/description if category is not provided
 const categorizeFoodItem = (item) => {
@@ -385,7 +385,7 @@ function Menu() {
                     <CardMedia
                       component="img"
                       height="200"
-                      image={`http://127.0.0.1:8000/media/${item.image}`}
+                      image={`https://restaurant-backend5.onrender.com/media/${item.image}`}
                       alt={item.name}
                       sx={{ objectFit: "cover" }}
                     />

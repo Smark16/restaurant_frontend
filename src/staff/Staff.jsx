@@ -132,16 +132,16 @@ const theme = createTheme({
   },
 });
 
-const tablesUrl = "http://127.0.0.1:8000/tables/tables";
-const postTableUrl = "http://127.0.0.1:8000/tables/post_table";
-const patchTableStatusUrl = "http://127.0.0.1:8000/tables/table_status/";
+const tablesUrl = "https://restaurant-backend5.onrender.com/tables/tables";
+const postTableUrl = "https://restaurant-backend5.onrender.com/tables/post_table";
+const patchTableStatusUrl = "https://restaurant-backend5.onrender.com/tables/table_status/";
 
 // stats urls
-const yesterday_orders = 'http://127.0.0.1:8000/dashboard/yesterday_orders'
-const this_month_orders = 'http://127.0.0.1:8000/dashboard/this_month_orders'
-const last_month_orders = 'http://127.0.0.1:8000/dashboard/last_month_orders'
-const cat_perfomance = 'http://127.0.0.1:8000/dashboard/cat_perfomance'
-const order_status_perfomance = 'http://127.0.0.1:8000/dashboard/order_status_stats'
+const yesterday_orders = 'https://restaurant-backend5.onrender.com/dashboard/yesterday_orders'
+const this_month_orders = 'https://restaurant-backend5.onrender.com/dashboard/this_month_orders'
+const last_month_orders = 'https://restaurant-backend5.onrender.com/dashboard/last_month_orders'
+const cat_perfomance = 'https://restaurant-backend5.onrender.com/dashboard/cat_perfomance'
+const order_status_perfomance = 'https://restaurant-backend5.onrender.com/dashboard/order_status_stats'
 
 function StaffDashboard() {
   const { orders, reservations } = useHook();
@@ -164,7 +164,7 @@ function StaffDashboard() {
   // current orders
   const TodayOrders = async () => {
     try {
-      const response = await axiosInstance.get('http://127.0.0.1:8000/dashboard/today_stats')
+      const response = await axiosInstance.get('https://restaurant-backend5.onrender.com/dashboard/today_stats')
       const data = response.data
       setCurrentOrders(data)
     } catch (err) {

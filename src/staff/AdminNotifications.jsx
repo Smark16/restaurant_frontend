@@ -41,7 +41,7 @@ function AdminNotificationsPanel() {
   const { showUserNotifications, setUnreadUserNotifications, setShowUserNotifications } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const userNotifictions = 'http://127.0.0.1:8000/notifications/admin_notifications'
+  const userNotifictions = 'https://restaurant-backend5.onrender.com/notifications/admin_notifications'
   const axiosInstance = useAxios()
   
   const [filter, setFilter] = useState("all");
@@ -156,7 +156,7 @@ useEffect(()=>{
     try {
       const newReadStatus = !selectedNotification?.read;
       await axiosInstance.patch(
-        `http://127.0.0.1:8000/notifications/mark_as_read/${selectedNotification?.id}`,
+        `https://restaurant-backend5.onrender.com/notifications/mark_as_read/${selectedNotification?.id}`,
         { read: newReadStatus }
       );
       setNotifications((prev) =>
@@ -176,7 +176,7 @@ useEffect(()=>{
      const notread = notifications.filter(n => !n.read)
      await Promise.all(
       notread.map(async(notify) =>{
-        await axiosInstance.patch( `http://127.0.0.1:8000/notifications/mark_as_read/${notify?.id}`, {read : true})
+        await axiosInstance.patch( `https://restaurant-backend5.onrender.com/notifications/mark_as_read/${notify?.id}`, {read : true})
       })
       )
       setNotifications((prev) => prev.map((notify) => ({...notify, read:true})))

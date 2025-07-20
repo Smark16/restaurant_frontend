@@ -38,39 +38,6 @@ import {
 import { Link } from "react-router-dom"
 import { AuthContext } from "../Context/AuthContext"
 
-// Mock AuthContext for demonstration
-// const AuthContext = React.createContext({
-//   data: [
-//     {
-//       id: 1,
-//       name: "Grilled Salmon",
-//       price: 38000,
-//       image: "/placeholder.svg?height=80&width=80",
-//       quantity: 2,
-//       category: "dinner",
-//     },
-//     {
-//       id: 2,
-//       name: "Caesar Salad",
-//       price: 18000,
-//       image: "/placeholder.svg?height=80&width=80",
-//       quantity: 1,
-//       category: "lunch",
-//     },
-//     {
-//       id: 3,
-//       name: "Chocolate Cake",
-//       price: 15000,
-//       image: "/placeholder.svg?height=80&width=80",
-//       quantity: 3,
-//       category: "dessert",
-//     },
-//   ],
-//   handleDelete: (id) => console.log("Delete item:", id),
-//   Increase: (item) => console.log("Increase:", item),
-//   Reduce: (item) => console.log("Reduce:", item),
-// })
-
 // Cart Item Component
 const CartItemCard = ({ item, onDelete, onIncrease, onReduce }) => {
   const theme = useTheme()
@@ -90,7 +57,7 @@ const CartItemCard = ({ item, onDelete, onIncrease, onReduce }) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {/* Product Image */}
             <Avatar
-              src={`http://127.0.0.1:8000/media/${item.product.image}`}
+              src={`https://restaurant-backend5.onrender.com/media/${item.product.image}`}
               alt={item.product.name}
               loading='lazy'
               sx={{

@@ -152,8 +152,8 @@ function EnhancedReservations() {
   const theme = useTheme()
   const axiosInstance = useAxios()
 
-  const post_reservations = 'http://127.0.0.1:8000/reservations/new_reservation'
-  const table_list = 'http://127.0.0.1:8000/tables/tables'
+  const post_reservations = 'https://restaurant-backend5.onrender.com/reservations/new_reservation'
+  const table_list = 'https://restaurant-backend5.onrender.com/tables/tables'
 
   const [reservation, setReservation] = useState({
     user:user?.user_id,

@@ -137,9 +137,9 @@ function Customer() {
   const [reservations, setReservations] = useState([])
 
   // API endpoints
-  const user_order = `http://127.0.0.1:8000/orders/userOrder/${user?.user_id}`
-  const userReservation = `http://127.0.0.1:8000/reservations/user-reservation/${user?.user_id}`
-  const total_expense = `http://127.0.0.1:8000/dashboard/user_expense/${user?.user_id}`
+  const user_order = `https://restaurant-backend5.onrender.com/orders/userOrder/${user?.user_id}`
+  const userReservation = `https://restaurant-backend5.onrender.com/reservations/user-reservation/${user?.user_id}`
+  const total_expense = `https://restaurant-backend5.onrender.com/dashboard/user_expense/${user?.user_id}`
 
   // get user orders
   const fetchData = async () => {
