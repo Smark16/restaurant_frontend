@@ -153,5 +153,9 @@ font-size: 15px;
 
   /* ------------------------------------------------media screens------------------------- */
   
-  
+  @media screen and (max-width:1000px) {
+    .notify_icon{
+      display: none;
+    }
+  }
   

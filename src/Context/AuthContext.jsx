@@ -44,7 +44,7 @@ useEffect(()=>{
     const tokenString = localStorage.getItem('authtokens');
     const token = tokenString ? JSON.parse(tokenString) : null;
 
-    websocket.current  = new WebSocket(`ws://127.0.0.1:8000/ws/user_updates/?token=${token.access}`)
+    websocket.current  = new WebSocket(`wss://restaurant-backend5.onrender.com/ws/user_updates/?token=${token.access}`)
   
     websocket.current.onopen = ()=>{
       console.log('connection established')

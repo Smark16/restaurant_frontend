@@ -42,12 +42,6 @@ export default defineConfig({
               type: 'image/png',
               purpose: 'any maskable',
             },
-            // {
-            //   src: '/icon-512.png',
-            //   sizes: '512x512',
-            //   type: 'image/png',
-            //   purpose: 'any maskable',
-            // },
           ],
         },
         workbox: {
@@ -73,6 +67,22 @@ export default defineConfig({
             {
               // Cache orders  API
               urlPattern: ({ url }) => url.pathname.startsWith('/orders/user_orders'),
+              handler: 'CacheFirst', // Use cache if available, else network
+              options: {
+                cacheName: 'smookies-cache',
+                expiration: {
+                  maxEntries: 10, // Limit cache size
+                  maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200], // Cache successful responses and opaque (offline)
+                },
+              },
+            },
+            
+            {
+              // Cache tables  API
+              urlPattern: ({ url }) => url.pathname.startsWith('/tables/tables'),
               handler: 'CacheFirst', // Use cache if available, else network
               options: {
                 cacheName: 'smookies-cache',

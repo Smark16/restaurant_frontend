@@ -135,7 +135,7 @@ function Show() {
                     <Custbar />
                   </div>
               
-                    <div className="props p-3">
+                    <div className="props p-3 mt-4">
                       <Routes>
                         <Route path='customermenuDisplay' element={<Suspense fallback={<LoadingSpinner/>}><EnhancedMenuDisplay /></Suspense>} />
                         <Route path='item/:id' element={<Suspense fallback={<LoadingSpinner/>}><SingleMenu/></Suspense>}/>

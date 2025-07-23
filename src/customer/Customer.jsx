@@ -47,6 +47,8 @@ import { AuthContext } from '../Context/AuthContext'
 import Calendar from "./calendar"
 import NotificationsPanel from "./UserNotifications"
 
+import '../App.css'
+
 // Stats Card Component
 const StatsCard = ({ title, value, icon, color, trend, subtitle }) => {
   const theme = useTheme()
@@ -210,12 +212,14 @@ function Customer() {
     <>
       <Box
         sx={{
-          display: "flex",
+          display: {xs:"none", sm:"flex"},
           alignItems: "center",
           justifyContent: "flex-end",
           flexGrow: 1,
           gap: 1,
         }}
+
+        className='notify_icon'
       >
         <IconButton onClick={() => setShowUserNotifications(!showUserNotifications)}>
           <Badge badgeContent={unreadUserNotifications} color="error">
