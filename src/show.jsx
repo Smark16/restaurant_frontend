@@ -12,6 +12,7 @@ import { onMessage } from 'firebase/messaging';
 import toast, { Toaster } from 'react-hot-toast';
 import paymentSucesss from './customer/paymentSucesss';
 import NetworkStatus from './components/NetworkCheck';
+import InstallPWAButton from './components/Reusables/InstallPWAButton';
 
 const Home = lazy(()=>import('./components/Home'));
 const Login = lazy(()=>import('./components/login'));
@@ -79,6 +80,9 @@ function Show() {
 
   return (
     <>
+     <div>
+      <InstallPWAButton />
+    </div>
      <Toaster position='top-right'/> 
      <NetworkStatus/>
           <Routes>

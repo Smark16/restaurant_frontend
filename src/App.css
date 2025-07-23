@@ -151,11 +151,15 @@ font-size: 15px;
   position: absolute;
 }
 
+.install-btn {
+  background-color: #317efb;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
   /* ------------------------------------------------media screens------------------------- */
-  
-  @media screen and (max-width:1000px) {
-    .notify_icon{
-      display: none;
-    }
-  }
   
