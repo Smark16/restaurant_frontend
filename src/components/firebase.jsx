@@ -37,16 +37,16 @@ export const tokenGeneration = () => {
                 if (currentToken && user) {
                     await axiosInstance.patch(`https://restaurant-backend5.onrender.com/restaurant/fcm_token/${user?.user_id}`, { fcm_token: currentToken })
                         .then(response => {
-                            // console.log('FCM token saved successfully:', response);
+                             console.log('FCM token saved successfully:', response);
                         })
                         .catch(error => {
-                            // console.error('Error saving FCM token:', error);
+                             console.error('Error saving FCM token:', error);
                         });
                 } else {
-                    // console.log('No registration token available. Request permission to generate one.');
+                     console.log('No registration token available. Request permission to generate one.');
                 }
             } else {
-                // console.warn('Notification permission not granted.');
+                 console.warn('Notification permission not granted.');
             }
         } catch (err) {
             // console.error('An error occurred while retrieving token:', err);
