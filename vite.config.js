@@ -51,7 +51,7 @@ export default defineConfig({
             {
               // Cache product list API
               urlPattern: ({ url }) => url.pathname.startsWith('/restaurant/food_items'),
-              handler: 'CacheFirst', // Use cache if available, else network
+              handler: 'StaleWhileRevalidate', // Use cache if available, else network
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
@@ -67,7 +67,7 @@ export default defineConfig({
             {
               // Cache orders  API
               urlPattern: ({ url }) => url.pathname.startsWith('/orders/user_orders'),
-              handler: 'CacheFirst', // Use cache if available, else network
+              handler: 'StaleWhileRevalidate', // Use cache if available, else network
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
@@ -83,7 +83,7 @@ export default defineConfig({
             {
               // Cache tables  API
               urlPattern: ({ url }) => url.pathname.startsWith('/tables/tables'),
-              handler: 'CacheFirst', // Use cache if available, else network
+              handler: 'StaleWhileRevalidate', // Use cache if available, else network
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
@@ -99,7 +99,7 @@ export default defineConfig({
             {
               // Cache reservations  API
               urlPattern: ({ url }) => url.pathname.startsWith('/reservations/all_resrvations'),
-              handler: 'CacheFirst', 
+              handler: 'StaleWhileRevalidate', 
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
@@ -115,7 +115,7 @@ export default defineConfig({
             // firebase scripts cache
             {
               urlPattern: /^https:\/\/www\.gstatic\.com\/firebasejs/,
-              handler: 'CacheFirst',
+              handler: 'StaleWhileRevalidate',
               options: {
                 cacheName: 'firebase-cache',
                 expiration: {
