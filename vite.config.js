@@ -67,15 +67,15 @@ export default defineConfig({
             {
               // Cache orders  API
               urlPattern: ({ url }) => url.pathname.startsWith('/orders/user_orders'),
-              handler: 'StaleWhileRevalidate', // Use cache if available, else network
+              handler: 'StaleWhileRevalidate', 
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
-                  maxEntries: 10, // Limit cache size
-                  maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                  maxEntries: 10, 
+                  maxAgeSeconds: 7 * 24 * 60 * 60, 
                 },
                 cacheableResponse: {
-                  statuses: [0, 200], // Cache successful responses and opaque (offline)
+                  statuses: [0, 200], 
                 },
               },
             },
@@ -83,15 +83,15 @@ export default defineConfig({
             {
               // Cache tables  API
               urlPattern: ({ url }) => url.pathname.startsWith('/tables/tables'),
-              handler: 'StaleWhileRevalidate', // Use cache if available, else network
+              handler: 'StaleWhileRevalidate', 
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
-                  maxEntries: 10, // Limit cache size
+                  maxEntries: 10, 
                   maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
                 },
                 cacheableResponse: {
-                  statuses: [0, 200], // Cache successful responses and opaque (offline)
+                  statuses: [0, 200], 
                 },
               },
             },
@@ -113,20 +113,20 @@ export default defineConfig({
             },
 
             // firebase scripts cache
-            {
-              urlPattern: /^https:\/\/www\.gstatic\.com\/firebasejs/,
-              handler: 'StaleWhileRevalidate',
-              options: {
-                cacheName: 'firebase-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
-            },
+            // {
+            //   urlPattern: /^https:\/\/www\.gstatic\.com\/firebasejs/,
+            //   handler: 'StaleWhileRevalidate',
+            //   options: {
+            //     cacheName: 'firebase-cache',
+            //     expiration: {
+            //       maxEntries: 10,
+            //       maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+            //     },
+            //     cacheableResponse: {
+            //       statuses: [0, 200],
+            //     },
+            //   },
+            // },
           ]
         }
       }
