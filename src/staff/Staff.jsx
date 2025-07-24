@@ -388,10 +388,10 @@ function StaffDashboard() {
     <>
       <Box
         sx={{
-          display: "flex",
+          display: {xs:"none", sm:"flex"},
           alignItems: "center",
-          justifyContent: "flex-end", // Aligns content to the right
-          flexGrow: 1, // Ensures Box takes available space to push content to the right
+          justifyContent: "flex-end",
+          flexGrow: 1,
           gap: 1,
         }}
       >

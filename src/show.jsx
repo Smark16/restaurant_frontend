@@ -80,9 +80,7 @@ function Show() {
 
   return (
     <>
-     <div>
       <InstallPWAButton />
-    </div>
      <Toaster position='top-right'/> 
      <NetworkStatus/>
           <Routes>
@@ -110,7 +108,7 @@ function Show() {
                     <div>
                       <Sidebar />
                     </div>
-                    <div className="props p-3">
+                    <div className="props p-3 mt-4">
                       <Routes>
                         <Route path='menu' element={<Suspense fallback={<LoadingSpinner/>}><Menu /></Suspense>} />
                         <Route path='orders' element={<Suspense fallback={<LoadingSpinner/>}><OrdersManagement /></Suspense>} />
