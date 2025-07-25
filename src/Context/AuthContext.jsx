@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 //import { tokenGeneration } from '../components/firebase';
 import Swal from 'sweetalert2'
 
-const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
+const loginurl = 'http://127.0.0.1:8000/restaurant/'
 
 import axios from 'axios'
 
@@ -24,6 +24,8 @@ export const AuthProvider = ({children}) =>{
  const [clicked, setClicked] = useState(false)
  const [total, setTotal] = useState('')
  const [noAccount, setNoAccount] = useState('')
+
+ const [Loginloading, setLoginLoading] = useState(false)
  
 
  const [showUserNotifications, setShowUserNotifications] = useState(false)
@@ -44,7 +46,7 @@ useEffect(()=>{
     const tokenString = localStorage.getItem('authtokens');
     const token = tokenString ? JSON.parse(tokenString) : null;
 
-    websocket.current  = new WebSocket(`ws://127.0.0.1:8000/ws/user_updates/?token=${token.access}`)
+    websocket.current  = new WebSocket(`wss://restaurant-backend5.onrender.com/ws/user_updates/?token=${token.access}`)
   
     websocket.current.onopen = ()=>{
       console.log('connection established')
@@ -167,6 +169,7 @@ useEffect(()=>{
   }
 
  const loginUser = async (username, password) =>{
+  setLoginLoading(true)
   axios.post(loginurl, {
     username, password
   }).then(response =>{
@@ -183,13 +186,15 @@ useEffect(()=>{
   localStorage.setItem('authtokens', JSON.stringify(data))
   {decodedCustomer && navigate("/customer/dashboard")}
   {decodedStaff && navigate("/staff/dashboard")}
-  //generateToken();
+  setLoginLoading(false)
   showSuccessAlert("Login successfull")
   }else{
     showErrorAlert("Please provide correct username/password")
+    setLoginLoading(false)
   }
   }).catch (err => {
     console.log("Error", err)
+    setLoginLoading(false)
     if(err.response.data.detail){
       setNoAccount(err.response.data.detail)
     }
@@ -260,7 +265,8 @@ const contextData = {
     unreadUserNotifications, setUnreadUserNotifications,
     websocket,
     CurrentOrders, setCurrentOrders,
-    catPerfomance, setCatPerfomnace
+    catPerfomance, setCatPerfomnace,
+    Loginloading
 
 }
 return (
