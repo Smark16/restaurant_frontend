@@ -235,7 +235,12 @@ useEffect(()=>{
           boxShadow: theme.shadows[8],
         }}
       >
-        <Card sx={{ maxHeight: "100%", display: "flex", flexDirection: "column" }}>
+        <Card sx={{ 
+          maxHeight: "100%",
+           display: "flex", 
+           flexDirection: "column",
+           overflowY:'scroll'
+          }}>
           {/* Header */}
           <CardContent sx={{ pb: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>

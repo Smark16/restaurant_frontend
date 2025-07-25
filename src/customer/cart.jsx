@@ -69,7 +69,7 @@ const CartItemCard = ({ item, onDelete, onIncrease, onReduce }) => {
             />
 
             {/* Product Info */}
-            <Box sx={{ flexGrow: 1 }}>
+            <Box sx={{ flexGrow: 1, overflowX: {xs:'scroll'}}}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
                 <Typography variant="h6" fontWeight="bold">
                   {item.product.name}

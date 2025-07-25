@@ -44,7 +44,6 @@ import {
   FilterList,
 } from "@mui/icons-material"
 import { Link } from "react-router-dom"
-import axios from "axios"
 import { AuthContext } from "../Context/AuthContext"
 import useAxios from "../components/useAxios"
 

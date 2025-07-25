@@ -26,6 +26,7 @@ import {
   Snackbar,
   LinearProgress,
   Divider,
+  CircularProgress,
   List,
   ListItem,
   ListItemText,
@@ -34,7 +35,8 @@ import {
   Tab,
   Paper,
   Badge,
-  Avatar
+  Avatar,
+  alpha
 } from "@mui/material";
 import {
   TrendingUp,
@@ -51,6 +53,8 @@ import {
   CalendarMonth,
   DateRange,
   History,
+  EventSeat,
+  Restaurant,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -144,11 +148,14 @@ const cat_perfomance = 'https://restaurant-backend5.onrender.com/dashboard/cat_p
 const order_status_perfomance = 'https://restaurant-backend5.onrender.com/dashboard/order_status_stats'
 
 function StaffDashboard() {
-  const { orders, reservations } = useHook();
+  const { orders, reservations, loading } = useHook();
   const { user, CurrentOrders, setCurrentOrders, catPerfomance, setCatPerfomnace, unreadUserNotifications, showUserNotifications, setShowUserNotifications } = useContext(AuthContext);
   const axiosInstance = useAxios()
 
   const [tables, setTables] = useState([]);
+  const [tableLoader, setTableLoader] = useState(false)
+  const [catLoader, setCatLoader] = useState(false)
+  const [statusLoader, setStatusLoader] = useState(false)
   const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
@@ -208,20 +215,26 @@ function StaffDashboard() {
   // category perfomance
   const CatPerfomance = async () => {
     try {
+      setCatLoader(true)
       const response = await axios.get(cat_perfomance)
       setCatPerfomnace(response.data)
+      setCatLoader(false)
     } catch (err) {
       console.log('err', err)
+      setCatLoader(false)
     }
   }
 
   // order perfomance
   const OrderStatusPerfomance = async () => {
     try {
+      setStatusLoader(true)
       const response = await axios.get(order_status_perfomance)
       setOrderPerfomance(response.data)
+      setStatusLoader(false)
     } catch (err) {
       console.log('err', err)
+      setStatusLoader(false)
     }
   }
   console.log('current orders', CurrentOrders)
@@ -332,13 +345,15 @@ function StaffDashboard() {
 
   const fetchTables = async () => {
     try {
+      setTableLoader(true)
       const response = await axiosInstance.get(tablesUrl);
       setTables(response.data);
+      setTableLoader(false)
     } catch (err) {
       console.log("No table");
+      setTableLoader(false)
     }
   };
-  console.log('tables', tables)
 
   useEffect(() => {
     const loadData = async () => {
@@ -388,7 +403,7 @@ function StaffDashboard() {
     <>
       <Box
         sx={{
-          display: {xs:"none", sm:"flex"},
+          display: { xs: "none", sm: "flex" },
           alignItems: "center",
           justifyContent: "flex-end",
           flexGrow: 1,
@@ -571,7 +586,12 @@ function StaffDashboard() {
                       <Typography variant="h6" fontWeight="bold" mb={2}>
                         Menu Category Perfomance
                       </Typography>
-                      <ResponsiveContainer width="100%" height={200} >
+                      {catLoader ? (
+                          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                          <CircularProgress />
+                        </Box>
+                      ) : catPerfomance ? (
+                        <ResponsiveContainer width="100%" height={200} >
                         <PieChart>
                           <Pie
                             data={Object.entries(catPerfomance).map(([name, value]) => ({
@@ -601,6 +621,25 @@ function StaffDashboard() {
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>
+                      ) : (
+                        <Paper
+                        sx={{
+                          p: 6,
+                          textAlign: "center",
+                          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
+                            theme.palette.secondary.main,
+                            0.05,
+                          )} 100%)`,
+                        }}
+                      >
+                        <Restaurant sx={{ fontSize: 80, color: "text.secondary", mb: 2 }} />
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>
+                          category pie chart will appear here
+                        </Typography>
+                       
+                      </Paper>
+                      )}
+                      
                     </CardContent>
                   </Card>
                 </Grid>
@@ -612,7 +651,12 @@ function StaffDashboard() {
                       <Typography variant="h6" fontWeight="bold" mb={2}>
                         Order Status
                       </Typography>
-                      <ResponsiveContainer width="100%" height={200}>
+                      {statusLoader ? (
+                          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                          <CircularProgress />
+                        </Box>
+                      ) : orderPerfomance ? (
+                        <ResponsiveContainer width="100%" height={200}>
                         <PieChart>
                           <Pie
                             data={Object.entries(orderPerfomance).map(([name, value]) => ({
@@ -642,6 +686,25 @@ function StaffDashboard() {
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>
+                      ) : (
+                        <Paper
+                        sx={{
+                          p: 6,
+                          textAlign: "center",
+                          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
+                            theme.palette.secondary.main,
+                            0.05,
+                          )} 100%)`,
+                        }}
+                      >
+                        <ShoppingBag sx={{ fontSize: 80, color: "text.secondary", mb: 2 }} />
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>
+                          status pie chart will appear here
+                        </Typography>
+                       
+                      </Paper>
+                      )}
+                      
                     </CardContent>
                   </Card>
                 </Grid>
@@ -680,24 +743,57 @@ function StaffDashboard() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {orders.slice(0, 6).map((order, index) => (
-                          <TableRow key={index} hover>
-                            <TableCell>
-                              <Box display="flex" alignItems="center" gap={1}>
-                                <Avatar sx={{ width: 32, height: 32 }}>
-                                  {order.user.username.charAt(0).toUpperCase()}
-                                </Avatar>
-                                {order.user.username}
+                        {loading ? (
+                          <TableRow>
+                            <TableCell colSpan={7}>
+                              <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                                <CircularProgress />
                               </Box>
                             </TableCell>
-                            <TableCell>{order.order_date}</TableCell>
-                            <TableCell>{order.location}</TableCell>
-                            <TableCell>{order.contact}</TableCell>
-                            <TableCell>
-                              <Chip label={order.status} color="success" size="small" icon={<CheckCircle />} />
-                            </TableCell>
                           </TableRow>
-                        ))}
+                        ) : orders.length > 0 ? (<>
+                          {orders.slice(0, 6).map((order, index) => (
+                            <TableRow key={index} hover>
+                              <TableCell>
+                                <Box display="flex" alignItems="center" gap={1}>
+                                  <Avatar sx={{ width: 32, height: 32 }}>
+                                    {order.user.username.charAt(0).toUpperCase()}
+                                  </Avatar>
+                                  {order.user.username}
+                                </Box>
+                              </TableCell>
+                              <TableCell>{order.order_date}</TableCell>
+                              <TableCell>{order.location}</TableCell>
+                              <TableCell>{order.contact}</TableCell>
+                              <TableCell>
+                                <Chip label={order.status} color="success" size="small" icon={<CheckCircle />} />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </>) : (<>
+                        <TableRow>
+                          <TableCell colSpan={7}>
+                          <Paper
+                            sx={{
+                              p: 6,
+                              textAlign: "center",
+                              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
+                                theme.palette.secondary.main,
+                                0.05,
+                              )} 100%)`,
+                            }}
+                          >
+                            <ShoppingBag sx={{ fontSize: 80, color: "text.secondary", mb: 2 }} />
+                            <Typography variant="h5" fontWeight="bold" gutterBottom>
+                              No Orders Yet
+                            </Typography>
+                           
+                          </Paper>
+                          </TableCell>
+                        </TableRow>
+                          
+                        </>)}
+
                       </TableBody>
                     </Table>
                   </TableContainer>
@@ -734,7 +830,17 @@ function StaffDashboard() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {reservations.slice(0, 6).map((reservation, index) => (
+                        {loading ? (
+                          <TableRow>
+                            <TableCell colSpan={7}>
+                            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                                <CircularProgress />
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        ) : reservations.length > 0 ? (
+                          <>
+                           {reservations.slice(0, 6).map((reservation, index) => (
                           <TableRow key={index} hover>
                             <TableCell>
                               <Box display="flex" alignItems="center" gap={1}>
@@ -753,6 +859,30 @@ function StaffDashboard() {
                             </TableCell>
                           </TableRow>
                         ))}
+                          </>
+                        ) : (
+                          <TableRow>
+                          <TableCell colSpan={7}>
+                          <Paper
+                            sx={{
+                              p: 6,
+                              textAlign: "center",
+                              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
+                                theme.palette.secondary.main,
+                                0.05,
+                              )} 100%)`,
+                            }}
+                          >
+                            <EventSeat sx={{ fontSize: 80, color: "text.secondary", mb: 2 }} />
+                            <Typography variant="h5" fontWeight="bold" gutterBottom>
+                              No Reservations Yet
+                            </Typography>
+                           
+                          </Paper>
+                          </TableCell>
+                        </TableRow>
+                        )}
+                       
                       </TableBody>
                     </Table>
                   </TableContainer>
@@ -774,7 +904,13 @@ function StaffDashboard() {
                   </Box>
                   <Divider sx={{ mb: 2 }} />
                   <List>
-                    {tables.map((table) => (
+                    {tableLoader ? (
+                       <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                       <CircularProgress />
+                     </Box>
+                    ) : tables.length > 0 ? (
+                      <>
+                      {tables.map((table) => (
                       <ListItem key={table.id} divider>
                         <TableRestaurant sx={{ mr: 2, color: "primary.main" }} />
                         <ListItemText
@@ -797,6 +933,26 @@ function StaffDashboard() {
                         </ListItemSecondaryAction>
                       </ListItem>
                     ))}
+                      </>
+                    ) : (
+                      <Paper
+                      sx={{
+                        p: 6,
+                        textAlign: "center",
+                        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(
+                          theme.palette.secondary.main,
+                          0.05,
+                        )} 100%)`,
+                      }}
+                    >
+                      <TableRestaurant sx={{ fontSize: 80, color: "text.secondary", mb: 2 }} />
+                      <Typography variant="h5" fontWeight="bold" gutterBottom>
+                        No Tables Yet
+                      </Typography>
+                     
+                    </Paper>
+                    )}
+                    
                   </List>
                 </CardContent>
               </Card>

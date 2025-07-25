@@ -10,7 +10,6 @@ function useHook() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [reservations, setReservations] = useState([]);
-    const [latest, setLatest] = useState([]);
     const [foodItems, setFoodItems] = useState([])
 
     const fetchOrders = async () => {
@@ -21,6 +20,7 @@ function useHook() {
             setLoading(false);
         } catch (err) {
             console.log(err);
+            setLoading(false);
         }
     };
 
@@ -32,25 +32,30 @@ function useHook() {
             setLoading(false);
         } catch (err) {
             console.log(err);
+            setLoading(false);
         }
     };
     const fetchfoodItems = async () => {
         try {
+            setLoading(true)
             const response = await axiosInstance.get(foodItemUrl);
             setFoodItems(response.data);
+            setLoading(false)
         } catch (err) {
             console.log(err);
+            setLoading(false)
         }
     };
 
     useEffect(() => {
-        fetchOrders();
-        fetchReservations();
-        fetchfoodItems();
+        const loadData = async()=>{
+            await Promise.all([ fetchOrders(), fetchReservations(), fetchfoodItems()])
+        }
+      loadData()
     }, []);
 
     return {
-        orders, loading, reservations, latest, foodItems
+        orders, loading, reservations, foodItems
     };
 }
 

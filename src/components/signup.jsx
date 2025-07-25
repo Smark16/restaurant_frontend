@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -23,6 +23,8 @@ import {
 } from "@mui/material";
 import { Person, Email, Lock, PersonAdd, AdminPanelSettings, Restaurant } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Swal from 'sweetalert2'
+import { AuthContext } from "../Context/AuthContext";
 
 const theme = createTheme({
   palette: {
@@ -82,6 +84,7 @@ const registerurl = "https://restaurant-backend5.onrender.com/restaurant/registe
 
 function SignupPage() {
   const navigate = useNavigate();
+  const { showSuccessAlert, showErrorAlert} = useContext(AuthContext)
 
   const [person, setPerson] = useState({
     username: "",
@@ -131,10 +134,10 @@ function SignupPage() {
       });
 
       if (response.status === 201) {
-        alert("Success! Registration successful, you can login now");
+        showSuccessAlert("Success! Registration successful, you can login now")
         navigate("/login");
       } else {
-        alert(`Error: An error occurred: ${response.status}`);
+        showErrorAlert(`Error: An error occurred: ${response.status}`)
       }
     } catch (error) {
       if (error.response && error.response.data) {

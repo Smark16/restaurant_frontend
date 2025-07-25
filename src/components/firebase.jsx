@@ -6,17 +6,17 @@ import { AuthContext } from '../Context/AuthContext';
 import useAxios from './useAxios';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDnNFszqf2n5P8ekFhbIcR_HDufhtHXzdk",
-    authDomain: "restaurant-management-sy-4c2c8.firebaseapp.com",
-    projectId: "restaurant-management-sy-4c2c8",
-    storageBucket: "restaurant-management-sy-4c2c8.appspot.com",
-    messagingSenderId: "736422553584",
-    appId: "1:736422553584:web:121ecad67feef01837df35",
-    measurementId: "G-HLBB29FJ4C"
+    apiKey: "AIzaSyDJoXbSgkrFbrqBt4pG2O-3awVHHSga9Xo",
+    authDomain: "restaurant-system-bad31.firebaseapp.com",
+    projectId: "restaurant-system-bad31",
+    storageBucket: "restaurant-system-bad31.firebasestorage.app",
+    messagingSenderId: "654263112189",
+    appId: "1:654263112189:web:3b3f6804951ecac1cb8994",
+    measurementId: "G-H9PXT2D6NC"
 };
 
 export const tokenGeneration = () => {
-    const { user } = useContext(AuthContext);  
+    const { user } = useContext(AuthContext);
     const axiosInstance = useAxios();
 
     // Initialize Firebase
@@ -30,23 +30,23 @@ export const tokenGeneration = () => {
             const permission = await Notification.requestPermission();
 
             if (permission === 'granted') {
-                const currentToken = await getToken(messaging, { 
-                    vapidKey: "BNK4QUakbgI1EuK6GXomrSYe8bWdoYNhDFH0mHtM5oRSL2prjMV8K8sUDWZjgxv_-WSm-Y67Q7bVdlusq13Lizg"
+                const currentToken = await getToken(messaging, {
+                    vapidKey: "BCDGsummNd6G91Ga0E2ParPsqA0vaXH0PU5Qn7Tgim34kFUNM50C6nzG0erK2M1HrLn05eHgiLZRueSO4HZO6Ww"
                 });
 
                 if (currentToken && user) {
                     await axiosInstance.patch(`https://restaurant-backend5.onrender.com/restaurant/fcm_token/${user?.user_id}`, { fcm_token: currentToken })
                         .then(response => {
-                             console.log('FCM token saved successfully:', response);
+                            console.log('FCM token saved successfully:', response);
                         })
                         .catch(error => {
-                             console.error('Error saving FCM token:', error);
+                            console.error('Error saving FCM token:', error);
                         });
                 } else {
-                     console.log('No registration token available. Request permission to generate one.');
+                    console.log('No registration token available. Request permission to generate one.');
                 }
             } else {
-                 console.warn('Notification permission not granted.');
+                console.warn('Notification permission not granted.');
             }
         } catch (err) {
             // console.error('An error occurred while retrieving token:', err);
@@ -66,7 +66,7 @@ export const tokenGeneration = () => {
     }, [user]); // Dependency on `user` ensures this runs when the user logs in
 
     return {
-        messaging, 
+        messaging,
         generateToken
     };
 };
