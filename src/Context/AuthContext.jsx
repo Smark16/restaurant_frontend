@@ -198,7 +198,7 @@ useEffect(()=>{
     if(err.response.data.detail){
       setNoAccount(err.response.data.detail)
     }
-    showErrorAlert("There was a server issue")
+    showErrorAlert(`${err.response.data.detail}`)
   })
  }
  
