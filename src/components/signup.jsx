@@ -23,7 +23,6 @@ import {
 } from "@mui/material";
 import { Person, Email, Lock, PersonAdd, AdminPanelSettings, Restaurant } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import Swal from 'sweetalert2'
 import { AuthContext } from "../Context/AuthContext";
 
 const theme = createTheme({
@@ -97,6 +96,8 @@ function SignupPage() {
     password: [],
     username: [],
   });
+  const [userNameErrror, setUserNameError] = useState('')
+  const [passwordError, setPasswordError] = useState([])
 
   const [loading, setLoading] = useState(false);
 
@@ -140,20 +141,13 @@ function SignupPage() {
         showErrorAlert(`Error: An error occurred: ${response.status}`)
       }
     } catch (error) {
-      if (error.response && error.response.data) {
-        const newErrors = { password: [], username: [] };
-
-        if (error.response.data.password) {
-          newErrors.password = error.response.data.password;
-        }
-        if (error.response.data.username) {
-          newErrors.username = error.response.data.username;
-        }
-
-        setErrors(newErrors);
+      if (error.response) {
+        setUserNameError(err.response.data.contact)
+        setPasswordError(err.response.data.password)
+      } else {
+        setError("Failed to register. Please try again later.");
       }
 
-      alert("Error: There was a server issue");
     } finally {
       setLoading(false);
     }
@@ -275,8 +269,7 @@ function SignupPage() {
                             </InputAdornment>
                           ),
                         }}
-                        error={errors.username.length > 0}
-                        helperText={errors.username.join(", ")}
+                        helperText={userNameErrror}
                       />
 
                       {/* Email Field */}
@@ -315,10 +308,9 @@ function SignupPage() {
                             </InputAdornment>
                           ),
                         }}
-                        error={errors.password.length > 0}
-                        helperText={errors.password.join(", ")}
                       />
-
+                       {passwordError && passwordError.map(err => <p className="text-danger">{err}</p>)}
+                       
                       {/* Role Selection */}
                       <FormControl component="fieldset">
                         <FormLabel component="legend" sx={{ mb: 1, fontWeight: 600 }}>
