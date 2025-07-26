@@ -24,6 +24,7 @@ import {
 import { Person, Email, Lock, PersonAdd, AdminPanelSettings, Restaurant } from "@mui/icons-material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AuthContext } from "../Context/AuthContext";
+import axios from 'axios'
 
 const theme = createTheme({
   palette: {
@@ -113,19 +114,15 @@ function SignupPage() {
       const is_staff = role === "staff";
       const is_customer = role === "customer";
 
-      const response = await fetch(registerurl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.post(registerurl, 
+        {
           username,
           password,
           email,
           is_staff,
           is_customer,
-        }),
-      });
+        },
+      );
 
       if (response.status === 201) {
         showSuccessAlert("Success! Registration successful, you can login now")
@@ -133,16 +130,22 @@ function SignupPage() {
       }
     } catch (error) {
       if (error.response) {
-        setUserNameError(err.response.data.contact)
-        setPasswordError(err.response.data.password)
-      } else {
-        setError("Failed to register. Please try again later.");
+        const errors = error.response.data;
+        // Handle field-specific errors
+        setUserNameError(
+          errors.username ? errors.username.join(" ") : "" // Join array of errors if any
+        );
+        setPasswordError(
+          errors.password ? errors.password.join(" ") : ""
+        );
       }
 
     } finally {
       setLoading(false);
     }
   };
+
+  // console.log('usernameError', userNameErrror, 'passwordError', passwordError)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -260,7 +263,7 @@ function SignupPage() {
                             </InputAdornment>
                           ),
                         }}
-                        helperText={userNameErrror}
+                        helperText={<p className="text-danger">{userNameErrror}</p>}
                       />
 
                       {/* Email Field */}
@@ -299,8 +302,8 @@ function SignupPage() {
                             </InputAdornment>
                           ),
                         }}
+                        helperText={<p className="text-danger">{passwordError}</p>}
                       />
-                       {passwordError && passwordError.map(err => <p className="text-danger">{err}</p>)}
 
                       {/* Role Selection */}
                       <FormControl component="fieldset">
