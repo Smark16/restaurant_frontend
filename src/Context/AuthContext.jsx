@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 //import { tokenGeneration } from '../components/firebase';
 import Swal from 'sweetalert2'
 
-const loginurl = 'http://127.0.0.1:8000/restaurant/'
+const loginurl = 'https://restaurant-backend5.onrender.com/restaurant/'
 
 import axios from 'axios'
 
