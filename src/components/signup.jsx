@@ -102,10 +102,6 @@ function SignupPage() {
     const { name, value } = e.target;
     setPerson({ ...person, [name]: value });
 
-    // Clear errors when user starts typing
-    if (errors[name]?.length > 0) {
-      setErrors({ ...errors, [name]: [] });
-    }
   };
 
   const handleRoleChange = (e) => {
