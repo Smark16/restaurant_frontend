@@ -92,10 +92,7 @@ function SignupPage() {
     role: "",
   });
 
-  const [errors, setErrors] = useState({
-    password: [],
-    username: [],
-  });
+  const [error, setError] = useState('');
   const [userNameErrror, setUserNameError] = useState('')
   const [passwordError, setPasswordError] = useState([])
 
@@ -137,8 +134,6 @@ function SignupPage() {
       if (response.status === 201) {
         showSuccessAlert("Success! Registration successful, you can login now")
         navigate("/login");
-      } else {
-        showErrorAlert(`Error: An error occurred: ${response.status}`)
       }
     } catch (error) {
       if (error.response) {
@@ -310,7 +305,7 @@ function SignupPage() {
                         }}
                       />
                        {passwordError && passwordError.map(err => <p className="text-danger">{err}</p>)}
-                       
+
                       {/* Role Selection */}
                       <FormControl component="fieldset">
                         <FormLabel component="legend" sx={{ mb: 1, fontWeight: 600 }}>
