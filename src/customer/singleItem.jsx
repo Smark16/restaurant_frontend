@@ -340,7 +340,7 @@ function SingleMenuEnhanced() {
               )}
               <CardMedia
                 component="img"
-                image={item?.image}
+                image={`https://res.cloudinary.com/dnsx36nia/${item?.image}`}
                 alt={item?.name || "Item"}
                 loading="lazy"
                 sx={{

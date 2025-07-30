@@ -261,7 +261,7 @@ function SingleItem() {
             <Card sx={{ boxShadow: 3 }}>
               <CardMedia
                 component="img"
-                image={item.image}
+                image={`https://res.cloudinary.com/dnsx36nia/${item.image}`}
                 alt={item.name}
                 sx={{
                   height: { xs: 300, md: 400 },
