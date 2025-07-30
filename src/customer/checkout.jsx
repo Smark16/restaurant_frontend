@@ -113,7 +113,7 @@ const OrderSummaryCard = ({ items, totalAmount }) => {
               {items.map((item) => (
                 <ListItem key={item.menu} sx={{ px: 0 }}>
                   <ListItemAvatar>
-                    <Avatar src={`https://restaurant-backend5.onrender.com/${item.product.image}`} alt={item.product.name} sx={{ width: 50, height: 50 }} />
+                    <Avatar src={item.product.image} alt={item.product.name} sx={{ width: 50, height: 50 }} />
                   </ListItemAvatar>
                   <ListItemText
                     primary={item.product.name}

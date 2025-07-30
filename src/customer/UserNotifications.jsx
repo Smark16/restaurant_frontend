@@ -239,7 +239,7 @@ useEffect(()=>{
           maxHeight: "100%",
            display: "flex", 
            flexDirection: "column",
-           overflowY:'scroll'
+           overflowY:{xs:'scroll'}
           }}>
           {/* Header */}
           <CardContent sx={{ pb: 1 }}>

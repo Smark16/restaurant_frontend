@@ -261,7 +261,7 @@ function SingleItem() {
             <Card sx={{ boxShadow: 3 }}>
               <CardMedia
                 component="img"
-                image={`https://restaurant-backend5.onrender.com${item.image}`}
+                image={item.image}
                 alt={item.name}
                 sx={{
                   height: { xs: 300, md: 400 },

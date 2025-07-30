@@ -52,16 +52,16 @@ function ProfileManagement() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const updateUser = user?.user_id
-    ? `https://restaurant-backend5.onrender.com/restaurant/update_user/${user.user_id}`
+    ? `http://127.0.0.1:8000/restaurant/update_user/${user.user_id}`
     : "";
   const getUser = user?.user_id
-    ? `https://restaurant-backend5.onrender.com/restaurant/get_user/${user.user_id}`
+    ? `http://127.0.0.1:8000/restaurant/get_user/${user.user_id}`
     : "";
   const updateProfileUrl = user?.user_id
-    ? `https://restaurant-backend5.onrender.com/restaurant/update_profile/${user.user_id}`
+    ? `http://127.0.0.1:8000/restaurant/update_profile/${user.user_id}`
     : "";
   const profileUrl = user?.user_id
-    ? `https://restaurant-backend5.onrender.com/restaurant/profile/${user.user_id}`
+    ? `http://127.0.0.1:8000/restaurant/profile/${user.user_id}`
     : "";
 
   const [profileImage, setProfileImage] = useState([]);

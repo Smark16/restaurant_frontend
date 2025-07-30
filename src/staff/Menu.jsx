@@ -385,7 +385,7 @@ function Menu() {
                     <CardMedia
                       component="img"
                       height="200"
-                      image={`https://restaurant-backend5.onrender.com/media/${item.image}`}
+                      image={item.image}
                       alt={item.name}
                       sx={{ objectFit: "cover" }}
                     />

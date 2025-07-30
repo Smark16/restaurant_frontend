@@ -271,7 +271,9 @@ useEffect(()=>{
           <Divider />
 
           {/* Notifications List */}
-          <Box sx={{ flexGrow: 1, overflow: "auto" }}>
+          <Box sx={{ 
+            flexGrow: 1, 
+            overflowY: "auto" }}>
             {filteredNotifications.length === 0 ? (
               <Box sx={{ p: 3, textAlign: "center" }}>
                 <NotificationsIcon sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />

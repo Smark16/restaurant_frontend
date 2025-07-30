@@ -231,7 +231,7 @@ const needsAttention = async()=>{
       renderCell: (params) => (
         <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
           <Avatar
-            src={`https://restaurant-backend5.onrender.com/media/${params.value}` || "/placeholder.svg"}
+            src={params.value}
             alt="Product"
             sx={{
               width: 60,

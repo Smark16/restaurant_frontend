@@ -116,6 +116,7 @@ function AddItem() {
 
   const handleImageChange = (e) => {
     const selectedFile = e.target.files?.[0]
+
     if (selectedFile) {
       // Validate file type
       if (!selectedFile.type.startsWith("image/")) {

@@ -73,7 +73,7 @@ const SimilarProductCard = ({ item, onAddToCart }) => {
         <CardMedia
           component="img"
           height="160"
-          image={`https://restaurant-backend5.onrender.com/media/${item?.image}` || "/placeholder.svg?height=160&width=300"}
+          image={`${item?.image}` || "/placeholder.svg?height=160&width=300"}
           alt={item?.name || "Product"}
           loading='lazy'
         />
@@ -340,7 +340,7 @@ function SingleMenuEnhanced() {
               )}
               <CardMedia
                 component="img"
-                image={`https://restaurant-backend5.onrender.com${item?.image || "/media/images/profile.jpg"}`}
+                image={item?.image}
                 alt={item?.name || "Item"}
                 loading="lazy"
                 sx={{

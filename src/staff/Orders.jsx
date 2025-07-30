@@ -454,7 +454,7 @@ function OrdersManagement() {
                   <Grid item xs={12} key={item.id}>
                     <Paper sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
-                        src={item.menu.image ? `https://restaurant-backend5.onrender.com${item.menu.image}` : "/placeholder.svg"}
+                        src={item.menu.image ? `${item.menu.image}`: "/placeholder.svg"}
                         alt={item.name || "Item"}
                         sx={{ width: 60, height: 60 }}
                         variant="rounded"

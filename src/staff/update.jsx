@@ -601,7 +601,7 @@ function UpdateItem() {
                         />
                       ) : originalImage ? (
                         <img
-                          src={`https://restaurant-backend5.onrender.com${originalImage}`}
+                          src={originalImage}
                           alt="Preview"
                           style={{
                             maxWidth: "100%",

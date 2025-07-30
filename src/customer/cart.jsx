@@ -57,7 +57,7 @@ const CartItemCard = ({ item, onDelete, onIncrease, onReduce }) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {/* Product Image */}
             <Avatar
-              src={`https://restaurant-backend5.onrender.com/media/${item.product.image}`}
+              src={item.product.image}
               alt={item.product.name}
               loading='lazy'
               sx={{

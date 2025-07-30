@@ -51,15 +51,16 @@ export default defineConfig({
             {
               // Cache product list API
               urlPattern: ({ url }) => url.pathname.startsWith('/restaurant/food_items'),
-              handler: 'StaleWhileRevalidate', // Use cache if available, else network
+              handler: 'NetworkFirst', 
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
-                  maxEntries: 10, // Limit cache size
-                  maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60, 
                 },
+                networkTimeoutSeconds: 3,
                 cacheableResponse: {
-                  statuses: [0, 200], // Cache successful responses and opaque (offline)
+                  statuses: [0, 200], 
                 },
               },
             },
@@ -67,13 +68,14 @@ export default defineConfig({
             {
               // Cache orders  API
               urlPattern: ({ url }) => url.pathname.startsWith('/orders/user_orders'),
-              handler: 'StaleWhileRevalidate', 
+              handler: 'NetworkFirst', 
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
-                  maxEntries: 10, 
-                  maxAgeSeconds: 7 * 24 * 60 * 60, 
+                  maxEntries: 50, 
+                  maxAgeSeconds: 60 * 60, 
                 },
+                networkTimeoutSeconds: 3,
                 cacheableResponse: {
                   statuses: [0, 200], 
                 },
@@ -83,13 +85,14 @@ export default defineConfig({
             {
               // Cache tables  API
               urlPattern: ({ url }) => url.pathname.startsWith('/tables/tables'),
-              handler: 'StaleWhileRevalidate', 
+              handler: 'NetworkFirst', 
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
-                  maxEntries: 10, 
-                  maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+                  maxEntries: 50, 
+                  maxAgeSeconds: 60 * 60, 
                 },
+                networkTimeoutSeconds: 3,
                 cacheableResponse: {
                   statuses: [0, 200], 
                 },
@@ -99,34 +102,20 @@ export default defineConfig({
             {
               // Cache reservations  API
               urlPattern: ({ url }) => url.pathname.startsWith('/reservations/all_resrvations'),
-              handler: 'StaleWhileRevalidate', 
+              handler: 'NetworkFirst', 
               options: {
                 cacheName: 'smookies-cache',
                 expiration: {
-                  maxEntries: 10, 
-                  maxAgeSeconds: 7 * 24 * 60 * 60, 
+                  maxEntries: 50, 
+                  maxAgeSeconds: 60 * 60, 
                 },
+                networkTimeoutSeconds: 3,
                 cacheableResponse: {
                   statuses: [0, 200], 
                 },
               },
             },
 
-            // firebase scripts cache
-            // {
-            //   urlPattern: /^https:\/\/www\.gstatic\.com\/firebasejs/,
-            //   handler: 'StaleWhileRevalidate',
-            //   options: {
-            //     cacheName: 'firebase-cache',
-            //     expiration: {
-            //       maxEntries: 10,
-            //       maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-            //     },
-            //     cacheableResponse: {
-            //       statuses: [0, 200],
-            //     },
-            //   },
-            // },
           ]
         }
       }
