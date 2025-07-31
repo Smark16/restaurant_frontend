@@ -39,7 +39,6 @@ import {
   AdminPanelSettings as AdminIcon,
 } from "@mui/icons-material";
 import { AuthContext } from "../Context/AuthContext";
-import axios from "axios";
 import Swal from "sweetalert2";
 import useAxios from "../components/useAxios";
 
@@ -101,7 +100,7 @@ function ProfileManagement() {
       return;
     }
     try {
-      const response = await axios.get(profileUrl);
+      const response = await axiosInstance.get(profileUrl);
       const data = response.data;
       setProfileImage(data.image)
       setProfile({
@@ -124,7 +123,7 @@ function ProfileManagement() {
       return;
     }
     try {
-      const response = await axios.get(getUser);
+      const response = await axiosInstance.get(getUser);
       const data = response.data;
       setMyUser({
         username: data.username || "",
