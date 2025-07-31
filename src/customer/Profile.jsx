@@ -365,7 +365,7 @@ function CustomerProfileManagement() {
                   />
                   ) : profileImage ? (
                      <Avatar
-                    src={profileImage}
+                    src={`https://res.cloudinary.com/dnsx36nia/${profileImage}`}
                     alt="Profile"
                     sx={{
                       width: 120,
