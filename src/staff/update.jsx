@@ -94,7 +94,7 @@ function UpdateItem() {
     image: null,
     category: "",
     ingredients: [], // Added ingredients field
-    is_available :""
+    is_available :true
   })
   const [originalImage, setOriginalImage] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
