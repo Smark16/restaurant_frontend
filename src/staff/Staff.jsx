@@ -363,6 +363,8 @@ function StaffDashboard() {
     loadData()
   }, [])
 
+  console.log('current_orders', CurrentOrders)
+
   const statsCards = [
     {
       title: "Total Revenue",
