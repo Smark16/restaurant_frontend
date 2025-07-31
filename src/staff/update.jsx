@@ -601,7 +601,7 @@ function UpdateItem() {
                         />
                       ) : originalImage ? (
                         <img
-                          src={originalImage}
+                          src={`https://res.cloudinary.com/dnsx36nia/${originalImage}`}
                           alt="Preview"
                           style={{
                             maxWidth: "100%",
