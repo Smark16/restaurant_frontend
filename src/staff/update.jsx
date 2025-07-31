@@ -145,6 +145,7 @@ function UpdateItem() {
         image: data.image,
         category: category,
         ingredients: ingredients,
+        is_available:data.is_available
       })
     } catch (err) {
       console.error(err)
