@@ -52,7 +52,7 @@ const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
 // Function to categorize food items (same as in menu component)
 const categorizeFoodItem = (item) => {
   console.log('item', item)
-  if (item.category.name) return item.category.name.toLowerCase();
+  if (item.category?.name) return item.category?.name.toLowerCase();
 
   const name = item.name.toLowerCase();
   const desc = item.descriptions.toLowerCase();
