@@ -94,6 +94,7 @@ function UpdateItem() {
     image: null,
     category: "",
     ingredients: [], // Added ingredients field
+    is_available :""
   })
   const [originalImage, setOriginalImage] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
@@ -281,6 +282,7 @@ function UpdateItem() {
       formData.append("descriptions", item.descriptions)
       formData.append("category", item.category)
       formData.append("ingredients", JSON.stringify(item.ingredients)) // Send ingredients as JSON string
+      formData.append("is_available", item.is_available)
 
       // Handle image
       if (item.image instanceof File) {
