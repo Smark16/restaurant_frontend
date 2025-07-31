@@ -231,6 +231,8 @@ function UpdateItem() {
     }
   }
 
+  console.log('items', item)
+
   const removeImage = () => {
     setItem({ ...item, image: originalImage })
     setImagePreview(originalImage)
