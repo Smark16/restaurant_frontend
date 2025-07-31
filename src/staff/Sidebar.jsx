@@ -12,7 +12,6 @@ import {
   Divider,
   Avatar,
   Chip,
-  Paper,
   IconButton,
   useTheme,
   useMediaQuery,

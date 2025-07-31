@@ -47,50 +47,48 @@ import axios from "axios";
 import useHook from "./customHook";
 import { IndexedData } from "../components/IndexedDB";
 
-const foodUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items";
-
 // Function to categorize food items (same as in menu component)
 const categorizeFoodItem = (item) => {
   if (item.category__name) return item.category__name.toLowerCase();
 
-  const name = item.name.toLowerCase();
-  const desc = item.descriptions.toLowerCase();
-  const text = `${name} ${desc}`;
+  // const name = item.name.toLowerCase();
+  // const desc = item.descriptions.toLowerCase();
+  // const text = `${name} ${desc}`;
 
-  if (
-    text.includes("breakfast") ||
-    text.includes("cereal") ||
-    text.includes("pancake") ||
-    text.includes("toast") ||
-    text.includes("egg") ||
-    text.includes("coffee") ||
-    text.includes("tea") ||
-    text.includes("juice") ||
-    text.includes("croissant") ||
-    text.includes("bagel") ||
-    text.includes("oatmeal") ||
-    text.includes("yogurt")
-  ) {
-    return "breakfast";
-  }
+  // if (
+  //   text.includes("breakfast") ||
+  //   text.includes("cereal") ||
+  //   text.includes("pancake") ||
+  //   text.includes("toast") ||
+  //   text.includes("egg") ||
+  //   text.includes("coffee") ||
+  //   text.includes("tea") ||
+  //   text.includes("juice") ||
+  //   text.includes("croissant") ||
+  //   text.includes("bagel") ||
+  //   text.includes("oatmeal") ||
+  //   text.includes("yogurt")
+  // ) {
+  //   return "breakfast";
+  // }
 
-  if (
-    text.includes("dinner") ||
-    text.includes("steak") ||
-    text.includes("wine") ||
-    text.includes("roast") ||
-    text.includes("grilled") ||
-    text.includes("pasta") ||
-    text.includes("salmon") ||
-    text.includes("chicken breast") ||
-    text.includes("lamb") ||
-    text.includes("seafood") ||
-    text.includes("risotto")
-  ) {
-    return "dinner";
-  }
+  // if (
+  //   text.includes("dinner") ||
+  //   text.includes("steak") ||
+  //   text.includes("wine") ||
+  //   text.includes("roast") ||
+  //   text.includes("grilled") ||
+  //   text.includes("pasta") ||
+  //   text.includes("salmon") ||
+  //   text.includes("chicken breast") ||
+  //   text.includes("lamb") ||
+  //   text.includes("seafood") ||
+  //   text.includes("risotto")
+  // ) {
+  //   return "dinner";
+  // }
 
-  return "lunch";
+  // return "lunch";
 };
 
 function SingleItem() {
@@ -234,6 +232,8 @@ function SingleItem() {
 
   const itemCategory = categorizeFoodItem(item);
   const categoryInfo = categoryConfig[itemCategory];
+
+  console.log('item category',itemCategory, 'categoryInfo', categoryInfo )
 
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "100vh", py: 3 }}>
@@ -411,7 +411,7 @@ function SingleItem() {
                     <CardMedia
                       component="img"
                       height="150"
-                      image={`https://restaurant-backend5.onrender.com/media/${relatedItem.image}`}
+                      image={relatedItem.image}
                       alt={relatedItem.name}
                       sx={{ objectFit: "cover" }}
                     />

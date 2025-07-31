@@ -219,7 +219,6 @@ function Customer() {
           gap: 1,
         }}
 
-        className='notify_icon'
       >
         <IconButton onClick={() => setShowUserNotifications(!showUserNotifications)}>
           <Badge badgeContent={unreadUserNotifications} color="error">
