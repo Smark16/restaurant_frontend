@@ -284,6 +284,9 @@ function UpdateItem() {
       if (item.image instanceof File) {
         // New image uploaded
         formData.append("image", item.image)
+      }else if (typeof item.image === 'string') {
+        // If the image is not updated (Cloudinary public ID), append the public ID directly
+        formData.append('image', item.image);
       }
 
       const response = await axios.put(updateUrl, formData, {
