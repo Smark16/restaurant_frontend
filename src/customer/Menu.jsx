@@ -116,7 +116,7 @@ const FoodItemCard = ({ item, isAdded, onAddToCart }) => {
           <CardMedia
             component="img"
             height="200"
-            image={`${item.image}` || "/placeholder.svg?height=200&width=300"}
+            image={item.image}
             alt={item.name}
             Loading='lazy'
             onLoad={() => setImageLoaded(true)}
