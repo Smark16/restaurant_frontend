@@ -47,6 +47,8 @@ import axios from "axios";
 import useHook from "./customHook";
 import { IndexedData } from "../components/IndexedDB";
 
+const foodUrl = 'https://restaurant-backend5.onrender.com/restaurant/food_items'
+
 // Function to categorize food items (same as in menu component)
 const categorizeFoodItem = (item) => {
   if (item.category__name) return item.category__name.toLowerCase();
