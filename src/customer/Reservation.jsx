@@ -40,7 +40,6 @@ import {
   Celebration,
 } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
 import { AuthContext } from "../Context/AuthContext"
 import useAxios from "../components/useAxios"
 

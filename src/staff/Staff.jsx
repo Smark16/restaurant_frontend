@@ -73,7 +73,6 @@ import {
 } from "recharts";
 import { AuthContext } from "../Context/AuthContext";
 import useHook from "./customHook";
-import axios from 'axios'
 import useAxios from "../components/useAxios";
 import NotificationsPanel from "../customer/UserNotifications";
 
@@ -182,7 +181,7 @@ function StaffDashboard() {
   // order stats
   const YesterdayOrders = async () => {
     try {
-      const response = await axios.get(yesterday_orders)
+      const response = await axiosInstance.get(yesterday_orders)
       const data = response.data
       setYesterday(data)
     } catch (err) {
@@ -193,7 +192,7 @@ function StaffDashboard() {
   // current month orders
   const ThisMonthOrders = async () => {
     try {
-      const response = await axios.get(this_month_orders)
+      const response = await axiosInstance.get(this_month_orders)
       const data = response.data
       setThisMonth(data)
     } catch (err) {
@@ -204,7 +203,7 @@ function StaffDashboard() {
   // last month orders
   const LastMonthOrders = async () => {
     try {
-      const response = await axios.get(last_month_orders)
+      const response = await axiosInstance.get(last_month_orders)
       const data = response.data
       setLastMonth(data)
     } catch (err) {
@@ -216,7 +215,7 @@ function StaffDashboard() {
   const CatPerfomance = async () => {
     try {
       setCatLoader(true)
-      const response = await axios.get(cat_perfomance)
+      const response = await axiosInstance.get(cat_perfomance)
       setCatPerfomnace(response.data)
       setCatLoader(false)
     } catch (err) {
@@ -229,7 +228,7 @@ function StaffDashboard() {
   const OrderStatusPerfomance = async () => {
     try {
       setStatusLoader(true)
-      const response = await axios.get(order_status_perfomance)
+      const response = await axiosInstance.get(order_status_perfomance)
       setOrderPerfomance(response.data)
       setStatusLoader(false)
     } catch (err) {
@@ -237,7 +236,6 @@ function StaffDashboard() {
       setStatusLoader(false)
     }
   }
-  console.log('current orders', CurrentOrders)
 
   //data for different time periods
   const generateSampleData = (period) => {

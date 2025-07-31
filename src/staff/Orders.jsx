@@ -40,7 +40,6 @@ import {
   CalendarToday as CalendarIcon,
   Search as SearchIcon,
 } from "@mui/icons-material";
-import axios from "axios";
 import useAxios from "../components/useAxios";
 import { AuthContext } from "../Context/AuthContext";
 
@@ -69,7 +68,7 @@ function OrdersManagement() {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(orderUrl);
+      const response = await axiosInstance.get(orderUrl);
       // Validate response data
       if (!Array.isArray(response.data)) {
         throw new Error("Invalid response format: Expected an array of orders");
@@ -85,7 +84,7 @@ function OrdersManagement() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://restaurant-backend5.onrender.com/orders/delete_order/${id}`);
+      await axiosInstance.delete(`https://restaurant-backend5.onrender.com/orders/delete_order/${id}`);
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
       setDeleteDialogOpen(false);
       setOrderToDelete(null);
@@ -125,7 +124,7 @@ function OrdersManagement() {
     const SingleOrderItemUrl = `https://restaurant-backend5.onrender.com/orders/single_order_item/${order?.id}`;
 
     try {
-      const response = await axios.get(SingleOrderItemUrl);
+      const response = await axiosInstance.get(SingleOrderItemUrl);
       const data = response.data;
       
       setOrderItems(data?.takenItems);

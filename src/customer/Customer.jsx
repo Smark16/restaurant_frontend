@@ -42,10 +42,11 @@ import {
   Notifications as NotificationsIcon,
 } from "@mui/icons-material"
 import { Link } from "react-router-dom"
-import axios from "axios"
+
 import { AuthContext } from '../Context/AuthContext'
 import Calendar from "./calendar"
 import NotificationsPanel from "./UserNotifications"
+import useAxios from "../components/useAxios"
 
 import '../App.css'
 
@@ -129,8 +130,7 @@ const StatusChip = ({ status }) => {
 
 function Customer() {
   const { user, Loginloading, unreadUserNotifications, showUserNotifications, setShowUserNotifications } = useContext(AuthContext)
-
-  console.log('bool', showUserNotifications)
+  const axiosInstance = useAxios()
   const theme = useTheme()
 
   const [expense, setExpense] = useState(0)
@@ -147,7 +147,7 @@ function Customer() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(user_order)
+      const response = await axiosInstance.get(user_order)
       setOrders(response.data)
     } catch (err) {
       console.log("Error occurred", err)
@@ -160,7 +160,7 @@ function Customer() {
   const fetchReservations = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(userReservation)
+      const response = await axiosInstance.get(userReservation)
       setReservations(response.data)
     } catch (err) {
       console.log("Error occurred", err)
@@ -172,7 +172,7 @@ function Customer() {
   // get total Expense
   const totalExpense = async () => {
     try {
-      const response = await axios.get(total_expense)
+      const response = await axiosInstance.get(total_expense)
       setExpense(response.data)
     } catch (err) {
       console.log('err', err)

@@ -43,7 +43,7 @@ import {
 } from "@mui/icons-material";
 
 import { Link, useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import useAxios from "../components/useAxios";
 import useHook from "./customHook";
 import { IndexedData } from "../components/IndexedDB";
 
@@ -99,6 +99,7 @@ function SingleItem() {
   const { id } = useParams();
   const navigate = useNavigate();
   const theme = useTheme();
+  const axiosInstance = useAxios()
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const singleUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`;
@@ -120,7 +121,7 @@ function SingleItem() {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(singleUrl);
+      const response = await axiosInstance.get(singleUrl);
       const data = response.data;
       setItem(data);
     } catch (err) {
@@ -136,7 +137,7 @@ function SingleItem() {
 
     try {
       setDeleting(true);
-      await axios.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_items/${id}`);
+      await axiosInstance.delete(`https://restaurant-backend5.onrender.com/restaurant/delete_items/${id}`);
       navigate("/staff/dashboard/menu");
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -152,7 +153,7 @@ function SingleItem() {
     try{
        const change_status = `https://restaurant-backend5.onrender.com/restaurant/update_availability/${id}`
        const newStatus = !available
-       await axios.patch(change_status, {is_available : newStatus})
+       await axiosInstance.patch(change_status, {is_available : newStatus})
 
        setItem((prev) => prev.id === id ? {...prev, is_available:newStatus} : prev)
     }catch(err){

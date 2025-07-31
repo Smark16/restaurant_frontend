@@ -31,6 +31,7 @@ import {
   DinnerDining as DinnerIcon,
 } from "@mui/icons-material";
 import axios from "axios";
+import useAxios from "../components/useAxios";
 
 const menuUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items";
 
@@ -88,6 +89,7 @@ function categorizeFoodItem(item) {
 function MenuAnalytics() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const axiosInstance = useAxios()
 
   const [menuItems, setMenuItems] = useState([]);
   const [stats, setStats] = useState('')
@@ -103,7 +105,7 @@ function MenuAnalytics() {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(menuUrl);
+      const response = await axiosInstance.get(menuUrl);
       if (!Array.isArray(response.data)) {
         throw new Error("Invalid response format: Expected an array of menu items");
       }
@@ -131,10 +133,12 @@ function MenuAnalytics() {
   // menu stats
  const getMenuStats = async()=>{
   try{
-    const response = await axios.get(menu_stats)
-    const count_response = await axios.get(category_count)
-    const data = response.data
-    setStats(data)
+    const [response, count_response] =  await Promise.all([
+       axiosInstance.get(menu_stats),
+       axiosInstance.get(category_count)
+    ])
+   
+    setStats(response.data)
     setCat_stats(count_response.data)
   }catch(err){
     console.log('err', err)
@@ -144,7 +148,7 @@ function MenuAnalytics() {
 //  top perfomers
 const topPerfomers = async()=>{
   try{
-   const response = await axios.get(top_perfomers)
+   const response = await axiosInstance.get(top_perfomers)
    const data = response.data
    setTop(data)
   }catch(err){
@@ -155,7 +159,7 @@ const topPerfomers = async()=>{
 // needs attension
 const needsAttention = async()=>{
   try{
-    const response = await axios.get(needs_attension)
+    const response = await axiosInstance.get(needs_attension)
     const data = response.data
     setAttention(data)
   }catch(err){
@@ -470,7 +474,7 @@ const needsAttention = async()=>{
                         sx={{ minWidth: "40px", fontWeight: "bold" }}
                       />
                       <Avatar
-                        src={item.image || "/placeholder.svg"}
+                        src={item.image}
                         alt={item.name || "Unknown"}
                         sx={{ width: 30, height: 30 }}
                       />
@@ -503,7 +507,7 @@ const needsAttention = async()=>{
                     <Box key={item.id} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Chip label={`⚠️`} color="warning" size="small" sx={{ minWidth: "40px", fontWeight: "bold" }} />
                       <Avatar
-                        src={item.image || "/placeholder.svg"}
+                        src={item.image}
                         alt={item.name || "Unknown"}
                         sx={{ width: 30, height: 30 }}
                       />

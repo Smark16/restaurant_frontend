@@ -45,7 +45,6 @@ import {
   Refresh,
 } from "@mui/icons-material"
 
-import axios from 'axios'
 import { AuthContext } from "../Context/AuthContext"
 import useAxios from "../components/useAxios"
 
@@ -231,7 +230,7 @@ function EnhancedOrder() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(user_orders)
+      const response = await axiosInstance.get(user_orders)
       
       setOrders(response.data)
       setLoading(false)

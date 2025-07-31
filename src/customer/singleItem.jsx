@@ -47,7 +47,7 @@ import {
 } from "@mui/icons-material"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { AuthContext } from "../Context/AuthContext"
-import axios from "axios"
+import useAxios from "../components/useAxios"
 
 import { IndexedData } from "../components/IndexedDB";
 
@@ -153,6 +153,7 @@ function SingleMenuEnhanced() {
   const { id } = useParams()
   const { getSingleItem } = IndexedData()
   const navigate = useNavigate()
+  const axiosInstance = useAxios()
   const theme = useTheme()
   const { user, handleCart, Increase, Reduce, addItem } = useContext(AuthContext)
   const ItemUrl = `https://restaurant-backend5.onrender.com/restaurant/food_items/${id}`
@@ -185,9 +186,9 @@ function SingleMenuEnhanced() {
     try {
       setLoading(true)
       const [itemResponse, reviewResponse, similarItemResponse] = await Promise.all([
-        axios.get(ItemUrl),
-        axios.get(product_reviews),
-        axios.get('https://restaurant-backend5.onrender.com/restaurant/food_items')
+        axiosInstance.get(ItemUrl),
+        axiosInstance.get(product_reviews),
+        axiosInstance.get('https://restaurant-backend5.onrender.com/restaurant/food_items')
       ])
       setItem(itemResponse.data)
       setReviews(reviewResponse.data.reviews_products || [])
@@ -243,14 +244,14 @@ function SingleMenuEnhanced() {
 
     try {
       // Submit rating
-      const ratingResponse = await axios.post(post_rates, {
+      const ratingResponse = await axiosInstance.post(post_rates, {
         user: user.user_id,
         value: userRating,
         product: id,
       })
 
       // Submit review
-      const reviewResponse = await axios.post(post_reviews, {
+      const reviewResponse = await axiosInstance.post(post_reviews, {
         product: id,
         review: reviewText,
         rating: ratingResponse.data.id, 
@@ -258,7 +259,7 @@ function SingleMenuEnhanced() {
       })
 
       // Refetch reviews to update the list (ordered by created_at from backend)
-      const reviewResponseUpdated = await axios.get(product_reviews)
+      const reviewResponseUpdated = await axiosInstance.get(product_reviews)
       setReviews(reviewResponseUpdated.data.reviews_products || [])
 
       // Reset form and show success message

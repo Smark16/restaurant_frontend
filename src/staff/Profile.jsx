@@ -206,10 +206,10 @@ function ProfileManagement() {
 
     try {
       const [profileRes, userRes] = await Promise.all([
-        axios.put(updateProfileUrl, formData, {
+        axiosInstance.put(updateProfileUrl, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         }),
-        axios.put(updateUser, userData, {
+        axiosInstance.put(updateUser, userData, {
           headers: { "Content-Type": "multipart/form-data" },
         }),
       ]);

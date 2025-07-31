@@ -38,15 +38,16 @@ import {
   Search as SearchIcon,
   EventSeat as ReservationIcon,
 } from "@mui/icons-material";
-import axios from "axios";
 import { AuthContext } from "../Context/AuthContext";
+import useAxios from "../components/useAxios";
 
 const reservationUrl = "https://restaurant-backend5.onrender.com/reservations/all_resrvations";
 
 function ReservationManagement() {
-  const { user, notifyAll, setNotifyAll } = useContext(AuthContext);
+  const { user} = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const axiosInstance = useAxios()
 
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +62,7 @@ function ReservationManagement() {
     try {
       setLoading(true);
       setError("");
-      const response = await axios.get(reservationUrl);
+      const response = await axiosInstance.get(reservationUrl);
       if (!Array.isArray(response.data)) {
         throw new Error("Invalid response format: Expected an array of reservations");
       }
@@ -76,7 +77,7 @@ function ReservationManagement() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://restaurant-backend5.onrender.com/reservations/delete_reservation/${id}`);
+      await axiosInstance.delete(`https://restaurant-backend5.onrender.com/reservations/delete_reservation/${id}`);
       setReservations((prevReservations) => prevReservations.filter((reservation) => reservation.id !== id));
       setDeleteDialogOpen(false);
       setReservationToDelete(null);
@@ -93,7 +94,7 @@ function ReservationManagement() {
     }
 
     try {
-      await axios.patch(`https://restaurant-backend5.onrender.com/reservations/update_reservation/${id}`, {"status" : newStatus});
+      await axiosInstance.patch(`https://restaurant-backend5.onrender.com/reservations/update_reservation/${id}`, {"status" : newStatus});
       setReservations((prevReservations) =>
         prevReservations.map((reservation) =>
           reservation.id === id ? { ...reservation, status: newStatus } : reservation,
