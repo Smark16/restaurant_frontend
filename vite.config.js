@@ -10,6 +10,7 @@ export default defineConfig({
     VitePWA(
       {
         registerType: 'autoUpdate',
+        injectRegister: 'auto',
 
         manifest: {
           includeAssets: [
@@ -47,10 +48,16 @@ export default defineConfig({
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
 
+          navigateFallback: '/index.html',
+
+          navigateFallbackDenylist: [
+          /^https:\/\/restaurant-backend5\.onrender\.com\// 
+         ],
+
           runtimeCaching: [
             {
               // Cache product list API
-              urlPattern: ({ url }) => url.pathname.startsWith('/restaurant/food_items'),
+              urlPattern: /^https:\/\/restaurant-backend5\.onrender\.com\/restaurant\/food_items.*$/,
               handler: 'NetworkFirst', 
               options: {
                 cacheName: 'smookies-cache',
