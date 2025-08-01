@@ -43,48 +43,6 @@ const foodUrl = "https://restaurant-backend5.onrender.com/restaurant/food_items"
 // Function to categorize food items based on name/description if category is not provided
 const categorizeFoodItem = (item) => {
   if (item.category__name) return item.category__name.toLowerCase();
-
-  // const name = item.name.toLowerCase();
-  // const desc = item.descriptions.toLowerCase();
-  // const text = `${name} ${desc}`;
-
-  // // Breakfast keywords
-  // if (
-  //   text.includes("breakfast") ||
-  //   text.includes("cereal") ||
-  //   text.includes("pancake") ||
-  //   text.includes("toast") ||
-  //   text.includes("egg") ||
-  //   text.includes("coffee") ||
-  //   text.includes("tea") ||
-  //   text.includes("juice") ||
-  //   text.includes("croissant") ||
-  //   text.includes("bagel") ||
-  //   text.includes("oatmeal") ||
-  //   text.includes("yogurt")
-  // ) {
-  //   return "breakfast";
-  // }
-
-  // // Dinner keywords
-  // if (
-  //   text.includes("dinner") ||
-  //   text.includes("steak") ||
-  //   text.includes("wine") ||
-  //   text.includes("roast") ||
-  //   text.includes("grilled") ||
-  //   text.includes("pasta") ||
-  //   text.includes("salmon") ||
-  //   text.includes("chicken breast") ||
-  //   text.includes("lamb") ||
-  //   text.includes("seafood") ||
-  //   text.includes("risotto")
-  // ) {
-  //   return "dinner";
-  // }
-
-  // // Default to lunch for everything else
-  // return "lunch";
 };
 
 function Menu() {
