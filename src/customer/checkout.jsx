@@ -52,6 +52,7 @@ import {
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../Context/AuthContext"
 import useAxios from '../components/useAxios'
+import axios from 'axios'
 
 // Order Summary Component
 const OrderSummaryCard = ({ items, totalAmount }) => {
@@ -335,26 +336,49 @@ function EnhancedCheckout() {
   }
 
    // make payment post
-   const handlePesaPalPayment = async() => {
-     try{
-        setLoading(true)
-        const response = await axiosInstance.post(make_payment, {
-         amount:totalAmount,
-         email_address:user?.email,
-         phone_number:info.contact,
-         first_name:user?.username
-    })
-    
-    if (response.data.status === 'success' && response.data.data.redirect_url) {
-      setTrackId(response.data.data.order_tracking_id)
-      setLoading(false)
-      window.location.href = response.data.data.redirect_url
+   const handlePesaPalPayment = async () => {
+    try {
+      setLoading(true);
+  
+      const params = new URLSearchParams({
+        amount: totalAmount,
+        email: user?.email,
+        phone_number: info.contact,
+        first_name: user?.username,
+      });
+
+      const response = await axios.get(`${make_payment}?${params.toString()}`);
+  
+      if (response.data.iframe_url) {
+        setLoading(false);
+        window.location.href = response.data.iframe_url;
+      }
+    } catch (err) {
+      console.error("Payment error:", err);
+      setLoading(false);
     }
-      
-    }catch(err){
-      console.log('err', err)
+  };
+
+  // work on displaying payment status
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const trackingId = params.get("OrderTrackingId");
+    const merchantRef = params.get("OrderMerchantReference");
+  
+    if (trackingId && merchantRef) {
+      axios.get(
+        `https://restaurant-backend5.onrender.com/payments/v3/pesapal-callback/?OrderTrackingId=${trackingId}&OrderMerchantReference=${merchantRef}`
+      )
+      .then((res) => {
+        console.log("✅ Payment status updated:", res.data);
+        // Optional: show status to user
+      })
+      .catch((err) => {
+        console.error("❌ Failed to update payment status", err);
+      });
     }
- }
+  }, []);
+  
 
   const handleFinalSubmit = async (e) => {
   e.preventDefault();
