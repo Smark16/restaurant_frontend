@@ -292,7 +292,7 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPaym
 function EnhancedCheckout() {
   const { addItem, user, setAddItem, setTotal, websocket  } = useContext(AuthContext)
  const axiosInstance = useAxios()
- const location = useLocation()
+//  const location = useLocation()
   const navigate = useNavigate()
   const theme = useTheme()
   const post_orderInfo = 'https://restaurant-backend5.onrender.com/orders/placed_orders'
@@ -361,9 +361,9 @@ function EnhancedCheckout() {
   };
 
   useEffect(() => {
-    console.log('location.search:', location.search);
+    console.log('location.search:', window.location.search);
   
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(window.location.search);
     const trackingId = params.get("OrderTrackingId");
     const merchantRef = params.get("OrderMerchantReference");
   
