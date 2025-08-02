@@ -49,7 +49,7 @@ import {
   Security,
   ShoppingBag,
 } from "@mui/icons-material"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { AuthContext } from "../Context/AuthContext"
 import useAxios from '../components/useAxios'
 import axios from 'axios'
@@ -292,6 +292,7 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPaym
 function EnhancedCheckout() {
   const { addItem, user, setAddItem, setTotal, websocket  } = useContext(AuthContext)
  const axiosInstance = useAxios()
+ const location = useLocation()
   const navigate = useNavigate()
   const theme = useTheme()
   const post_orderInfo = 'https://restaurant-backend5.onrender.com/orders/placed_orders'
@@ -361,9 +362,11 @@ function EnhancedCheckout() {
 
   // work on displaying payment status
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const trackingId = params.get("OrderTrackingId");
     const merchantRef = params.get("OrderMerchantReference");
+
+    console.log('trackId', trackingId, 'merchant_ref', merchantRef)
   
     if (trackingId && merchantRef) {
       axios.get(
