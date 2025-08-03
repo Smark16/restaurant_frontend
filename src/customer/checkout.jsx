@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useContext, useEffect, useState, useRef } from "react"
+import React, { useContext, useEffect, useState} from "react"
 import {
   Box,
   Grid,
@@ -49,7 +49,7 @@ import {
   Security,
   ShoppingBag,
 } from "@mui/icons-material"
-import { useNavigate} from "react-router-dom"
+import { useNavigate, useLocation, useSearchParams} from "react-router-dom"
 import { AuthContext } from "../Context/AuthContext"
 import useAxios from '../components/useAxios'
 import axios from 'axios'
@@ -292,12 +292,12 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPaym
 function EnhancedCheckout() {
   const { addItem, user, setAddItem, setTotal, websocket  } = useContext(AuthContext)
  const axiosInstance = useAxios()
-  const navigate = useNavigate()
-  const theme = useTheme()
+ const navigate = useNavigate()
+ const theme = useTheme()
   const post_orderInfo = 'https://restaurant-backend5.onrender.com/orders/placed_orders'
   const make_payment = 'https://restaurant-backend5.onrender.com/payments/make_payment'
   const post_picked_items = 'https://restaurant-backend5.onrender.com/orders/post_picked_items'
-
+  
   const [info, setInfo] = useState(() => {
     const savedInfo = localStorage.getItem('info')
     return savedInfo ? JSON.parse(savedInfo) : { location: '', contact: '' }
@@ -312,8 +312,39 @@ function EnhancedCheckout() {
   const [trackId, setTrackId] = useState('')
   const [snackbarMessage, setSnackbarMessage] = useState("")
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-
+  
   const steps = ["Delivery Info", "Payment Method", "Confirm Order"]
+  
+  // handle payment status
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams(location.search)
+
+  const trackingId = searchParams.get("OrderTrackingId");
+  const merchantRef = searchParams.get("OrderMerchantReference");
+
+  console.log('trackId:', trackingId, 'merchant_ref:', merchantRef);
+
+  useEffect(()=>{
+    if (trackingId && merchantRef) {
+      // Use the production backend URL instead of localhost
+      const callbackUrl = `https://restaurant-backend5.onrender.com/payments/v3/pesapal-callback/?OrderTrackingId=${trackingId}&OrderMerchantReference=${merchantRef}`;
+  
+      axios
+        .get(callbackUrl)
+        .then((res) => {
+          console.log("✅ Payment status updated:", res.data);
+          setSnackbarMessage(`Payment Status: ${res.data.status}`);
+          setSnackbarOpen(true);
+        })
+        .catch((err) => {
+          console.error("❌ Failed to update payment status:", err);
+          setSnackbarMessage("Failed to update payment status. Please try again.");
+          setSnackbarOpen(true);
+        });
+    } else {
+      console.log("No trackingId or merchantRef found in URL");
+    }
+  }, [])
 
   const totalAmount = addItem
     .map((item) => {
@@ -334,6 +365,7 @@ function EnhancedCheckout() {
     }))
     
   }
+
 
    // make payment post
    const handlePesaPalPayment = async () => {
