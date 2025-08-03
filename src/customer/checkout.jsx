@@ -361,7 +361,7 @@ function EnhancedCheckout() {
   };
 
   useEffect(() => {
-    console.log('location.search:', window.location.search);
+    console.log('window location.search:', window.location.search);
   
     const params = new URLSearchParams(window.location.search);
     const trackingId = params.get("OrderTrackingId");
@@ -389,7 +389,7 @@ function EnhancedCheckout() {
     } else {
       console.log("No trackingId or merchantRef found in URL");
     }
-  }, [location.search]);
+  }, [window.location.search]);
   
 
   const handleFinalSubmit = async (e) => {
