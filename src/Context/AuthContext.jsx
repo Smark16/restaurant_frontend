@@ -228,28 +228,23 @@ const showErrorAlert =(message)=>{
  })
 }
 
-useEffect(()=>{
-  // fetchFood()
-  if(authTokens){
-    const decodedUser =  jwtDecode(authTokens.access)
+useEffect(() => {
+  if (authTokens) {
+    const decodedUser = jwtDecode(authTokens.access);
     const lastPath = localStorage.getItem('lastPath');
+
     setUser(decodedUser);
-    setStaff(decodedUser.is_staff)
-    setCustomer(decodedUser.is_customer)
-    if(decodedUser.is_staff){
-      navigate(lastPath);
-      setStaff(true)
-    }else if(decodedUser.is_customer){
-      navigate(lastPath);
-      setCustomer(true)
-    }
+    setStaff(decodedUser.is_staff);
+    setCustomer(decodedUser.is_customer);
+
     if (lastPath) {
-      navigate(lastPath);  // Redirect to last accessed page if available
-      localStorage.removeItem('lastPath');  // Clear after redirecting
+      navigate(lastPath);  // Redirect once
+      localStorage.removeItem('lastPath');
     }
   }
-  setLoading(false)     
-}, [authTokens])
+
+  setLoading(false);
+}, [authTokens]);
 
 const contextData = {
     user, setUser,

@@ -1,20 +1,19 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { AuthContext } from '../Context/AuthContext';
 
-const PrivateRoute = ({ children}) => {
-  const { user} = useContext(AuthContext);
+const PrivateRoute = ({ children }) => {
+  const { user } = useContext(AuthContext);
+  const location = useLocation();
 
-  const location = useLocation()
+  // Only save path if not authenticated
+  if (!user) {
+    const pathToSave = location.pathname + location.search;
+    localStorage.setItem('lastPath', pathToSave);
+    return <Navigate to="/login" replace />;
+  }
 
-  useEffect(() => {
-    if (user) {
-      // Save the current path in localStorage for redirection
-      localStorage.setItem('lastPath', location.pathname + location.search);
-    }
-  }, [location, user]);
-
-  return user ? children : <Navigate to="/login"/>
+  return children;
 };
 
 export default PrivateRoute;
