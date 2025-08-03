@@ -10,7 +10,6 @@ import { AuthContext } from './Context/AuthContext';
 import { tokenGeneration } from './components/firebase';
 import { onMessage } from 'firebase/messaging';
 import toast, { Toaster } from 'react-hot-toast';
-import paymentSucesss from './customer/paymentSucesss';
 import NetworkStatus from './components/NetworkCheck';
 import InstallPWAButton from './components/Reusables/InstallPWAButton';
 
@@ -45,6 +44,7 @@ const Index = lazy(()=>import('./LandingPage'));
 const CustomerProfileManagement = lazy(()=>import('./customer/Profile'));
 const ProfileManagement = lazy(()=>import('./staff/Profile'));
 const Checkout = lazy(()=>import('./customer/checkout'));
+const PaymentStatus = lazy(()=>import('./customer/pesapal_callback'))
 
 function Show() {
   const {messaging, generateToken} = tokenGeneration()
@@ -97,7 +97,6 @@ function Show() {
             <Route path='/team' element={<Suspense fallback={<LoadingSpinner/>}><Team/></Suspense>}></Route>
             <Route path='/testimonial' element={<Suspense fallback={<LoadingSpinner/>}><Testimonial/></Suspense>}></Route>
             <Route path='/service' element={<Suspense fallback={<LoadingSpinner/>}><Service/></Suspense>}></Route>
-            <Route path='/payment/callback?order_id&merchant_id' element={<paymentSucesss/>}/>
 
             {/* Staff Routes */}
             <Route
@@ -147,6 +146,7 @@ function Show() {
                         <Route path='/' element={<Suspense fallback={<LoadingSpinner/>}><Customer /></Suspense>} />
                         <Route path='cart' element={<Suspense fallback={<LoadingSpinner/>}><Cart/></Suspense>}/>
                         <Route path='Checkout' element={<Suspense fallback={<LoadingSpinner/>}><Checkout/></Suspense>}/>
+                        <Route path='pesapal-callback' element={<Suspense fallback={<LoadingSpinner/>}><PaymentStatus/></Suspense>}/>
                         <Route path='/logout' element={<Suspense fallback={<LoadingSpinner/>}><Logout/></Suspense>}></Route>
                       </Routes>
                     </div>

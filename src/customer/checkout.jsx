@@ -49,7 +49,7 @@ import {
   Security,
   ShoppingBag,
 } from "@mui/icons-material"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate} from "react-router-dom"
 import { AuthContext } from "../Context/AuthContext"
 import useAxios from '../components/useAxios'
 import axios from 'axios'
@@ -292,7 +292,6 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPaym
 function EnhancedCheckout() {
   const { addItem, user, setAddItem, setTotal, websocket  } = useContext(AuthContext)
  const axiosInstance = useAxios()
- const location = useLocation()
   const navigate = useNavigate()
   const theme = useTheme()
   const post_orderInfo = 'https://restaurant-backend5.onrender.com/orders/placed_orders'
@@ -360,38 +359,7 @@ function EnhancedCheckout() {
     }
   };
 
-  useEffect(() => {
-    console.log('location.search:', location.search);
   
-    const params = new URLSearchParams(location.search);
-    const trackingId = params.get("OrderTrackingId");
-    const merchantRef = params.get("OrderMerchantReference");
-  
-    console.log('trackId:', trackingId, 'merchant_ref:', merchantRef);
-  
-    if (trackingId && merchantRef) {
-      // Use the production backend URL instead of localhost
-      const callbackUrl = `https://restaurant-backend5.onrender.com/payments/v3/pesapal-callback/?OrderTrackingId=${trackingId}&OrderMerchantReference=${merchantRef}`;
-  
-      axios
-        .get(callbackUrl)
-        .then((res) => {
-          console.log("✅ Payment status updated:", res.data);
-          // Show payment status to the user via Snackbar
-          setSnackbarMessage(`Payment Status: ${res.data.detail}`);
-          setSnackbarOpen(true);
-        })
-        .catch((err) => {
-          console.error("❌ Failed to update payment status:", err);
-          setSnackbarMessage("Failed to update payment status. Please try again.");
-          setSnackbarOpen(true);
-        });
-    } else {
-      console.log("No trackingId or merchantRef found in URL");
-    }
-  }, [location.search]);
-  
-
   const handleFinalSubmit = async (e) => {
   e.preventDefault();
   setLoader(true);
