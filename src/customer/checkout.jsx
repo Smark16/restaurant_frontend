@@ -333,7 +333,7 @@ function EnhancedCheckout() {
         .get(callbackUrl)
         .then((res) => {
           console.log("✅ Payment status updated:", res.data);
-          setSnackbarMessage(`Payment Status: ${res.data.status}`);
+          setSnackbarMessage(`Payment Status: ${res.data.status} \n merchant_reference: ${res.data.merchant_reference}`);
           setSnackbarOpen(true);
         })
         .catch((err) => {
@@ -365,7 +365,6 @@ function EnhancedCheckout() {
     }))
     
   }
-
 
    // make payment post
    const handlePesaPalPayment = async () => {
