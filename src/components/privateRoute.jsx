@@ -10,7 +10,7 @@ const PrivateRoute = ({ children}) => {
   useEffect(() => {
     if (user) {
       // Save the current path in localStorage for redirection
-      localStorage.setItem('lastPath', location.pathname);
+      localStorage.setItem('lastPath', location.pathname + location.search);
     }
   }, [location, user]);
 

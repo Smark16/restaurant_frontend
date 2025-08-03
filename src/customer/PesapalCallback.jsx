@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 
-function paymentStatus() {
+function PaymentStatus() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams(location.search)
   
@@ -45,4 +45,4 @@ function paymentStatus() {
   )
 }
 
-export default paymentStatus
+export default PaymentStatus

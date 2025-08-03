@@ -44,7 +44,7 @@ const Index = lazy(()=>import('./LandingPage'));
 const CustomerProfileManagement = lazy(()=>import('./customer/Profile'));
 const ProfileManagement = lazy(()=>import('./staff/Profile'));
 const Checkout = lazy(()=>import('./customer/checkout'));
-const PaymentStatus = lazy(()=>import('./customer/pesapal_callback'))
+const PaymentStatus = lazy(()=>import('./customer/PesapalCallback'))
 
 function Show() {
   const {messaging, generateToken} = tokenGeneration()
