@@ -44,10 +44,13 @@ import {
   CreditCard,
   AccountBalanceWallet,
   ExpandMore,
-  CheckCircle,
   Schedule,
   Security,
   ShoppingBag,
+  ErrorOutline, 
+  HourglassBottom, 
+  Cancel, 
+  CheckCircle
 } from "@mui/icons-material"
 import { useNavigate, useLocation, useSearchParams} from "react-router-dom"
 import { AuthContext } from "../Context/AuthContext"
@@ -187,8 +190,43 @@ const OrderSummaryCard = ({ items, totalAmount }) => {
   )
 }
 
+// payment status Icons
+const getStatusIcon = (status) => {
+  switch (status) {
+    case "Completed":
+      return <CheckCircle />;
+    case "Pending":
+      return <HourglassBottom />;
+    case "Failed":
+      return <Cancel />;
+    case "INVALID":
+      return <ErrorOutline />;
+    case "Reversed":
+      return <ErrorOutline />;
+    default:
+      return <HourglassBottom />;
+  }
+};
+
+// payment status color
+const getStatusColor = (status) => {
+  switch (status) {
+    case "Completed":
+      return "success";
+    case "Pending":
+      return "warning";
+    case "Failed":
+    case "INVALID":
+    case "Reversed":
+      return "error";
+    default:
+      return "default";
+  }
+};
+
+
 // Payment Method Component
-const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPayment, contact, location, loading }) => {
+const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPayment, contact, location, loading, PaymentStatus }) => {
   return (
     <Card elevation={2} sx={{ mb: 3 }}>
       <CardContent sx={{ p: 3 }}>
@@ -248,7 +286,7 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPaym
                         Instant Payment
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Pay now with Flutterwave
+                        Pay now with (Airtel, MTN, Visa Cards)
                       </Typography>
                     </Box>
                   </Box>
@@ -258,12 +296,26 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPaym
           </RadioGroup>
         </FormControl>
 
+        {/* payment status  */}
+        {PaymentStatus && (
+        <Typography variant="body2" color="primary.main" fontWeight="medium">
+          Payment Staus: 
+          <Chip
+            icon={getStatusIcon(PaymentStatus)}
+            label={PaymentStatus}
+            color={getStatusColor(PaymentStatus)}
+            variant="outlined"
+            sx={{ fontWeight: "bold" }}
+          />
+         </Typography>
+        )}
+
         {paymentMethod === "instant" && (
           <Box sx={{ mt: 3, p: 2, bgcolor: "primary.light", borderRadius: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Security sx={{ mr: 1, color: "primary.main" }} />
-              <Typography variant="body2" color="primary.main" fontWeight="medium">
-                Secure Payment with Pesapal
+              <Typography variant="body2" color="white" fontWeight="medium">
+                Secure Payment with Pesapal (Click the button below to select payment method of your choice)
               </Typography>
             </Box>
             <Button
@@ -289,6 +341,7 @@ const PaymentMethodCard = ({ paymentMethod, onPaymentMethodChange, onPesaPalPaym
   )
 }
 
+
 function EnhancedCheckout() {
   const { addItem, user, setAddItem, setTotal, websocket  } = useContext(AuthContext)
  const axiosInstance = useAxios()
@@ -305,13 +358,17 @@ function EnhancedCheckout() {
   const [orderId, setOrderId] = useState("")
   const [loader, setLoader] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState("cash")
+  const [paymentMethod, setPaymentMethod] = useState(()=>{
+    const paymentInfo = localStorage.getItem('payment_method')
+    return paymentInfo ? JSON.parse(paymentInfo) : "cash"
+  })
   const [orderError, setOrderError] = useState("")
   const [activeStep, setActiveStep] = useState(0)
   const [infoSaved, setInfoSaved] = useState(false)
   const [trackId, setTrackId] = useState('')
   const [snackbarMessage, setSnackbarMessage] = useState("")
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [statusCheck, setStatusCheck] = useState("")
   
   const steps = ["Delivery Info", "Payment Method", "Confirm Order"]
   
@@ -332,7 +389,8 @@ function EnhancedCheckout() {
       axios
         .get(callbackUrl)
         .then((res) => {
-          console.log("✅ Payment status updated:", res.data);
+          console.log("Payment status updated:", res.data);
+          setStatusCheck(res.data.status)
           setSnackbarMessage(`Payment Status: ${res.data.status} \n merchant_reference: ${res.data.merchant_reference}`);
           setSnackbarOpen(true);
         })
@@ -346,6 +404,8 @@ function EnhancedCheckout() {
     }
   }, [])
 
+  console.log('status check', statusCheck)
+
   const totalAmount = addItem
     .map((item) => {
       const { quantity } = item
@@ -356,7 +416,8 @@ function EnhancedCheckout() {
     // store user info in local storage
     useEffect(()=>{
       localStorage.setItem('info', JSON.stringify(info))
-    }, [info])
+      localStorage.setItem('payment_method', JSON.stringify(paymentMethod))
+    }, [info, paymentMethod])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -582,6 +643,7 @@ function EnhancedCheckout() {
                 contact={info.contact}
                 location={info.location}
                 loading={loading}
+                PaymentStatus={statusCheck}
               />
           
             {/* Final Confirmation */}
@@ -606,12 +668,33 @@ function EnhancedCheckout() {
                   </Box>
 
                   <form onSubmit={handleFinalSubmit}>
-                    <Button
+                    {paymentMethod === "cash" ? (
+                       <Button
+                       type="submit"
+                       variant="contained"
+                       size="large"
+                       fullWidth
+                       disabled={loader}
+                       startIcon={loader ? <CircularProgress size={20} /> : <CheckCircle />}
+                       sx={{
+                         py: 1.5,
+                         fontSize: "1.1rem",
+                         fontWeight: "bold",
+                         background: "linear-gradient(45deg, #667eea 30%, #764ba2 90%)",
+                         "&:hover": {
+                           background: "linear-gradient(45deg, #5a6fd8 30%, #6a4190 90%)",
+                         },
+                       }}
+                     >
+                       {loader ? "Processing Order..." : `Confirm Order - UGX ${totalAmount.toLocaleString()}`}
+                     </Button>
+                    ) : (
+                      <Button
                       type="submit"
                       variant="contained"
                       size="large"
                       fullWidth
-                      disabled={loader}
+                      disabled={statusCheck !== "Completed"}
                       startIcon={loader ? <CircularProgress size={20} /> : <CheckCircle />}
                       sx={{
                         py: 1.5,
@@ -625,6 +708,8 @@ function EnhancedCheckout() {
                     >
                       {loader ? "Processing Order..." : `Confirm Order - UGX ${totalAmount.toLocaleString()}`}
                     </Button>
+                    )}
+                    
                   </form>
                 </CardContent>
               </Card>
