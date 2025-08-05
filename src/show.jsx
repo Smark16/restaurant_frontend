@@ -2,7 +2,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useContext, useEffect, lazy, Suspense } from 'react';
 import {Route, Routes} from 'react-router-dom';
-import { CircularProgress } from '@mui/material'
+import { CircularProgress, Box } from '@mui/material'
 import './App.css';
 import PrivateRoute from './components/privateRoute';
 import Sidebar from './staff/Sidebar';
@@ -48,11 +48,24 @@ const PaymentStatus = lazy(()=>import('./customer/PesapalCallback'))
 
 function Show() {
   const {messaging, generateToken} = tokenGeneration()
-
   const LoadingSpinner = () => (
-    <div className="center-content">
-      <CircularProgress size={40} sx={{color:'#600018'}}/>
-    </div>
+    <Box
+      sx={{
+        height: '100vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'background.default',
+        transition: 'opacity 0.3s ease-in-out',
+        zIndex: 2000,
+      }}
+    >
+      <CircularProgress
+        size={50}
+        thickness={4}
+      />
+    </Box>
   );
 
   useEffect(() => {
