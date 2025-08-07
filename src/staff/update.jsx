@@ -42,7 +42,7 @@ import {
   LocalDining as IngredientsIcon,
 } from "@mui/icons-material"
 import { Link } from "react-router-dom"
-import axios from "axios"
+import useAxios from "../components/useAxios"
 import Swal from "sweetalert2"
 
 // Function to categorize food items (same as other components)
@@ -87,6 +87,7 @@ const categorizeFoodItem = (item) => {
 function UpdateItem() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const axiosInstance = useAxios()
   const [item, setItem] = useState({
     name: "",
     price: "",
@@ -115,7 +116,7 @@ function UpdateItem() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(singleUrl)
+      const response = await axiosInstance.get(singleUrl)
       const data = response.data
 
       setOriginalImage(data.image)
@@ -294,7 +295,7 @@ function UpdateItem() {
         formData.append('image', item.image);
       }
 
-      const response = await axios.put(updateUrl, formData, {
+      const response = await axiosInstance.put(updateUrl, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
